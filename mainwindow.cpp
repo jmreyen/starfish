@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "storycardscene.h"
+#include "setupdialog.h"
 
 
 #include <QPrinter>
@@ -13,47 +14,61 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     theScene(new StoryCardScene(0,0,298,210,this)),
-    thePrinter(new QPrinter(QPrinter::HighResolution))
+    thePrinter(new QPrinter(QPrinter::HighResolution)),
+    settings("pic.ini", QSettings::IniFormat)
 {
 
     ui->setupUi(this);
+
     // setup card view
     ui->cardView->setScene(theScene);
+
     // setup Printer
     thePrinter->setOrientation(QPrinter::Landscape);
     thePrinter->setPageSize(QPrinter::A5);
+
     // initialise XMLRPC interface to trac
     //QUrl url("https://trac.f.ddk/dekafinanciallib/login/xmlrpc");
     QUrl url("http://admin:Millie007@localhost:8000/tracdata/login/xmlrpc");
     rpc = new MaiaXmlRpcClient(url, this);
 
-    QTableWidgetItem* item = new QTableWidgetItem();
-    item->setIcon(*(new QIcon("printer.png")));
-    ui->storyTable->setHorizontalHeaderItem(8,item);
-
-
-
-    ui->storyTable->setColumnHidden(2, true);
-    ui->storyTable->setColumnHidden(3, true);
-    ui->storyTable->setColumnHidden(4, true);
-    ui->storyTable->setColumnHidden(5, true);
-    ui->storyTable->setColumnHidden(6, true);
-    ui->storyTable->setColumnHidden(7, true);
-
-    ui->storyTable->setColumnWidth(0, 48);
-    ui->storyTable->setColumnWidth(1, 256);
-    ui->storyTable->setColumnWidth(8, 24);
+    applySettings();
 
 }
 
 MainWindow::~MainWindow()
 {
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        bool hide = ui->storyTable->isColumnHidden(i);
+        settings.setValue(QString("columns/show-"+header), hide);
+    }
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        int width = ui->storyTable->columnWidth(i);
+        settings.setValue(QString("columns/width-"+header), width);
+    }
     delete ui;
     delete theScene;
     delete rpc;
     delete thePrinter;
 }
 
+
+void MainWindow::applySettings()
+{
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        bool hide = settings.value(QString("columns/show-"+header), false).toBool();
+        ui->storyTable->setColumnHidden(i, hide);
+    }
+
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        int width = settings.value(QString("columns/width-"+header), 100).toInt();
+        ui->storyTable->setColumnWidth(i, width);
+    }
+}
 
 void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
 {
@@ -130,6 +145,10 @@ void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc,
 
 }
 
+//void MainWindow::setColumnHidden(int col, bool hide)
+//{
+//    ui->storyTable->setColumnHidden(col, hide);
+//}
 
 void MainWindow::on_storyTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
 {
@@ -184,7 +203,7 @@ void MainWindow::on_importButton_clicked()
     args.append(QString("status!=closed&component^=DekaGrid"));
 
     rpc->call("ticket.query", args,
-                this, SLOT(myResponseMethod(QVariant &)),
+                this, SLOT(queryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
 
     int rowcount = ui->storyTable->rowCount();
@@ -194,7 +213,7 @@ void MainWindow::on_importButton_clicked()
 }
 
 
-void MainWindow::myResponseMethod(QVariant &arg) {
+void MainWindow::queryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
 
@@ -207,10 +226,10 @@ void MainWindow::myResponseMethod(QVariant &arg) {
         methodList.append(newMethod);
     }
     args.insert(0, methodList);;
-    rpc->call("system.multicall", args, this, SLOT(myResponseMethod2(QVariant&)), this, SLOT(rpcError(int, const QString &)));
+    rpc->call("system.multicall", args, this, SLOT(insertResponseMethod(QVariant&)), this, SLOT(rpcError(int, const QString &)));
 }
 
-void MainWindow::myResponseMethod2(QVariant &arg)
+void MainWindow::insertResponseMethod(QVariant &arg)
 {
     QVariantList ticketList = arg.toList();
     for (int i = 0; i < ticketList.size(); ++i) {
@@ -262,3 +281,13 @@ void MainWindow::myFaultResponse(int error, const QString &message) {
     qDebug() << "An Error occoured, Code: " << error << " Message: " << message;
 }
 
+
+void MainWindow::on_setupButton_clicked()
+{
+    SetupDialog dlg;
+    dlg.exec();
+    for (int i = 0; i<=8; ++i)
+        ui->storyTable->setColumnHidden(i, dlg.isColumnHidden(i));
+
+
+}

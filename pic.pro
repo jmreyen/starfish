@@ -12,12 +12,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    storycardscene.cpp
+    storycardscene.cpp \
+    setupdialog.cpp
 
 HEADERS  += mainwindow.h \
-    storycardscene.h
+    storycardscene.h \
+    setupdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    setupdialog.ui
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a
