@@ -195,49 +195,67 @@ void MainWindow::on_importButton_clicked()
 
 
 void MainWindow::myResponseMethod(QVariant &arg) {
-    QList<QVariant> list = arg.toList();
-    for (int i = 0; i < list.size(); ++i) {
-        QVariant item = list[i];
-        QVariantList args;
-        args.append(item.toInt());
+    QStringList list = arg.toStringList();
+    QVariantList args, methodList;
 
-        mutex.lock();
-        rpc->call("ticket.get", args,
-                    this, SLOT(myResponseMethod2(QVariant &)),
-                    this, SLOT(myFaultResponse(int, const QString &)));
-
-        mutex.unlock();
-     }
+    for (int i=0; i<list.size(); ++i)    {
+        QVariantMap newMethod;
+        QVariantList newParams;
+        newParams.append(list[i].toInt());
+        newMethod.insert("methodName", "ticket.get");
+        newMethod.insert("params", newParams);
+        methodList.append(newMethod);
+    }
+    args.insert(0, methodList);;
+    rpc->call("system.multicall", args, this, SLOT(myResponseMethod2(QVariant&)), this, SLOT(rpcError(int, const QString &)));
 }
 
-void MainWindow::myResponseMethod2(QVariant &arg) {
-    QList<QVariant> list = arg.toList();
-    QMap<QString,QVariant> map = list[3].toMap();
-
-    QString status = "unkown";
-    if (map["status"].toString().left(8) == QString("new"))
-        status = "new";
-    else if (map["milestone"]==QString("waiting"))
-        status = "waiting";
-    if (map["status"].toString().left(8) == QString("postponed"))
-        status = "postponed";
-    else if (map["milestone"]==QString("current"))
-        status = "selected";
-    else if ((map["status"]==QString("assigned") ||
-              map["status"]==QString("accepted")) &&
-             (map["milestone"]==QString("none") ||
-              map["milestone"]==QString("")))
-         status = "not yet started";
-
-    insertStoryRow(list[0].toInt(),
-        map["summary"].toString(),
-        map["description"].toString(),
-        map["how_to_demo"].toString(),
-        map["priority"].toString(),
-        map["estimation"].toString(),
-        map["reporter"].toString(),
-        status);
+void MainWindow::myResponseMethod2(QVariant &arg)
+{
+    QVariantList ticketList = arg.toList();
+    for (int i = 0; i < ticketList.size(); ++i) {
+        QVariantList fieldList = ticketList[i].toList().at(0).toList();
+        QMap<QString,QVariant> map = fieldList[3].toMap();
+            insertStoryRow(fieldList[0].toInt(),
+                map["summary"].toString(),
+                map["description"].toString(),
+                map["how_to_demo"].toString(),
+                map["priority"].toString(),
+                map["estimation"].toString(),
+                map["reporter"].toString(),
+                "unknown");
+    }
 }
+
+
+//void MainWindow::myResponseMethod2(QVariant &arg) {
+//    QList<QVariant> list = arg.toList();
+//    QMap<QString,QVariant> map = list[3].toMap();
+
+//    QString status = "unkown";
+//    if (map["status"].toString().left(8) == QString("new"))
+//        status = "new";
+//    else if (map["milestone"]==QString("waiting"))
+//        status = "waiting";
+//    if (map["status"].toString().left(8) == QString("postponed"))
+//        status = "postponed";
+//    else if (map["milestone"]==QString("current"))
+//        status = "selected";
+//    else if ((map["status"]==QString("assigned") ||
+//              map["status"]==QString("accepted")) &&
+//             (map["milestone"]==QString("none") ||
+//              map["milestone"]==QString("")))
+//         status = "not yet started";
+
+//    insertStoryRow(list[0].toInt(),
+//        map["summary"].toString(),
+//        map["description"].toString(),
+//        map["how_to_demo"].toString(),
+//        map["priority"].toString(),
+//        map["estimation"].toString(),
+//        map["reporter"].toString(),
+//        status);
+//}
 
 
 void MainWindow::myFaultResponse(int error, const QString &message) {
