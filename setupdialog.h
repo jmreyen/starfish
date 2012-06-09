@@ -15,9 +15,10 @@ class SetupDialog : public QDialog
 public:
     explicit SetupDialog(QWidget *parent = 0);
     ~SetupDialog();
-    void setHideColumn(int col, bool hide);
+    void setUrl(const QUrl& url);
+    void setShowColumn(int col, bool hide);
 signals:
-    void accepted(QVariantList q);
+    void accepted(QVariantMap q);
     
 private slots:
     void on_buttonBox_accepted();

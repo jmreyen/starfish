@@ -1,8 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "storycardscene.h"
 #include "setupdialog.h"
-
 
 #include <QPrinter>
 #include <QPrintDialog>
@@ -13,57 +11,62 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    theScene(new StoryCardScene(0,0,298,210,this)),
-    thePrinter(new QPrinter(QPrinter::HighResolution)),
-    settings("pic.ini", QSettings::IniFormat)
+    theScene(0,0,298,210,this),
+    thePrinter(QPrinter::HighResolution),
+    rpc(this),
+    theUrl(),
+    theSettings("pic.ini", QSettings::IniFormat)
 {
 
     ui->setupUi(this);
 
     // setup card view
-    ui->cardView->setScene(theScene);
-
-    // setup Printer
-    thePrinter->setOrientation(QPrinter::Landscape);
-    thePrinter->setPageSize(QPrinter::A5);
-
-    // initialise XMLRPC interface to trac
-    //QUrl url("https://trac.f.ddk/dekafinanciallib/login/xmlrpc");
-    QUrl url("http://admin:Millie007@localhost:8000/tracdata/login/xmlrpc");
-    rpc = new MaiaXmlRpcClient(url, this);
+    ui->cardView->setScene(&theScene);
 
     // Load Settings
-    //Column visibility
-    for (int i = 0; i <=8; ++i){
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
-        bool hide = settings.value(QString("columns/show-"+header), false).toBool();
-        ui->storyTable->setColumnHidden(i, hide);
-    }
-    //Column width
-    for (int i = 0; i <=8; ++i){
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
-        int width = settings.value(QString("columns/width-"+header), 100).toInt();
+    //TRAC
+    theUrl.setUrl(theSettings.value("TRAC/Server").toString());
+    theUrl.setPort(theSettings.value("TRAC/Port").toInt());
+    theUrl.setUserName(theSettings.value("TRAC/UserName").toString());
+    theUrl.setPassword(theSettings.value("TRAC/Password").toString());
+    rpc.setUrl(theUrl);
+
+    //Columns
+    int size = theSettings.beginReadArray("columns");
+    for (int i = 0; i < size; ++i) {
+        theSettings.setArrayIndex(i);
+        bool show = theSettings.value(QString("show"), false).toBool();
+        int width = theSettings.value(QString("width"), 100).toInt();
+        ui->storyTable->setColumnHidden(i, !show);
         ui->storyTable->setColumnWidth(i, width==0?100:width);
     }
+    theSettings.endArray();
+
+    // setup Printer
+    thePrinter.setOrientation(QPrinter::Landscape);
+    thePrinter.setPageSize(QPrinter::A5);
 }
 
 MainWindow::~MainWindow()
 {
+    // Save Settings
+    //TRAC
+    theSettings.setValue("TRAC/Server", theUrl.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+    theSettings.setValue("TRAC/UserName", theUrl.userName());
+    theSettings.setValue("TRAC/Password", theUrl.password());
+
+    // Columns
+    theSettings.beginWriteArray("columns");
     for (int i=0; i<ui->storyTable->columnCount(); ++i){
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
-        bool hide = ui->storyTable->isColumnHidden(i);
-        settings.setValue(QString("columns/show-"+header), hide);
-    }
-    for (int i=0; i<ui->storyTable->columnCount(); ++i) {
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        theSettings.setArrayIndex(i);
+        bool show = !ui->storyTable->isColumnHidden(i);
         ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
         int width = ui->storyTable->columnWidth(i);
-        settings.setValue(QString("columns/width-"+header), width);
+        theSettings.setValue(QString("show"), show);
+        theSettings.setValue(QString("width"), width);
     }
+    theSettings.endArray();
     delete ui;
-    delete theScene;
-    delete rpc;
-    delete thePrinter;
 }
 
 
@@ -72,7 +75,7 @@ void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
     QString txt = ui->storyTable->item(row,col)?ui->storyTable->item(row,col)->text():"";
 
     if (scene==0x0)
-        scene = theScene;
+        scene = &theScene;
 
     if (ui->storyTable->rowCount()==0 || row == -1)
         return;
@@ -106,7 +109,7 @@ void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
 void MainWindow::fillCard(int row, StoryCardScene *scene)
 {
     if (scene==0x0)
-        scene = theScene;
+        scene = &theScene;
     fillCard(row, 0, scene);
     fillCard(row, 1, scene);
     fillCard(row, 2, scene);
@@ -169,24 +172,24 @@ void MainWindow::on_addRowButton_clicked()
 void MainWindow::on_removeRowButton_clicked()
 {
     int row = ui->storyTable->currentRow();
-    theScene->clearCard();
+    theScene.clearCard();
     ui->storyTable->removeRow(row);
 }
 
 void MainWindow::on_printButton_clicked()
 {
 
-    QPrintDialog printDialog(thePrinter);
+    QPrintDialog printDialog(&thePrinter);
     StoryCardScene scene;
 
     if (printDialog.exec() == QDialog::Accepted) {
-        QPainter painter(thePrinter);
+        QPainter painter(&thePrinter);
         painter.setRenderHint(QPainter::Antialiasing);
         for (int i=0; i<ui->storyTable->rowCount(); ++i) {
             if (((QCheckBox*)ui->storyTable->cellWidget(i,8))->isChecked()) {
-                fillCard(i, theScene);
-                theScene->render(&painter);
-                thePrinter->newPage();
+                fillCard(i, &theScene);
+                theScene.render(&painter);
+                thePrinter.newPage();
             }
         }
     }
@@ -197,9 +200,12 @@ QMutex mutex;
 void MainWindow::on_importButton_clicked()
 {
     QVariantList args;
+
+    statusBar()->showMessage("Querying ...");
+
     args.append(QString("status!=closed&component^=DekaGrid"));
 
-    rpc->call("ticket.query", args,
+    rpc.call("ticket.query", args,
                 this, SLOT(queryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
 
@@ -214,6 +220,7 @@ void MainWindow::queryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
 
+    statusBar()->showMessage("Retrieving ...");
     for (int i=0; i<list.size(); ++i)    {
         QVariantMap newMethod;
         QVariantList newParams;
@@ -223,7 +230,7 @@ void MainWindow::queryResponseMethod(QVariant &arg) {
         methodList.append(newMethod);
     }
     args.insert(0, methodList);;
-    rpc->call("system.multicall", args, this, SLOT(insertResponseMethod(QVariant&)), this, SLOT(rpcError(int, const QString &)));
+    rpc.call("system.multicall", args, this, SLOT(insertResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));
 }
 
 void MainWindow::insertResponseMethod(QVariant &arg)
@@ -241,6 +248,7 @@ void MainWindow::insertResponseMethod(QVariant &arg)
                 map["reporter"].toString(),
                 "unknown");
     }
+    statusBar()->showMessage("");
 }
 
 
@@ -282,18 +290,20 @@ void MainWindow::myFaultResponse(int error, const QString &message) {
 void MainWindow::on_setupButton_clicked()
 {
     SetupDialog dlg;
+    dlg.setUrl(theUrl);
     for (int i=0; i<ui->storyTable->columnCount(); ++i)
-        dlg.setHideColumn(i, ui->storyTable->isColumnHidden(i));
+        dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
 
-    QObject::connect(&dlg, SIGNAL(accepted(QVariantList)),
-                     this, SLOT(onSetupAccepted(QVariantList)));
+    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
+                     this, SLOT(onSetupAccepted(QVariantMap)));
     dlg.exec();
 }
 
-void MainWindow::onSetupAccepted(QVariantList list)
+void MainWindow::onSetupAccepted(QVariantMap map)
 {
+    theUrl = map["Url"].toUrl();
+    rpc.setUrl(theUrl);
+    QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
-        ui->storyTable->setColumnHidden(i, list[i].toBool());
-
-
+        ui->storyTable->setColumnHidden(i, !list[i].toBool());
 }

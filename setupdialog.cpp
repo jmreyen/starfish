@@ -3,26 +3,28 @@
 
 #include <QUrl>
 
-class urlValidator : public QValidator
-{
-public:
-    void fixup ( QString & input ) const {}
-    QValidator::State validate(QString &input, int &pos) const {return QUrl(input).isValid()?QValidator::Acceptable:QValidator::Intermediate;}
-};
 
 SetupDialog::SetupDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SetupDialog)
 {
     ui->setupUi(this);
-    ui->lineEdit->setValidator(new urlValidator);
 }
 
 SetupDialog::~SetupDialog()
 {
     delete ui;
 }
-void SetupDialog::setHideColumn(int col, bool hide)
+
+void SetupDialog::setUrl(const QUrl& url)
+{
+    ui->serverEdit->setText(url.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+    ui->portSpinBox->setValue(url.port());
+    ui->userEdit->setText(url.userName());
+    ui->passwordEdit->setText(url.password());
+}
+
+void SetupDialog::setShowColumn(int col, bool hide)
 {
     switch (col)
     {
@@ -40,12 +42,22 @@ void SetupDialog::setHideColumn(int col, bool hide)
 
 void SetupDialog::on_buttonBox_accepted()
 {
-    QVariantList list;
-    list << ui->checkBox_0->isChecked() << ui->checkBox_1->isChecked()<<
+    QVariantMap returnMap;
+    QVariantList columnlist;
+    QUrl url;
+
+    url.setUrl(ui->serverEdit->text());
+    url.setPort(ui->portSpinBox->value());
+    url.setUserName(ui->userEdit->text());
+    url.setPassword(ui->passwordEdit->text());
+    returnMap["Url"] = url;
+
+    columnlist << ui->checkBox_0->isChecked() << ui->checkBox_1->isChecked()<<
             ui->checkBox_2->isChecked() << ui->checkBox_3->isChecked() <<
             ui->checkBox_4->isChecked() << ui->checkBox_5->isChecked() <<
             ui->checkBox_6->isChecked() << ui->checkBox_7->isChecked()<<
             ui->checkBox_8->isChecked();
+    returnMap["Columns"] = columnlist;
 
-    emit accepted(list);
+    emit accepted(returnMap);
 }

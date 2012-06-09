@@ -2,8 +2,12 @@
 #define MAINWINDOW_H
 
 #include "libmaia/maiaXmlRpcClient.h"
+#include "storycardscene.h"
+
+
 #include <QMainWindow>
 #include <QSettings>
+#include <QPrinter>
 
 class QPrinter;
 class QGraphicsTextItem;
@@ -38,14 +42,15 @@ private slots:
     void on_printButton_clicked();
     void on_importButton_clicked();
     void on_setupButton_clicked();
-    void onSetupAccepted(QVariantList);
+    void onSetupAccepted(QVariantMap);
 
 private:
     Ui::MainWindow *ui;
-    StoryCardScene *theScene;
-    MaiaXmlRpcClient *rpc;
-    QPrinter *thePrinter;
-    QSettings settings;
+    StoryCardScene theScene;
+    QPrinter thePrinter;
+    MaiaXmlRpcClient rpc;
+    QUrl theUrl;
+    QSettings theSettings;
 };
 
 
