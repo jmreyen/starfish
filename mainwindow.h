@@ -37,8 +37,8 @@ private slots:
     void on_removeRowButton_clicked();
     void on_printButton_clicked();
     void on_importButton_clicked();
-
     void on_setupButton_clicked();
+    void onSetupAccepted(QVariantList);
 
 private:
     Ui::MainWindow *ui;

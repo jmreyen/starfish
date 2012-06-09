@@ -32,19 +32,31 @@ MainWindow::MainWindow(QWidget *parent) :
     QUrl url("http://admin:Millie007@localhost:8000/tracdata/login/xmlrpc");
     rpc = new MaiaXmlRpcClient(url, this);
 
-    applySettings();
-
+    // Load Settings
+    //Column visibility
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        bool hide = settings.value(QString("columns/show-"+header), false).toBool();
+        ui->storyTable->setColumnHidden(i, hide);
+    }
+    //Column width
+    for (int i = 0; i <=8; ++i){
+        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        int width = settings.value(QString("columns/width-"+header), 100).toInt();
+        ui->storyTable->setColumnWidth(i, width==0?100:width);
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    for (int i = 0; i <=8; ++i){
+    for (int i=0; i<ui->storyTable->columnCount(); ++i){
         QString header = ui->storyTable->horizontalHeaderItem(i)->text();
         bool hide = ui->storyTable->isColumnHidden(i);
         settings.setValue(QString("columns/show-"+header), hide);
     }
-    for (int i = 0; i <=8; ++i){
+    for (int i=0; i<ui->storyTable->columnCount(); ++i) {
         QString header = ui->storyTable->horizontalHeaderItem(i)->text();
+        ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
         int width = ui->storyTable->columnWidth(i);
         settings.setValue(QString("columns/width-"+header), width);
     }
@@ -54,21 +66,6 @@ MainWindow::~MainWindow()
     delete thePrinter;
 }
 
-
-void MainWindow::applySettings()
-{
-    for (int i = 0; i <=8; ++i){
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
-        bool hide = settings.value(QString("columns/show-"+header), false).toBool();
-        ui->storyTable->setColumnHidden(i, hide);
-    }
-
-    for (int i = 0; i <=8; ++i){
-        QString header = ui->storyTable->horizontalHeaderItem(i)->text();
-        int width = settings.value(QString("columns/width-"+header), 100).toInt();
-        ui->storyTable->setColumnWidth(i, width);
-    }
-}
 
 void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
 {
@@ -285,9 +282,18 @@ void MainWindow::myFaultResponse(int error, const QString &message) {
 void MainWindow::on_setupButton_clicked()
 {
     SetupDialog dlg;
+    for (int i=0; i<ui->storyTable->columnCount(); ++i)
+        dlg.setHideColumn(i, ui->storyTable->isColumnHidden(i));
+
+    QObject::connect(&dlg, SIGNAL(accepted(QVariantList)),
+                     this, SLOT(onSetupAccepted(QVariantList)));
     dlg.exec();
-    for (int i = 0; i<=8; ++i)
-        ui->storyTable->setColumnHidden(i, dlg.isColumnHidden(i));
+}
+
+void MainWindow::onSetupAccepted(QVariantList list)
+{
+    for (int i=0; i<list.size(); ++i)
+        ui->storyTable->setColumnHidden(i, list[i].toBool());
 
 
 }
