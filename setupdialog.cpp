@@ -24,6 +24,12 @@ void SetupDialog::setUrl(const QUrl& url)
     ui->passwordEdit->setText(url.password());
 }
 
+void SetupDialog::setQueryString(const QString &str)
+{
+    ui->queryGeneralEdit->setText(str);
+}
+
+
 void SetupDialog::setShowColumn(int col, bool hide)
 {
     switch (col)
@@ -51,6 +57,8 @@ void SetupDialog::on_buttonBox_accepted()
     url.setUserName(ui->userEdit->text());
     url.setPassword(ui->passwordEdit->text());
     returnMap["Url"] = url;
+
+    returnMap["QueryString"] = ui->queryGeneralEdit->text();
 
     columnlist << ui->checkBox_0->isChecked() << ui->checkBox_1->isChecked()<<
             ui->checkBox_2->isChecked() << ui->checkBox_3->isChecked() <<

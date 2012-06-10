@@ -17,6 +17,7 @@ public:
     ~SetupDialog();
     void setUrl(const QUrl& url);
     void setShowColumn(int col, bool hide);
+    void setQueryString(const QString &str);
 signals:
     void accepted(QVariantMap q);
     

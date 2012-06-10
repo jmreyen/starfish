@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QCheckBox>
 #include <QMutex>
+#include <sstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theUrl.setUserName(theSettings.value("TRAC/UserName").toString());
     theUrl.setPassword(theSettings.value("TRAC/Password").toString());
     rpc.setUrl(theUrl);
+    theQueryString = theSettings.value("TRAC/QueryString").toString();
 
     //Columns
     int size = theSettings.beginReadArray("columns");
@@ -54,6 +56,7 @@ MainWindow::~MainWindow()
     theSettings.setValue("TRAC/Server", theUrl.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
     theSettings.setValue("TRAC/UserName", theUrl.userName());
     theSettings.setValue("TRAC/Password", theUrl.password());
+    theSettings.setValue("TRAC/QueryString", theQueryString);
 
     // Columns
     theSettings.beginWriteArray("columns");
@@ -202,9 +205,7 @@ void MainWindow::on_importButton_clicked()
     QVariantList args;
 
     statusBar()->showMessage("Querying ...");
-
-    args.append(QString("status!=closed&component^=DekaGrid"));
-
+    args.append(theQueryString);
     rpc.call("ticket.query", args,
                 this, SLOT(queryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
@@ -246,51 +247,44 @@ void MainWindow::insertResponseMethod(QVariant &arg)
                 map["priority"].toString(),
                 map["estimation"].toString(),
                 map["reporter"].toString(),
-                "unknown");
+                           getStatus(map));
     }
     statusBar()->showMessage("");
 }
 
 
-//void MainWindow::myResponseMethod2(QVariant &arg) {
-//    QList<QVariant> list = arg.toList();
-//    QMap<QString,QVariant> map = list[3].toMap();
+QString MainWindow::getStatus( QMap<QString,QVariant> &map) const {
 
-//    QString status = "unkown";
-//    if (map["status"].toString().left(8) == QString("new"))
-//        status = "new";
-//    else if (map["milestone"]==QString("waiting"))
-//        status = "waiting";
-//    if (map["status"].toString().left(8) == QString("postponed"))
-//        status = "postponed";
-//    else if (map["milestone"]==QString("current"))
-//        status = "selected";
-//    else if ((map["status"]==QString("assigned") ||
-//              map["status"]==QString("accepted")) &&
-//             (map["milestone"]==QString("none") ||
-//              map["milestone"]==QString("")))
-//         status = "not yet started";
+    QString status = "unkown";
+    if (map["status"].toString().left(8) == QString("new"))
+        status = "new";
+    else if (map["milestone"]==QString("waiting"))
+        status = "waiting";
+    if (map["status"].toString().left(8) == QString("postponed"))
+        status = "postponed";
+    else if (map["milestone"]==QString("current"))
+        status = "selected";
+    else if ((map["status"]==QString("assigned") ||
+              map["status"]==QString("accepted")) &&
+             (map["milestone"]==QString("none") ||
+              map["milestone"]==QString("")))
+         status = "backlog";
 
-//    insertStoryRow(list[0].toInt(),
-//        map["summary"].toString(),
-//        map["description"].toString(),
-//        map["how_to_demo"].toString(),
-//        map["priority"].toString(),
-//        map["estimation"].toString(),
-//        map["reporter"].toString(),
-//        status);
-//}
+    return status;
+}
 
 
 void MainWindow::myFaultResponse(int error, const QString &message) {
-    qDebug() << "An Error occoured, Code: " << error << " Message: " << message;
+    QString msg = QString().sprintf("An Error occured: %i. Message: ", error) + message;
+    qDebug() << msg;
+    ui->statusBar->showMessage(msg, 5000);
 }
-
 
 void MainWindow::on_setupButton_clicked()
 {
     SetupDialog dlg;
     dlg.setUrl(theUrl);
+    dlg.setQueryString(theQueryString);
     for (int i=0; i<ui->storyTable->columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
 
@@ -303,6 +297,7 @@ void MainWindow::onSetupAccepted(QVariantMap map)
 {
     theUrl = map["Url"].toUrl();
     rpc.setUrl(theUrl);
+    theQueryString = map["QueryString"].toString();
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTable->setColumnHidden(i, !list[i].toBool());
