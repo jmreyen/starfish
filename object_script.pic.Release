@@ -1,0 +1,15 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\storycardscene.o
+./release\setupdialog.o
+./release\ticketreport.o
+./release\ticketreportdialog.o
+./release\ticketmodel.o
+./release\moc_mainwindow.o
+./release\moc_storycardscene.o
+./release\moc_setupdialog.o
+./release\moc_ticketreport.o
+./release\moc_ticketreportdialog.o
+./release\moc_ticketmodel.o
+);

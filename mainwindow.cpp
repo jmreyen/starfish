@@ -1,13 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "ticketreport.h"
 #include "setupdialog.h"
+#include "ticketreportdialog.h"
 
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QNetworkReply>
 #include <QCheckBox>
-#include <QMutex>
-#include <sstream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,8 +21,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    //setup Ticket Table
+    ui->storyTable->setModel(&theTickets);
+
     // setup card view
     ui->cardView->setScene(&theScene);
+
+    //Get Updates from StoryTable
+    connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
+           SLOT(on_storyTable_currentCellChanged(const QModelIndex & , const QModelIndex & )));
 
     // Load Settings
     //TRAC
@@ -33,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     rpc.setUrl(theUrl);
     theQueryString = theSettings.value("TRAC/QueryString").toString();
 
-    //Columns
+    //Columns of StoryTable
     int size = theSettings.beginReadArray("columns");
     for (int i = 0; i < size; ++i) {
         theSettings.setArrayIndex(i);
@@ -44,43 +51,57 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     theSettings.endArray();
 
+    //Setup SprintTable
+    ui->sprintTable->setColumnHidden(1, true);
+    ui->sprintTable->setColumnHidden(2, true);
+    ui->sprintTable->sortByColumn(1, Qt::DescendingOrder);
+
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
     thePrinter.setPageSize(QPrinter::A5);
+
+    //Widget Test
+    QList<QTreeWidgetItem *> items;
+    for (int i = 0; i < 10; ++i)
+        items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1").arg(i))));
+
+    ui->treeWidget->insertTopLevelItems(0, items);
+    ui->treeWidget->insertTopLevelItems(1, items);
 }
 
 MainWindow::~MainWindow()
 {
-    // Save Settings
-    //TRAC
-    theSettings.setValue("TRAC/Server", theUrl.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-    theSettings.setValue("TRAC/UserName", theUrl.userName());
-    theSettings.setValue("TRAC/Password", theUrl.password());
-    theSettings.setValue("TRAC/QueryString", theQueryString);
+   // Save Settings
+   //TRAC
+   theSettings.setValue("TRAC/Server", theUrl.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+   theSettings.setValue("TRAC/Port", theUrl.port());
+   theSettings.setValue("TRAC/UserName", theUrl.userName());
+   theSettings.setValue("TRAC/Password", theUrl.password());
+   theSettings.setValue("TRAC/QueryString", theQueryString);
 
-    // Columns
-    theSettings.beginWriteArray("columns");
-    for (int i=0; i<ui->storyTable->columnCount(); ++i){
-        theSettings.setArrayIndex(i);
-        bool show = !ui->storyTable->isColumnHidden(i);
-        ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
-        int width = ui->storyTable->columnWidth(i);
-        theSettings.setValue(QString("show"), show);
-        theSettings.setValue(QString("width"), width);
-    }
-    theSettings.endArray();
+   // Columns
+   theSettings.beginWriteArray("columns");
+   for (int i=0; i<theTickets.columnCount(); ++i){
+       theSettings.setArrayIndex(i);
+       bool show = !ui->storyTable->isColumnHidden(i);
+       ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
+       int width = ui->storyTable->columnWidth(i);
+       theSettings.setValue(QString("show"), show);
+       theSettings.setValue(QString("width"), width);
+   }
+   theSettings.endArray();
     delete ui;
 }
 
 
 void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
 {
-    QString txt = ui->storyTable->item(row,col)?ui->storyTable->item(row,col)->text():"";
+    QString txt = theTickets.data(row, col).toString();
 
     if (scene==0x0)
         scene = &theScene;
 
-    if (ui->storyTable->rowCount()==0 || row == -1)
+    if (theTickets.rowCount()==0 || row == -1)
         return;
 
     switch (col) {
@@ -123,40 +144,19 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 }
 
 
-void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &stat)
+void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &ms, const QString &stat)
 {
-    int row = ui->storyTable->rowCount();
 
-    ui->storyTable->insertRow(row);
-    QTableWidgetItem *item = new QTableWidgetItem();
-    if (id>=0)
-        item->setData(Qt::DisplayRole, id);
-    else
-        item->setText("");
-    item->setTextAlignment(Qt::AlignRight);
-    ui->storyTable->setItem(row,0, item);
-    ui->storyTable->item(row,0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-    ui->storyTable->setItem(row,1, new QTableWidgetItem(sum));
-    ui->storyTable->setItem(row,2, new QTableWidgetItem(desc));
-    ui->storyTable->setItem(row,3, new QTableWidgetItem(htd));
-    ui->storyTable->setItem(row,4, new QTableWidgetItem(prio));
-    ui->storyTable->setItem(row,5, new QTableWidgetItem(est));
-    ui->storyTable->setItem(row,6, new QTableWidgetItem(usr));
-    ui->storyTable->setItem(row,7, new QTableWidgetItem(stat));
-    //ui->storyTable->setItem(row,8, new QTableWidgetItem(""));
-    ui->storyTable->setCellWidget(row, 8, new QCheckBox());
+    TicketData t(QString::number(id), sum, desc, htd, prio, est, usr, ms, stat);
+    theTickets.addTicket(t);
 
 }
 
-//void MainWindow::setColumnHidden(int col, bool hide)
-//{
-//    ui->storyTable->setColumnHidden(col, hide);
-//}
 
-void MainWindow::on_storyTable_currentCellChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+void MainWindow::on_storyTable_currentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
-    if (currentRow!=previousRow) {
-        fillCard(currentRow);
+    if (current.row()!= previous.row()) {
+        fillCard(current.row());
         ui->cardView->show();
     }
 }
@@ -174,9 +174,9 @@ void MainWindow::on_addRowButton_clicked()
 
 void MainWindow::on_removeRowButton_clicked()
 {
-    int row = ui->storyTable->currentRow();
-    theScene.clearCard();
-    ui->storyTable->removeRow(row);
+//    int row = ui->storyTable->currentRow();
+//    theScene.clearCard();
+//    ui->storyTable->removeRow(row);
 }
 
 void MainWindow::on_printButton_clicked()
@@ -188,13 +188,13 @@ void MainWindow::on_printButton_clicked()
     if (printDialog.exec() == QDialog::Accepted) {
         QPainter painter(&thePrinter);
         painter.setRenderHint(QPainter::Antialiasing);
-        for (int i=0; i<ui->storyTable->rowCount(); ++i) {
-            if (((QCheckBox*)ui->storyTable->cellWidget(i,8))->isChecked()) {
+        for (int i=0; i<theTickets.rowCount(); ++i) {
+//            if (((QCheckBox*)ui->storyTable->cellWidget(i,9))->isChecked()) {
                 fillCard(i, &theScene);
                 theScene.render(&painter);
                 thePrinter.newPage();
             }
-        }
+//        }
     }
 }
 
@@ -202,22 +202,31 @@ QMutex mutex;
 
 void MainWindow::on_importButton_clicked()
 {
-    QVariantList args;
+    QVariantList ticketArgs;
+    QVariantList sprintArgs;
 
     statusBar()->showMessage("Querying ...");
-    args.append(theQueryString);
-    rpc.call("ticket.query", args,
-                this, SLOT(queryResponseMethod(QVariant &)),
+
+    //Query Tickets
+    ticketArgs.append(theQueryString);
+    rpc.call("ticket.query", ticketArgs,
+                this, SLOT(ticketQueryResponseMethod(QVariant &)),
+                this, SLOT(myFaultResponse(int, const QString &)));
+    //Empty Ticket Table
+    theTickets.clear();
+    //Set Ticket Filter to "All"
+    ui->comboBox->setCurrentIndex(0);
+
+    //Query Milestones/Sprints
+    rpc.call("ticket.milestone.getAll", sprintArgs,
+                this, SLOT(sprintQueryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
 
-    int rowcount = ui->storyTable->rowCount();
-    for (int i = rowcount; i>=0; --i)
-        ui->storyTable->removeRow(i);
-
+    ui->sprintTable->clear();
 }
 
 
-void MainWindow::queryResponseMethod(QVariant &arg) {
+void MainWindow::ticketQueryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
 
@@ -231,31 +240,65 @@ void MainWindow::queryResponseMethod(QVariant &arg) {
         methodList.append(newMethod);
     }
     args.insert(0, methodList);;
-    rpc.call("system.multicall", args, this, SLOT(insertResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));
+    rpc.call("system.multicall", args, this, SLOT(getTicketResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));
 }
 
-void MainWindow::insertResponseMethod(QVariant &arg)
+void MainWindow::sprintQueryResponseMethod(QVariant &arg) {
+
+    QStringList list = arg.toStringList();
+    QVariantList args, methodList;
+
+    for (int i=0; i<list.size(); ++i)    {
+        QVariantMap newMethod;
+        QVariantList newParams;
+        newParams.append(list[i]);
+        newMethod.insert("methodName", "ticket.milestone.get");
+        newMethod.insert("params", newParams);
+        methodList.append(newMethod);
+    }
+    args.insert(0, methodList);;
+    rpc.call("system.multicall", args, this, SLOT(getSprintResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));}
+
+void MainWindow::getTicketResponseMethod(QVariant &arg)
 {
     QVariantList ticketList = arg.toList();
     for (int i = 0; i < ticketList.size(); ++i) {
         QVariantList fieldList = ticketList[i].toList().at(0).toList();
         QMap<QString,QVariant> map = fieldList[3].toMap();
-            insertStoryRow(fieldList[0].toInt(),
-                map["summary"].toString(),
-                map["description"].toString(),
-                map["how_to_demo"].toString(),
-                map["priority"].toString(),
-                map["estimation"].toString(),
-                map["reporter"].toString(),
-                           getStatus(map));
+        insertStoryRow(
+            fieldList[0].toInt(),
+            map["summary"].toString(),
+            map["description"].toString(),
+            map["how_to_demo"].toString(),
+            map["priority"].toString(),
+            map["estimation"].toString(),
+            map["reporter"].toString(),
+            map["milestone"].toString(),
+            getStatus(map));
     }
+    ui->storyTable->resizeRowsToContents ();
     statusBar()->showMessage("");
 }
+
+void MainWindow::getSprintResponseMethod(QVariant &arg)
+{
+    QVariantList sprintList = arg.toList();
+    for (int i = 0; i < sprintList.size(); ++i) {
+        QMap<QString, QVariant> map = sprintList[i].toList().at(0).toMap();
+        int row = ui->sprintTable->rowCount();
+        ui->sprintTable->insertRow(row);
+        ui->sprintTable->setItem(row,0, new QTableWidgetItem(map["name"].toString()));
+        ui->sprintTable->setItem(row,1, new QTableWidgetItem(map["due"].toString()));
+        ui->sprintTable->setItem(row,2, new QTableWidgetItem(map["completed"].toString()));
+    }
+    ui->sprintTable->resizeRowsToContents ();
+}
+
 
 
 QString MainWindow::getStatus( QMap<QString,QVariant> &map) const {
 
-    QString status = "unkown";
+    QString status = "unknown";
     if (map["status"].toString().left(8) == QString("new"))
         status = "new";
     else if (map["milestone"]==QString("waiting"))
@@ -285,7 +328,7 @@ void MainWindow::on_setupButton_clicked()
     SetupDialog dlg;
     dlg.setUrl(theUrl);
     dlg.setQueryString(theQueryString);
-    for (int i=0; i<ui->storyTable->columnCount(); ++i)
+    for (int i=0; i<theTickets.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
 
     QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
@@ -301,4 +344,42 @@ void MainWindow::onSetupAccepted(QVariantMap map)
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTable->setColumnHidden(i, !list[i].toBool());
+}
+
+
+void MainWindow::onFilterRow(QString arg)
+{
+    for( int i = 0; i < theTickets.rowCount(); ++i )
+    {
+        QString str = theTickets.data(i,8).toString();
+        if(arg == "all" || str.contains(arg) )
+            ui->storyTable->setRowHidden( i, false);
+        else
+            ui->storyTable->setRowHidden( i, true);
+    }
+}
+
+
+void MainWindow::on_reportButton_clicked()
+{
+    TicketReport d;
+    d.beginInsertTicket();
+    for (int i=0; i<theTickets.rowCount(); ++i) {
+        d.insertTicket(
+            theTickets.data(i,0).toInt(),
+            theTickets.data(i,1).toString(),
+            theTickets.data(i,2).toString(),
+            theTickets.data(i,3).toString(),
+            theTickets.data(i,4).toString(),
+            theTickets.data(i,5).toString(),
+            theTickets.data(i,6).toString(),
+            theTickets.data(i,8).toString());
+
+    }
+    d.endInsertTicket();
+
+    ReportDialog dlg;
+    dlg.setTextDocument(&d);
+    dlg.exec();
+
 }
