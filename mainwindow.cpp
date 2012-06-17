@@ -8,6 +8,7 @@
 #include <QPrintDialog>
 #include <QNetworkReply>
 #include <QCheckBox>
+#include <QItemDelegate>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -23,13 +24,24 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //setup Ticket Table
     ui->storyTable->setModel(&theTickets);
+    ui->storyTable->horizontalHeader()->show();
+    connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
+           SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
 
     // setup card view
     ui->cardView->setScene(&theScene);
 
-    //Get Updates from StoryTable
-    connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
-           SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
+    //Setup SprintTable
+    ui->sprintTable->setModel(&theSprints);
+    theSprintDataMapper.setModel(&theSprints);
+    theSprintDataMapper.setItemDelegate(new QItemDelegate(&theSprintDataMapper));
+    theSprintDataMapper.addMapping(ui->capacityEdit, 0);
+    theSprintDataMapper.addMapping(ui->dueDateEdit, 1);
+    theSprintDataMapper.addMapping(ui->capacityEdit_3, 2);
+    connect(ui->sprintTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
+            &theSprintDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+    theSprintDataMapper.toFirst();
+
 
     // Load Settings
     //TRAC
@@ -51,12 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     theSettings.endArray();
 
-    ui->storyTable->horizontalHeader()->show();
 
-    //Setup SprintTable
-    ui->sprintTable->setColumnHidden(1, true);
-    ui->sprintTable->setColumnHidden(2, true);
-    ui->sprintTable->sortByColumn(1, Qt::DescendingOrder);
 
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
@@ -210,7 +217,7 @@ void MainWindow::on_importButton_clicked()
                 this, SLOT(sprintQueryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
 
-    ui->sprintTable->clear();
+    theSprints.clear();
 }
 
 
@@ -273,11 +280,12 @@ void MainWindow::getSprintResponseMethod(QVariant &arg)
     QVariantList sprintList = arg.toList();
     for (int i = 0; i < sprintList.size(); ++i) {
         QMap<QString, QVariant> map = sprintList[i].toList().at(0).toMap();
-        int row = ui->sprintTable->rowCount();
-        ui->sprintTable->insertRow(row);
-        ui->sprintTable->setItem(row,0, new QTableWidgetItem(map["name"].toString()));
-        ui->sprintTable->setItem(row,1, new QTableWidgetItem(map["due"].toString()));
-        ui->sprintTable->setItem(row,2, new QTableWidgetItem(map["completed"].toString()));
+        SprintData s(
+            map["name"].toString(),
+            map["due"].toDate(),
+            map["completed"].toBool(),
+            map["description"].toString());
+        theSprints.addSprint(s);
     }
     ui->sprintTable->resizeRowsToContents ();
 }
@@ -291,8 +299,10 @@ QString MainWindow::getStatus( QMap<QString,QVariant> &map) const {
         status = "new";
     else if (map["milestone"]==QString("waiting"))
         status = "waiting";
-    if (map["status"].toString().left(8) == QString("postponed"))
+    else if (map["status"].toString().left(8) == QString("postponed"))
         status = "postponed";
+    else if (map["status"].toString().left(8) == QString("closed"))
+        status = "done";
     else if (map["milestone"]==QString("current"))
         status = "selected";
     else if ((map["status"]==QString("assigned") ||

@@ -4,10 +4,12 @@
 #include "libmaia/maiaXmlRpcClient.h"
 #include "storycardscene.h"
 #include "ticketmodel.h"
+#include "sprintmodel.h"
 
 #include <QMainWindow>
 #include <QSettings>
 #include <QPrinter>
+#include <QDataWidgetMapper>
 
 class QPrinter;
 class QGraphicsTextItem;
@@ -51,6 +53,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     TicketModel theTickets;
+    SprintModel theSprints;
+    QDataWidgetMapper theSprintDataMapper;
     StoryCardScene theScene;
     QPrinter thePrinter;
     MaiaXmlRpcClient rpc;

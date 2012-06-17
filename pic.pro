@@ -16,7 +16,9 @@ SOURCES += main.cpp\
     setupdialog.cpp \
     ticketreport.cpp \
     ticketreportdialog.cpp \
-    ticketmodel.cpp
+    ticketmodel.cpp \
+    sprintmodel.cpp \
+    sprintdata.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -24,7 +26,9 @@ HEADERS  += mainwindow.h \
     ticketreport.h \
     ticketreportdialog.h \
     ticketmodel.h \
-    ticketdata.h
+    ticketdata.h \
+    sprintmodel.h \
+    sprintdata.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \

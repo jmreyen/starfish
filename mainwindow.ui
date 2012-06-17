@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>705</width>
-    <height>657</height>
+    <width>742</width>
+    <height>709</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,170 +25,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0" colspan="10">
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Tickets</string>
-       </attribute>
-       <widget class="QGraphicsView" name="cardView">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="geometry">
-         <rect>
-          <x>9</x>
-          <y>9</y>
-          <width>298</width>
-          <height>210</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>298</width>
-          <height>210</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>298</width>
-          <height>210</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="printButton">
-        <property name="geometry">
-         <rect>
-          <x>9</x>
-          <y>226</y>
-          <width>75</width>
-          <height>23</height>
-         </rect>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>81</width>
-          <height>23</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Print</string>
-        </property>
-       </widget>
-       <widget class="QTableWidget" name="sprintTable">
-        <property name="geometry">
-         <rect>
-          <x>313</x>
-          <y>9</y>
-          <width>138</width>
-          <height>211</height>
-         </rect>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAsNeeded</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="autoScroll">
-         <bool>false</bool>
-        </property>
-        <property name="verticalScrollMode">
-         <enum>QAbstractItemView::ScrollPerPixel</enum>
-        </property>
-        <property name="showGrid">
-         <bool>false</bool>
-        </property>
-        <property name="gridStyle">
-         <enum>Qt::NoPen</enum>
-        </property>
-        <property name="sortingEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="columnCount">
-         <number>3</number>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Sprint</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Due</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Completed</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Sprints</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QTreeWidget" name="treeWidget">
-          <column>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>3</string>
-           </property>
-          </column>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
     <item row="1" column="0">
      <widget class="QLabel" name="label">
       <property name="maximumSize">
@@ -243,6 +79,11 @@
       <item>
        <property name="text">
         <string>unknown</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>done</string>
        </property>
       </item>
      </widget>
@@ -384,6 +225,368 @@
       </attribute>
      </widget>
     </item>
+    <item row="0" column="0" colspan="10">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Tickets</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QGraphicsView" name="cardView">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>298</width>
+            <height>210</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>298</width>
+            <height>210</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="printButton">
+          <property name="maximumSize">
+           <size>
+            <width>81</width>
+            <height>23</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Print</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Sprints</string>
+       </attribute>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="geometry">
+         <rect>
+          <x>358</x>
+          <y>9</y>
+          <width>351</width>
+          <height>241</height>
+         </rect>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>351</width>
+          <height>241</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>351</width>
+          <height>241</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>Burndown</string>
+        </property>
+        <widget class="QListView" name="listView">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>331</width>
+           <height>51</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>331</width>
+           <height>51</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>331</width>
+           <height>51</height>
+          </size>
+         </property>
+         <property name="flow">
+          <enum>QListView::LeftToRight</enum>
+         </property>
+        </widget>
+        <widget class="QGraphicsView" name="burnDownView">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>331</width>
+           <height>141</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>331</width>
+           <height>141</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>331</width>
+           <height>141</height>
+          </size>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="geometry">
+         <rect>
+          <x>106</x>
+          <y>9</y>
+          <width>241</width>
+          <height>133</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Sprint Data</string>
+        </property>
+        <widget class="QLineEdit" name="capacityEdit_3">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>23</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="capacityEdit">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>49</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Normal</enum>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="storyPointsEdit">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>75</y>
+           <width>41</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>41</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QDateEdit" name="dueDateEdit">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>101</y>
+           <width>110</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>110</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>110</width>
+           <height>22</height>
+          </size>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>101</y>
+           <width>45</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Due Date</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>75</y>
+           <width>58</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Story Points</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>49</y>
+           <width>42</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Capacity</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>23</y>
+           <width>52</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Work Days</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QTableView" name="sprintTable">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>91</width>
+          <height>131</height>
+         </rect>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="autoScroll">
+         <bool>false</bool>
+        </property>
+        <property name="verticalScrollMode">
+         <enum>QAbstractItemView::ScrollPerPixel</enum>
+        </property>
+        <property name="showGrid">
+         <bool>false</bool>
+        </property>
+        <property name="gridStyle">
+         <enum>Qt::NoPen</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="horizontalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <attribute name="verticalHeaderHighlightSections">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </widget>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -391,7 +594,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>705</width>
+     <width>742</width>
      <height>21</height>
     </rect>
    </property>

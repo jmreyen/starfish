@@ -6,10 +6,13 @@ INPUT(
 ./release\ticketreport.o
 ./release\ticketreportdialog.o
 ./release\ticketmodel.o
+./release\sprintmodel.o
+./release\sprintdata.o
 ./release\moc_mainwindow.o
 ./release\moc_storycardscene.o
 ./release\moc_setupdialog.o
 ./release\moc_ticketreport.o
 ./release\moc_ticketreportdialog.o
 ./release\moc_ticketmodel.o
+./release\moc_sprintmodel.o
 );
