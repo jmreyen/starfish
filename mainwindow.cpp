@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Get Updates from StoryTable
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
-           SLOT(on_storyTable_currentCellChanged(const QModelIndex & , const QModelIndex & )));
+           SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
 
     // Load Settings
     //TRAC
@@ -51,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     theSettings.endArray();
 
+    ui->storyTable->horizontalHeader()->show();
+
     //Setup SprintTable
     ui->sprintTable->setColumnHidden(1, true);
     ui->sprintTable->setColumnHidden(2, true);
@@ -59,14 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
     thePrinter.setPageSize(QPrinter::A5);
-
-    //Widget Test
-    QList<QTreeWidgetItem *> items;
-    for (int i = 0; i < 10; ++i)
-        items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(QString("item: %1").arg(i))));
-
-    ui->treeWidget->insertTopLevelItems(0, items);
-    ui->treeWidget->insertTopLevelItems(1, items);
 }
 
 MainWindow::~MainWindow()
@@ -153,18 +147,12 @@ void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc,
 }
 
 
-void MainWindow::on_storyTable_currentCellChanged(const QModelIndex &current , const QModelIndex &previous )
+void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
     if (current.row()!= previous.row()) {
         fillCard(current.row());
         ui->cardView->show();
     }
-}
-
-void MainWindow::on_storyTable_cellChanged(int row, int column)
-{
-    fillCard(row, column);
-    ui->cardView->show();
 }
 
 void MainWindow::on_addRowButton_clicked()

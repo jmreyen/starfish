@@ -37,8 +37,7 @@ protected:
     void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &ms="none", const QString &stat="new");
     QString getStatus( QMap<QString,QVariant> &map) const;
 private slots:
-    void on_storyTable_currentCellChanged(const QModelIndex & , const QModelIndex & );
-    void on_storyTable_cellChanged(int row, int column);
+    void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void on_addRowButton_clicked();
     void on_removeRowButton_clicked();
     void on_printButton_clicked();
