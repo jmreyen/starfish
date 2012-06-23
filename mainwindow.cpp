@@ -51,9 +51,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     thePrinter(QPrinter::HighResolution),
-    rpc(this),
-    theUrl(),
-    theSettings("pic.ini", QSettings::IniFormat)
+    theSettings("pic.ini", QSettings::IniFormat),
+    theLoader(theStories, theSprints, this)
 {
 
     ui->setupUi(this);
@@ -100,12 +99,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Load Settings
     //TRAC
-    theUrl.setUrl(theSettings.value("TRAC/Server").toString());
-    theUrl.setPort(theSettings.value("TRAC/Port").toInt());
-    theUrl.setUserName(theSettings.value("TRAC/UserName").toString());
-    theUrl.setPassword(theSettings.value("TRAC/Password").toString());
-    rpc.setUrl(theUrl);
-    theQueryString = theSettings.value("TRAC/QueryString").toString();
+    QUrl url;
+    url.setUrl(theSettings.value("TRAC/Server").toString());
+    url.setPort(theSettings.value("TRAC/Port").toInt());
+    url.setUserName(theSettings.value("TRAC/UserName").toString());
+    url.setPassword(theSettings.value("TRAC/Password").toString());
+    theLoader.setUrl(url);
+    theLoader.setQueryString(theSettings.value("TRAC/QueryString").toString());
     loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
 
     //Columns of StoryTable
@@ -136,11 +136,11 @@ MainWindow::~MainWindow()
 {
    // Save Settings
    //TRAC
-   theSettings.setValue("TRAC/Server", theUrl.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-   theSettings.setValue("TRAC/Port", theUrl.port());
-   theSettings.setValue("TRAC/UserName", theUrl.userName());
-   theSettings.setValue("TRAC/Password", theUrl.password());
-   theSettings.setValue("TRAC/QueryString", theQueryString);
+   theSettings.setValue("TRAC/Server", theLoader.url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+   theSettings.setValue("TRAC/Port", theLoader.url().port());
+   theSettings.setValue("TRAC/UserName", theLoader.url().userName());
+   theSettings.setValue("TRAC/Password", theLoader.url().password());
+   theSettings.setValue("TRAC/QueryString", theLoader.queryString());
    theSettings.setValue("TRAC/LoadOnStart", loadOnStart);
 
    // Columns
@@ -299,135 +299,24 @@ void MainWindow::on_printButton_clicked()
 
 void MainWindow::on_importButton_clicked()
 {
-    QVariantList ticketArgs;
-    QVariantList sprintArgs;
 
-    statusBar()->showMessage("Querying ...");
-
-    //Query Tickets
-    ticketArgs.append(theQueryString+"&max=0");
-    rpc.call("ticket.query", ticketArgs,
-                this, SLOT(ticketQueryResponseMethod(QVariant &)),
-                this, SLOT(myFaultResponse(int, const QString &)));
-    //Empty Ticket Table
-    theStories.clear();
-    //Set Ticket Filter to "All"
-    ui->comboBox->setCurrentIndex(0);
-
-    //Query Milestones/Sprints
-    rpc.call("ticket.milestone.getAll", sprintArgs,
-                this, SLOT(sprintQueryResponseMethod(QVariant &)),
-                this, SLOT(myFaultResponse(int, const QString &)));
 
     theSprints.clear();
-}
-
-
-void MainWindow::ticketQueryResponseMethod(QVariant &arg) {
-    QStringList list = arg.toStringList();
-    QVariantList args, methodList;
-
-    statusBar()->showMessage("Retrieving ...");
-    for (int i=0; i<list.size(); ++i)    {
-        QVariantMap newMethod;
-        QVariantList newParams;
-        newParams.append(list[i].toInt());
-        newMethod.insert("methodName", "ticket.get");
-        newMethod.insert("params", newParams);
-        methodList.append(newMethod);
-    }
-    args.insert(0, methodList);;
-    rpc.call("system.multicall", args, this, SLOT(getTicketResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));
-}
-
-void MainWindow::sprintQueryResponseMethod(QVariant &arg) {
-
-    QStringList list = arg.toStringList();
-    QVariantList args, methodList;
-
-    for (int i=0; i<list.size(); ++i)    {
-        QVariantMap newMethod;
-        QVariantList newParams;
-        newParams.append(list[i]);
-        newMethod.insert("methodName", "ticket.milestone.get");
-        newMethod.insert("params", newParams);
-        methodList.append(newMethod);
-    }
-    args.insert(0, methodList);;
-    rpc.call("system.multicall", args, this, SLOT(getSprintResponseMethod(QVariant&)), this, SLOT(myFaultResponse(int, const QString &)));
-}
-
-void MainWindow::getTicketResponseMethod(QVariant &arg)
-{
-    QVariantList ticketList = arg.toList();
-    for (int i = 0; i < ticketList.size(); ++i) {
-        QVariantList fieldList = ticketList[i].toList().at(0).toList();
-        QMap<QString,QVariant> map = fieldList[3].toMap();
-        insertStoryRow(
-            fieldList[0].toInt(),
-            map["summary"].toString(),
-            map["description"].toString(),
-            map["how_to_demo"].toString(),
-            map["priority"].toString(),
-            map["estimation"].toString(),
-            map["reporter"].toString(),
-            map["milestone"].toString(),
-            getStatus(map));
-    }
-    statusBar()->showMessage("");
-}
-
-void MainWindow::getSprintResponseMethod(QVariant &arg)
-{
-    QVariantList sprintList = arg.toList();
-    for (int i = 0; i < sprintList.size(); ++i) {
-        QMap<QString, QVariant> map = sprintList[i].toList().at(0).toMap();
-        QString nam = map["name"].toString();
-        QDate dat = map["due"].toDateTime().date();
-        bool cmp = map["completed"].toString()!= "0";
-        QString dsc = map["description"].toString();
-        SprintData s(nam, dat, cmp, dsc);
-        theSprints.addSprint(s);
-    }
+    theStories.clear();
+    ui->comboBox->setCurrentIndex(0);
+    statusBar()->showMessage("Querying ...");
+    theLoader.loadStories();
+    theLoader.loadSprints();
     theSprints.sortByDate();
+
 }
 
-
-
-QString MainWindow::getStatus( QMap<QString,QVariant> &map) const {
-
-    QString status = "unknown";
-    if (map["status"].toString().left(8) == QString("new"))
-        status = "new";
-    else if (map["milestone"]==QString("waiting"))
-        status = "waiting";
-    else if (map["status"].toString().left(8) == QString("postponed"))
-        status = "postponed";
-    else if (map["status"].toString().left(8) == QString("closed"))
-        status = "done";
-    else if (map["milestone"]==QString("current"))
-        status = "selected";
-    else if ((map["status"]==QString("assigned") ||
-              map["status"]==QString("accepted")) &&
-             (map["milestone"]==QString("none") ||
-              map["milestone"]==QString("")))
-         status = "backlog";
-
-    return status;
-}
-
-
-void MainWindow::myFaultResponse(int error, const QString &message) {
-    QString msg = QString().sprintf("An Error occured: %i. Message: ", error) + message;
-    qDebug() << msg;
-    ui->statusBar->showMessage(msg, 5000);
-}
 
 void MainWindow::on_setupButton_clicked()
 {
     SetupDialog dlg;
-    dlg.setUrl(theUrl);
-    dlg.setQueryString(theQueryString);
+    dlg.setUrl(theLoader.url());
+    dlg.setQueryString(theLoader.queryString());
     dlg.setLoadOnStart(loadOnStart);
     for (int i=0; i<theStories.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
@@ -439,9 +328,8 @@ void MainWindow::on_setupButton_clicked()
 
 void MainWindow::onSetupAccepted(QVariantMap map)
 {
-    theUrl = map["Url"].toUrl();
-    rpc.setUrl(theUrl);
-    theQueryString = map["QueryString"].toString();
+    theLoader.setUrl(map["Url"].toUrl());
+    theLoader.setQueryString(map["QueryString"].toString());
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTable->setColumnHidden(i, !list[i].toBool());

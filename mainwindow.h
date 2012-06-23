@@ -1,11 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "libmaia/maiaXmlRpcClient.h"
 #include "burndownscene.h"
 #include "storycardscene.h"
 #include "storymodel.h"
 #include "sprintmodel.h"
+#include "tracdataloader.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -26,11 +26,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public slots:
-    void ticketQueryResponseMethod(QVariant &arg);
-    void sprintQueryResponseMethod(QVariant &arg);
-    void getTicketResponseMethod(QVariant &arg);
-    void getSprintResponseMethod(QVariant &arg);
-    void myFaultResponse(int error, const QString &message);
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -39,7 +35,6 @@ protected:
     void fillCard(int row, int col, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
     void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &ms="none", const QString &stat="new");
-    QString getStatus( QMap<QString,QVariant> &map) const;
 private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
@@ -63,11 +58,9 @@ private:
     BurnDownScene theBurnDownScene;
     StoryCardScene theCardScene;
     QPrinter thePrinter;
-    MaiaXmlRpcClient rpc;
-    QUrl theUrl;
     QSettings theSettings;
-    QString theQueryString;
     bool loadOnStart;
+    TracDataLoader theLoader;
 };
 
 

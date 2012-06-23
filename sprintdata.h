@@ -19,7 +19,7 @@ class SprintData
 {
 public:
     SprintData(){}
-    SprintData(QString , QDate , bool, QString );
+    SprintData(const QString &, const QDate &, bool, const QString &);
 
     QString name() const  {return theName;}
     QDate dueDate() const  {return theDueDate;}

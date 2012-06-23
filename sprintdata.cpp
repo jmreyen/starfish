@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QDebug>
 
-SprintData::SprintData(QString n, QDate d, bool b, QString dsc):
+SprintData::SprintData(const QString &n, const QDate &d, bool b, const QString &dsc):
     theName(n),
     theDueDate(d),
     isCompleted(b),

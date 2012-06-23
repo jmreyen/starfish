@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     burndownscene.cpp \
     storymodel.cpp \
     storyreport.cpp \
-    storyreportdialog.cpp
+    storyreportdialog.cpp \
+    tracdataloader.cpp \
+    abstractdataloader.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -30,7 +32,9 @@ HEADERS  += mainwindow.h \
     storydata.h \
     storymodel.h \
     storyreport.h \
-    storyreportdialog.h
+    storyreportdialog.h \
+    tracdataloader.h \
+    abstractdataloader.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \

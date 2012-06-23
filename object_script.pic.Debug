@@ -9,6 +9,8 @@ INPUT(
 ./debug\storymodel.o
 ./debug\storyreport.o
 ./debug\storyreportdialog.o
+./debug\tracdataloader.o
+./debug\abstractdataloader.o
 ./debug\moc_mainwindow.o
 ./debug\moc_storycardscene.o
 ./debug\moc_setupdialog.o
@@ -17,4 +19,6 @@ INPUT(
 ./debug\moc_storymodel.o
 ./debug\moc_storyreport.o
 ./debug\moc_storyreportdialog.o
+./debug\moc_tracdataloader.o
+./debug\moc_abstractdataloader.o
 );
