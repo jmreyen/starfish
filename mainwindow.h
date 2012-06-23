@@ -2,13 +2,15 @@
 #define MAINWINDOW_H
 
 #include "libmaia/maiaXmlRpcClient.h"
+#include "burndownscene.h"
 #include "storycardscene.h"
-#include "ticketmodel.h"
+#include "storymodel.h"
 #include "sprintmodel.h"
 
 #include <QMainWindow>
 #include <QSettings>
 #include <QPrinter>
+#include <QStandardItemModel>
 #include <QDataWidgetMapper>
 
 class QPrinter;
@@ -40,6 +42,8 @@ protected:
     QString getStatus( QMap<QString,QVariant> &map) const;
 private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
+    void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
+    void onSprintModelDataChanged(const QModelIndex &index);
     void on_addRowButton_clicked();
     void on_removeRowButton_clicked();
     void on_printButton_clicked();
@@ -47,20 +51,23 @@ private slots:
     void on_setupButton_clicked();
     void onSetupAccepted(QVariantMap);
     void onFilterRow(QString arg);
-
     void on_reportButton_clicked();
+    void on_filterBySprintCheckBox_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;
-    TicketModel theTickets;
+    StoryModel theStories;
     SprintModel theSprints;
+    QDataWidgetMapper theStoryDataMapper;
     QDataWidgetMapper theSprintDataMapper;
-    StoryCardScene theScene;
+    BurnDownScene theBurnDownScene;
+    StoryCardScene theCardScene;
     QPrinter thePrinter;
     MaiaXmlRpcClient rpc;
     QUrl theUrl;
     QSettings theSettings;
     QString theQueryString;
+    bool loadOnStart;
 };
 
 

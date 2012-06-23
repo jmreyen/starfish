@@ -14,21 +14,23 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     storycardscene.cpp \
     setupdialog.cpp \
-    ticketreport.cpp \
-    ticketreportdialog.cpp \
-    ticketmodel.cpp \
     sprintmodel.cpp \
-    sprintdata.cpp
+    sprintdata.cpp \
+    burndownscene.cpp \
+    storymodel.cpp \
+    storyreport.cpp \
+    storyreportdialog.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
     setupdialog.h \
-    ticketreport.h \
-    ticketreportdialog.h \
-    ticketmodel.h \
-    ticketdata.h \
     sprintmodel.h \
-    sprintdata.h
+    sprintdata.h \
+    burndownscene.h \
+    storydata.h \
+    storymodel.h \
+    storyreport.h \
+    storyreportdialog.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \

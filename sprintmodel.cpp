@@ -12,7 +12,7 @@ int SprintModel::rowCount ( const QModelIndex & parent ) const
 
 int SprintModel::columnCount ( const QModelIndex & parent ) const
 {
-    return 1;
+    return SP_LAST;
 }
 
 QVariant SprintModel::data ( const QModelIndex & index, int role) const
@@ -28,10 +28,7 @@ QVariant SprintModel::data (int row, int col, int role) const
     switch (role) {
     case Qt::EditRole:
     case Qt::DisplayRole:
-        switch(col) {
-            case 0: return t.name();
-            case 1: return t.dueDate();
-        }
+        return t.data(col);
         break;
     }
     return QVariant();
@@ -50,3 +47,38 @@ void SprintModel::clear()
     theList.clear();
     endResetModel();
 }
+
+bool gt(const SprintData &d1, const SprintData &d2)
+{
+    return d1.dueDate() > d2.dueDate();
+}
+
+void SprintModel::sortByDate()
+{
+    beginResetModel();
+    qSort(theList.begin(), theList.end(), gt);
+    endResetModel();
+}
+
+SprintData SprintModel::sprint(int row) const
+{
+    if (row < theList.count())
+        return theList[row];
+    else
+        return SprintData();
+}
+
+
+
+bool SprintModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+    SprintData &s = theList[index.row()];
+    if (role == Qt::EditRole ) {
+        s.setData(index.column(), value);
+        emit dataChanged(index, index);
+        return true;
+    }
+    return false;
+}
+
+

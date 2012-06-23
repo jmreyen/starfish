@@ -25,69 +25,6 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="1" column="0">
-     <widget class="QLabel" name="label">
-      <property name="maximumSize">
-       <size>
-        <width>71</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Show Status</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1" colspan="7">
-     <widget class="QComboBox" name="comboBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <item>
-       <property name="text">
-        <string>all</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>new</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>selected</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>postponed</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>waiting</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>backlog</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>unknown</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>done</string>
-       </property>
-      </item>
-     </widget>
-    </item>
     <item row="3" column="0">
      <widget class="QPushButton" name="addRowButton">
       <property name="maximumSize">
@@ -178,23 +115,23 @@
         <family>Arial</family>
        </font>
       </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
       <property name="gridStyle">
-       <enum>Qt::NoPen</enum>
+       <enum>Qt::SolidLine</enum>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
       <property name="wordWrap">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <attribute name="horizontalHeaderVisible">
        <bool>false</bool>
       </attribute>
       <attribute name="horizontalHeaderCascadingSectionResizes">
        <bool>true</bool>
-      </attribute>
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>50</number>
       </attribute>
       <attribute name="horizontalHeaderHighlightSections">
        <bool>true</bool>
@@ -214,9 +151,6 @@
       <attribute name="verticalHeaderCascadingSectionResizes">
        <bool>false</bool>
       </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>0</number>
-      </attribute>
       <attribute name="verticalHeaderHighlightSections">
        <bool>false</bool>
       </attribute>
@@ -228,64 +162,304 @@
     <item row="0" column="0" colspan="10">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Tickets</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QGraphicsView" name="cardView">
-          <property name="enabled">
-           <bool>true</bool>
+        <item row="3" column="7">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>23</height>
+           </size>
           </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>23</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Show Status</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="8">
+         <widget class="QComboBox" name="comboBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize">
-           <size>
-            <width>298</width>
-            <height>210</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>298</width>
-            <height>210</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
-          </property>
-          <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOff</enum>
-          </property>
+          <item>
+           <property name="text">
+            <string>all</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>new</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>selected</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>postponed</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>waiting</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>backlog</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>unknown</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>done</string>
+           </property>
+          </item>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="printButton">
-          <property name="maximumSize">
-           <size>
-            <width>81</width>
-            <height>23</height>
-           </size>
+        <item row="1" column="10" rowspan="3">
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Preview</string>
           </property>
-          <property name="text">
-           <string>Print</string>
-          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="0">
+            <widget class="QGraphicsView" name="cardView">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>298</width>
+               <height>210</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>298</width>
+               <height>210</height>
+              </size>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="printButton">
+             <property name="text">
+              <string>Print Index Cards</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
-        <item row="0" column="1">
+        <item row="1" column="7" rowspan="2" colspan="3">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Ticket</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="minimumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Summary</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="3">
+            <widget class="QLineEdit" name="summaryEdit"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="minimumSize">
+              <size>
+               <width>58</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>58</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>User</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" colspan="2">
+            <widget class="QLineEdit" name="lineEdit_2"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_7">
+             <property name="minimumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Description</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="4">
+            <widget class="QTextEdit" name="descriptionEdit">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>80</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string>Estimation</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QComboBox" name="comboBox_6">
+             <property name="maximumSize">
+              <size>
+               <width>51</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLabel" name="label_6">
+             <property name="minimumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>57</width>
+               <height>23</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Type</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QComboBox" name="comboBox_2"/>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>Importance</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QComboBox" name="comboBox_3">
+             <property name="maximumSize">
+              <size>
+               <width>51</width>
+               <height>20</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Component</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="3">
+            <widget class="QComboBox" name="comboBox_5"/>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Sprint</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QComboBox" name="comboBox_4"/>
+           </item>
+           <item row="6" column="2">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string>Version</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="3">
+            <widget class="QComboBox" name="comboBox_7"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="11">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -328,71 +502,88 @@
         <property name="title">
          <string>Burndown</string>
         </property>
-        <widget class="QListView" name="listView">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>180</y>
-           <width>331</width>
-           <height>51</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>331</width>
-           <height>51</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>331</width>
-           <height>51</height>
-          </size>
-         </property>
-         <property name="flow">
-          <enum>QListView::LeftToRight</enum>
-         </property>
-        </widget>
-        <widget class="QGraphicsView" name="burnDownView">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>20</y>
-           <width>331</width>
-           <height>141</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>331</width>
-           <height>141</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>331</width>
-           <height>141</height>
-          </size>
-         </property>
-        </widget>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="QGraphicsView" name="burnDownView">
+           <property name="minimumSize">
+            <size>
+             <width>329</width>
+             <height>149</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>329</width>
+             <height>149</height>
+            </size>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAlwaysOff</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QListWidget" name="burnDownTable">
+           <property name="minimumSize">
+            <size>
+             <width>331</width>
+             <height>51</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>331</width>
+             <height>51</height>
+            </size>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="lineWidth">
+            <number>2</number>
+           </property>
+           <property name="midLineWidth">
+            <number>2</number>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+           </property>
+           <property name="flow">
+            <enum>QListView::LeftToRight</enum>
+           </property>
+           <property name="resizeMode">
+            <enum>QListView::Adjust</enum>
+           </property>
+           <property name="viewMode">
+            <enum>QListView::ListMode</enum>
+           </property>
+           <property name="selectionRectVisible">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
-       <widget class="QGroupBox" name="groupBox_2">
+       <widget class="QGroupBox" name="sprintDataGroupBox">
         <property name="geometry">
          <rect>
-          <x>106</x>
-          <y>9</y>
-          <width>241</width>
-          <height>133</height>
+          <x>110</x>
+          <y>20</y>
+          <width>209</width>
+          <height>141</height>
          </rect>
         </property>
         <property name="title">
          <string>Sprint Data</string>
         </property>
-        <widget class="QLineEdit" name="capacityEdit_3">
+        <widget class="QLineEdit" name="workDayEdit">
          <property name="geometry">
           <rect>
-           <x>110</x>
-           <y>23</y>
+           <x>81</x>
+           <y>24</y>
            <width>41</width>
            <height>20</height>
           </rect>
@@ -416,8 +607,8 @@
         <widget class="QLineEdit" name="capacityEdit">
          <property name="geometry">
           <rect>
-           <x>110</x>
-           <y>49</y>
+           <x>81</x>
+           <y>45</y>
            <width>41</width>
            <height>20</height>
           </rect>
@@ -438,11 +629,11 @@
           <enum>QLineEdit::Normal</enum>
          </property>
         </widget>
-        <widget class="QLineEdit" name="storyPointsEdit">
+        <widget class="QLineEdit" name="velocityEdit">
          <property name="geometry">
           <rect>
-           <x>110</x>
-           <y>75</y>
+           <x>81</x>
+           <y>66</y>
            <width>41</width>
            <height>20</height>
           </rect>
@@ -466,8 +657,8 @@
         <widget class="QDateEdit" name="dueDateEdit">
          <property name="geometry">
           <rect>
-           <x>110</x>
-           <y>101</y>
+           <x>81</x>
+           <y>87</y>
            <width>110</width>
            <height>22</height>
           </rect>
@@ -488,8 +679,8 @@
         <widget class="QLabel" name="label_3">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>101</y>
+           <x>17</x>
+           <y>87</y>
            <width>45</width>
            <height>16</height>
           </rect>
@@ -501,21 +692,21 @@
         <widget class="QLabel" name="label_4">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>75</y>
-           <width>58</width>
+           <x>17</x>
+           <y>66</y>
+           <width>36</width>
            <height>16</height>
           </rect>
          </property>
          <property name="text">
-          <string>Story Points</string>
+          <string>Velocity</string>
          </property>
         </widget>
         <widget class="QLabel" name="label_2">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>49</y>
+           <x>17</x>
+           <y>45</y>
            <width>42</width>
            <height>16</height>
           </rect>
@@ -527,14 +718,30 @@
         <widget class="QLabel" name="label_8">
          <property name="geometry">
           <rect>
-           <x>20</x>
-           <y>23</y>
+           <x>17</x>
+           <y>24</y>
            <width>52</width>
            <height>16</height>
           </rect>
          </property>
          <property name="text">
           <string>Work Days</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="filterBySprintCheckBox">
+         <property name="geometry">
+          <rect>
+           <x>17</x>
+           <y>115</y>
+           <width>174</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>Show Only Tickets for this Sprint</string>
          </property>
         </widget>
        </widget>
@@ -544,7 +751,7 @@
           <x>10</x>
           <y>10</y>
           <width>91</width>
-          <height>131</height>
+          <height>151</height>
          </rect>
         </property>
         <property name="verticalScrollBarPolicy">
@@ -595,7 +802,7 @@
      <x>0</x>
      <y>0</y>
      <width>742</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
   </widget>

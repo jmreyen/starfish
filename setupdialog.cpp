@@ -30,20 +30,25 @@ void SetupDialog::setQueryString(const QString &str)
 }
 
 
-void SetupDialog::setShowColumn(int col, bool hide)
+void SetupDialog::setShowColumn(int col, bool b)
 {
     switch (col)
     {
-    case 0: ui->checkBox_0->setChecked(hide); break;
-    case 1: ui->checkBox_1->setChecked(hide); break;
-    case 2: ui->checkBox_2->setChecked(hide); break;
-    case 3: ui->checkBox_3->setChecked(hide); break;
-    case 4: ui->checkBox_4->setChecked(hide); break;
-    case 5: ui->checkBox_5->setChecked(hide); break;
-    case 6: ui->checkBox_6->setChecked(hide); break;
-    case 7: ui->checkBox_7->setChecked(hide); break;
-    case 8: ui->checkBox_8->setChecked(hide); break;
+    case 0: ui->checkBox_0->setChecked(b); break;
+    case 1: ui->checkBox_1->setChecked(b); break;
+    case 2: ui->checkBox_2->setChecked(b); break;
+    case 3: ui->checkBox_3->setChecked(b); break;
+    case 4: ui->checkBox_4->setChecked(b); break;
+    case 5: ui->checkBox_5->setChecked(b); break;
+    case 6: ui->checkBox_6->setChecked(b); break;
+    case 7: ui->checkBox_7->setChecked(b); break;
+    case 8: ui->checkBox_8->setChecked(b); break;
     }
+}
+
+void SetupDialog::setLoadOnStart(bool b)
+{
+    ui->loadOnStartCheckBox->setChecked(b);
 }
 
 void SetupDialog::on_buttonBox_accepted()
@@ -66,6 +71,7 @@ void SetupDialog::on_buttonBox_accepted()
             ui->checkBox_6->isChecked() << ui->checkBox_7->isChecked()<<
             ui->checkBox_8->isChecked();
     returnMap["Columns"] = columnlist;
+    returnMap["LoadOnStart"] = ui->loadOnStartCheckBox->isChecked();
 
     emit accepted(returnMap);
 }

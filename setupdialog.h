@@ -16,8 +16,9 @@ public:
     explicit SetupDialog(QWidget *parent = 0);
     ~SetupDialog();
     void setUrl(const QUrl& url);
-    void setShowColumn(int col, bool hide);
+    void setShowColumn(int col, bool b);
     void setQueryString(const QString &str);
+    void setLoadOnStart(bool b);
 signals:
     void accepted(QVariantMap q);
     
