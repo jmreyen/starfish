@@ -7,6 +7,8 @@
 #include <QList>
 #include <QVariant>
 
+
+
 const int SP_NAME = 0;
 const int SP_DUE  = 1;
 const int SP_CAP  = 2;
@@ -14,6 +16,8 @@ const int SP_VEL  = 3;
 const int SP_DAYS = 4;
 const int SP_BURN = 5;
 const int SP_LAST = 6;
+
+
 
 class SprintData
 {

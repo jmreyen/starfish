@@ -1,7 +1,15 @@
 #include "tracdataloader.h"
 
-TracDataLoader::TracDataLoader(StoryModel  &st, SprintModel &sp, QObject *parent) :
-    AbstractDataLoader(st, sp, parent),
+TracDataLoader::TracDataLoader(
+        StoryModel  &st,
+        SprintModel &sp,
+        QAbstractItemModel *pr,
+        QAbstractItemModel *es,
+        QAbstractItemModel *co,
+        QAbstractItemModel *ve,
+        QAbstractItemModel *ty,
+        QObject *parent) :
+AbstractDataLoader(st, sp, pr, es, co, ve, ty, parent),
     rpc(this),
     theUrl()
 {
@@ -33,6 +41,56 @@ bool TracDataLoader::loadSprints()
     return true;
 }
 
+bool TracDataLoader::loadMasterData()
+{
+    QVariantList args;
+    rpc.call("ticket.component.getAll", args,
+             this, SLOT(componentQueryResponseMethod(QVariant &)),
+             this, SLOT(myFaultResponse(int, const QString &)));
+
+    rpc.call("ticket.priority.getAll", args,
+             this, SLOT(priotityQueryResponseMethod(QVariant &)),
+             this, SLOT(myFaultResponse(int, const QString &)));
+
+    rpc.call("ticket.type.getAll", args,
+             this, SLOT(typeQueryResponseMethod(QVariant &)),
+             this, SLOT(myFaultResponse(int, const QString &)));
+
+    rpc.call("ticket.version.getAll", args,
+             this, SLOT(versionQueryResponseMethod(QVariant &)),
+             this, SLOT(myFaultResponse(int, const QString &)));
+
+    QStringList estimations;
+    estimations << "?" << "1" << "3" << "5" << "8" << "13" << "20" << "40" << "100";
+    setEstimations(estimations);
+    return true;
+
+}
+
+
+void TracDataLoader::componentQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setComponents(list);
+}
+
+void TracDataLoader::priorityQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setPriorities(list);
+}
+
+void TracDataLoader::typeQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setTypes(list);
+}
+
+void TracDataLoader::versionQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setVersions(list);
+}
 
 void TracDataLoader::ticketQueryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();

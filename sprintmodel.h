@@ -4,8 +4,14 @@
 #include "sprintdata.h"
 
 #include <QAbstractTableModel>
+#include <QItemDelegate>
 
-
+class SprintModelItemDelegate : public QItemDelegate
+{
+public:
+  void setEditorData ( QWidget * editor, const QModelIndex & index ) const;
+  void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
+};
 
 class SprintModel : public QAbstractTableModel
 {
@@ -21,19 +27,10 @@ public:
     void sortByDate();
     void clear();
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
-
-
-signals:
-
-public slots:
-
 private:
     QList<SprintData> theList;
-
 signals:
-    
 public slots:
-    
 };
 
 #endif // SPRINTMODEL_H

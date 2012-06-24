@@ -46,14 +46,24 @@ QVariant StoryModel::data (int row, int col, int role) const
 
 bool StoryModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
-    //Set status of the checkbox in the print column
-    if (role == Qt::CheckStateRole || index.column()==9) {
-        theList[index.row()].printFlag = value.toInt();
-        emit dataChanged(index, index);
-        return true;
+
+    switch (role){
+    case Qt::CheckStateRole :
+        if (index.column()==ST_LAST) {
+            //Set status of the checkbox in the print column
+            theList[index.row()].printFlag = value.toInt();
+            emit dataChanged(index, index);
+            return true;
+        }
+        break;
+    case Qt::EditRole:
+        if (index.column() < ST_LAST) {
+            theList[index.row()].storyData[index.column()] = value.toString();
+            emit dataChanged(index, index);
+        }
+        break;
     }
     return false;
-
 }
 Qt::ItemFlags StoryModel::flags ( const QModelIndex & index ) const
 {

@@ -1,4 +1,33 @@
 #include "sprintmodel.h"
+#include <QListWidget>
+
+
+void SprintModelItemDelegate::setEditorData ( QWidget * editor, const QModelIndex & index ) const
+{
+    if (index.column() == SP_BURN) {
+        QListWidget *w = static_cast<QListWidget *>(editor);
+        QVariantList list = index.data().toList();
+        int row = 0;
+        foreach (QVariant v, list) {
+            w->item(row++)->setText(v.toString());
+        }
+    }
+    else
+        QItemDelegate::setEditorData(editor, index);
+}
+void SprintModelItemDelegate::setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const
+{
+    if (index.column() == SP_BURN) {
+        QListWidget *w = static_cast<QListWidget *>(editor);
+        QVariantList list;
+        for (int i=0; i<w->count(); ++i)
+            list.append(w->item(i)->text().toInt());
+        model->setData(index, list, Qt::EditRole);
+
+    }
+    else
+        QItemDelegate::setModelData(editor, model, index);
+}
 
 SprintModel::SprintModel(QObject *parent) :
     QAbstractTableModel(parent)

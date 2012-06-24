@@ -12,74 +12,53 @@
 #include <QTableWidget>
 
 
-class MyDelegate : public QItemDelegate
-{
-public:
-  void setEditorData ( QWidget * editor, const QModelIndex & index ) const;
-  void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
-};
-
-void MyDelegate::setEditorData ( QWidget * editor, const QModelIndex & index ) const
-{
-    if (index.column() == SP_BURN) {
-        QListWidget *w = static_cast<QListWidget *>(editor);
-        QVariantList list = index.data().toList();
-        int row = 0;
-        foreach (QVariant v, list) {
-            w->item(row++)->setText(v.toString());
-        }
-    }
-    else
-        QItemDelegate::setEditorData(editor, index);
-}
-void MyDelegate::setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const
-{
-    if (index.column() == SP_BURN) {
-        QListWidget *w = static_cast<QListWidget *>(editor);
-        QVariantList list;
-        for (int i=0; i<w->count(); ++i)
-            list.append(w->item(i)->text().toInt());
-        model->setData(index, list, Qt::EditRole);
-
-    }
-    else
-        QItemDelegate::setModelData(editor, model, index);
-}
 
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     thePrinter(QPrinter::HighResolution),
-    theSettings("pic.ini", QSettings::IniFormat),
-    theLoader(theStories, theSprints, this)
+    theSettings("pic.ini", QSettings::IniFormat)
 {
-
     ui->setupUi(this);
+    theLoader = new TracDataLoader(theStories, theSprints,
+              ui->estComboBox->model(),ui->impComboBox->model(),
+              ui->comComboBox->model(),ui->verComboBox->model(),
+              ui->typComboBox->model(), this);
 
-
-    //setup Ticket Table
+    //*** story view ***
+    //setup story table
     ui->storyTable->setModel(&theStories);
     ui->storyTable->horizontalHeader()->show();
+    // setup card view
+    ui->cardView->setScene(&theCardScene);
+    theCardScene.setSceneRect(ui->cardView->rect());
+    //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStories);
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
+    theStoryDataMapper.addMapping(ui->reporterEdit, ST_USER);
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
+    theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
+    theStoryDataMapper.addMapping(ui->impComboBox, ST_IMP);
+    theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
     theStoryDataMapper.toFirst();
+    //signals and slots for the story table
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
            SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+    connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+            SLOT(onStoryModelDataChanged ( const QModelIndex & )));
+    connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+            &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+    // *** sprint view ***
+    //setup SprintTable
+    ui->sprintTable->setModel(&theSprints);
     //setup burndown view
     ui->burnDownView->setScene(&theBurnDownScene);
     theBurnDownScene.setSceneRect(ui->burnDownView->rect());
-
-    // setup card view
-    ui->cardView->setScene(&theCardScene);
-    theCardScene.setSceneRect(ui->cardView->rect());
-
-    //Setup SprintTable
-    ui->sprintTable->setModel(&theSprints);
-    theSprintDataMapper.setItemDelegate(new MyDelegate());
+    //map sprint table entries to edit widgets
+    theSprintDataMapper.setItemDelegate(new SprintModelItemDelegate());
     theSprintDataMapper.setModel(&theSprints);
     theSprintDataMapper.addMapping(ui->dueDateEdit, SP_DUE);
     theSprintDataMapper.addMapping(ui->capacityEdit, SP_CAP);
@@ -87,28 +66,24 @@ MainWindow::MainWindow(QWidget *parent) :
     theSprintDataMapper.addMapping(ui->workDayEdit, SP_DAYS);
     theSprintDataMapper.addMapping(ui->burnDownTable, SP_BURN);
     theSprintDataMapper.toFirst();
-
-    //A different row in the sprint table is selected
+    //Signals & Slots for the sprint table and the sprint model
     connect(ui->sprintTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             SLOT(onSprintTableCurrentCellChanged ( const QModelIndex & , const QModelIndex & )));
     connect(ui->sprintTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             &theSprintDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
     connect(&theSprints, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onSprintModelDataChanged ( const QModelIndex & )));
-
-
-    // Load Settings
-    //TRAC
+    // *** Load Settings ***
+    //TRAC settings
     QUrl url;
     url.setUrl(theSettings.value("TRAC/Server").toString());
     url.setPort(theSettings.value("TRAC/Port").toInt());
     url.setUserName(theSettings.value("TRAC/UserName").toString());
     url.setPassword(theSettings.value("TRAC/Password").toString());
-    theLoader.setUrl(url);
-    theLoader.setQueryString(theSettings.value("TRAC/QueryString").toString());
+    theLoader->setUrl(url);
+    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
     loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
-
-    //Columns of StoryTable
+    //Layout settings
     int size = theSettings.beginReadArray("columns");
     for (int i = 0; i < size; ++i) {
         theSettings.setArrayIndex(i);
@@ -117,17 +92,11 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->storyTable->setColumnHidden(i, !show);
         ui->storyTable->setColumnWidth(i, width==0?100:width);
     }
-
-
     theSettings.endArray();
-
-
-
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
     thePrinter.setPageSize(QPrinter::A5);
-
-    //if LoadOnStart flag ist set, load data
+    // if LoadOnStart flag ist set, load data
     if (loadOnStart)
         on_importButton_clicked();
 }
@@ -136,11 +105,11 @@ MainWindow::~MainWindow()
 {
    // Save Settings
    //TRAC
-   theSettings.setValue("TRAC/Server", theLoader.url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-   theSettings.setValue("TRAC/Port", theLoader.url().port());
-   theSettings.setValue("TRAC/UserName", theLoader.url().userName());
-   theSettings.setValue("TRAC/Password", theLoader.url().password());
-   theSettings.setValue("TRAC/QueryString", theLoader.queryString());
+   theSettings.setValue("TRAC/Server", theLoader->url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+   theSettings.setValue("TRAC/Port", theLoader->url().port());
+   theSettings.setValue("TRAC/UserName", theLoader->url().userName());
+   theSettings.setValue("TRAC/Password", theLoader->url().password());
+   theSettings.setValue("TRAC/QueryString", theLoader->queryString());
    theSettings.setValue("TRAC/LoadOnStart", loadOnStart);
 
    // Columns
@@ -221,8 +190,12 @@ void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , con
 {
     if (current.row()!= previous.row()) {
         fillCard(current.row());
-//        ui->cardView->show();
     }
+}
+
+void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
+{
+    fillCard(index.row());
 }
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -305,8 +278,9 @@ void MainWindow::on_importButton_clicked()
     theStories.clear();
     ui->comboBox->setCurrentIndex(0);
     statusBar()->showMessage("Querying ...");
-    theLoader.loadStories();
-    theLoader.loadSprints();
+    theLoader->loadMasterData();
+    theLoader->loadStories();
+    theLoader->loadSprints();
     theSprints.sortByDate();
 
 }
@@ -315,8 +289,8 @@ void MainWindow::on_importButton_clicked()
 void MainWindow::on_setupButton_clicked()
 {
     SetupDialog dlg;
-    dlg.setUrl(theLoader.url());
-    dlg.setQueryString(theLoader.queryString());
+    dlg.setUrl(theLoader->url());
+    dlg.setQueryString(theLoader->queryString());
     dlg.setLoadOnStart(loadOnStart);
     for (int i=0; i<theStories.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
@@ -328,8 +302,8 @@ void MainWindow::on_setupButton_clicked()
 
 void MainWindow::onSetupAccepted(QVariantMap map)
 {
-    theLoader.setUrl(map["Url"].toUrl());
-    theLoader.setQueryString(map["QueryString"].toString());
+    theLoader->setUrl(map["Url"].toUrl());
+    theLoader->setQueryString(map["QueryString"].toString());
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTable->setColumnHidden(i, !list[i].toBool());

@@ -1,9 +1,24 @@
 #include "abstractdataloader.h"
 
-AbstractDataLoader::AbstractDataLoader(StoryModel &st, SprintModel &sp, QObject *parent) :
+#include <QStandardItemModel>
+
+AbstractDataLoader::AbstractDataLoader(
+        StoryModel &st,
+        SprintModel &sp,
+        QAbstractItemModel *pr,
+        QAbstractItemModel *es,
+        QAbstractItemModel *co,
+        QAbstractItemModel *ve,
+        QAbstractItemModel *ty,
+        QObject *parent) :
     QObject(parent),
     theStories(st),
-    theSprints(sp)
+    theSprints(sp),
+    thePriorities(pr),
+    theEstimations(es),
+    theComponents(co),
+    theVersions(ve),
+    theTypes(ty)
 {
 }
 
@@ -18,4 +33,32 @@ void AbstractDataLoader::addSprint(const QString &name, const QDate &date, bool 
 {
     SprintData s(name, date, completed, description);
     theSprints.addSprint(s);
+}
+
+void AbstractDataLoader::setPriorities(const QStringList &l)
+{
+    setStandardItemModel(l, thePriorities);
+}
+
+void AbstractDataLoader::setEstimations(const QStringList &l)
+{
+    setStandardItemModel(l, thePriorities);
+}
+void AbstractDataLoader::setVersions(const QStringList &l)
+{
+    setStandardItemModel(l, thePriorities);
+}
+void AbstractDataLoader::setComponents(const QStringList &l)
+{
+    setStandardItemModel(l, thePriorities);
+}
+void AbstractDataLoader::setTypes(const QStringList &l)
+{
+    setStandardItemModel(l, theTypes);
+}
+void AbstractDataLoader::setStandardItemModel(const QStringList &l, QAbstractItemModel *m)
+{
+    QStandardItemModel *ms = static_cast<QStandardItemModel *>(m);
+    foreach (const QString &str, l)
+        ms->appendRow(new QStandardItem(str));
 }

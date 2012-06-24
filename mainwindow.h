@@ -37,6 +37,7 @@ protected:
     void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &ms="none", const QString &stat="new");
 private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
+    void onStoryModelDataChanged(const QModelIndex &index);
     void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onSprintModelDataChanged(const QModelIndex &index);
     void on_addRowButton_clicked();
@@ -60,7 +61,7 @@ private:
     QPrinter thePrinter;
     QSettings theSettings;
     bool loadOnStart;
-    TracDataLoader theLoader;
+    TracDataLoader *theLoader;
 };
 
 
