@@ -49,7 +49,7 @@ bool TracDataLoader::loadMasterData()
              this, SLOT(myFaultResponse(int, const QString &)));
 
     rpc.call("ticket.priority.getAll", args,
-             this, SLOT(priotityQueryResponseMethod(QVariant &)),
+             this, SLOT(priorityQueryResponseMethod(QVariant &)),
              this, SLOT(myFaultResponse(int, const QString &)));
 
     rpc.call("ticket.type.getAll", args,
@@ -140,6 +140,7 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
             map["priority"].toString(),
             map["estimation"].toString(),
             map["reporter"].toString(),
+            map["type"].toString(),
             map["milestone"].toString(),
             getStatus(map));
     }

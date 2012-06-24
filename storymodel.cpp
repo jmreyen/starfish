@@ -84,15 +84,16 @@ QVariant StoryModel::headerData ( int section, Qt::Orientation orientation, int 
             //retrun header strings
             switch (section)
             {
-            case 0: return "ID";
-            case 1: return "Description";
-            case 2: return "Notes";
-            case 3: return "How to Demo";
-            case 4: return "Importance";
-            case 5: return "Estimation";
-            case 6: return "User";
-            case 7: return "Sprint";
-            case 8: return "Status";
+            case ST_ID:     return "ID";
+            case ST_DESC:   return "Description";
+            case ST_NOTES:  return "Notes";
+            case ST_HTD:    return "How to Demo";
+            case ST_IMP:    return "Importance";
+            case ST_EST:    return "Estimation";
+            case ST_USER:   return "User";
+            case ST_TYP:    return "Type";
+            case ST_SPRINT: return "Sprint";
+            case ST_STATUS: return "Status";
             }
             break;
         case Qt::DecorationRole:

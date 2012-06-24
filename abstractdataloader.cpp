@@ -22,10 +22,10 @@ AbstractDataLoader::AbstractDataLoader(
 {
 }
 
-void AbstractDataLoader::addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &ms, const QString &stat)
+void AbstractDataLoader::addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &stat)
 {
 
-    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, ms, stat);
+    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, stat);
     theStories.addTicket(t);
 }
 
@@ -42,15 +42,15 @@ void AbstractDataLoader::setPriorities(const QStringList &l)
 
 void AbstractDataLoader::setEstimations(const QStringList &l)
 {
-    setStandardItemModel(l, thePriorities);
+    setStandardItemModel(l, theEstimations);
 }
 void AbstractDataLoader::setVersions(const QStringList &l)
 {
-    setStandardItemModel(l, thePriorities);
+    setStandardItemModel(l, theVersions);
 }
 void AbstractDataLoader::setComponents(const QStringList &l)
 {
-    setStandardItemModel(l, thePriorities);
+    setStandardItemModel(l, theComponents);
 }
 void AbstractDataLoader::setTypes(const QStringList &l)
 {

@@ -11,24 +11,26 @@ const int ST_HTD    = 3;
 const int ST_IMP    = 4;
 const int ST_EST    = 5;
 const int ST_USER   = 6;
-const int ST_SPRINT = 7;
-const int ST_STATUS = 8;
-const int ST_LAST   = 9;
+const int ST_TYP    = 7;
+const int ST_SPRINT = 8;
+const int ST_STATUS = 9;
+const int ST_LAST   = 10;
 
 
 class StoryData : public QVector<QString>
 {
 public:
     StoryData() : QVector<QString>(ST_LAST){}
-    StoryData(QString id,
-               QString desc,
-               QString notes,
-               QString htd,
-               QString imp,
-               QString est,
-               QString user,
-               QString sprint,
-               QString status) : QVector<QString>(ST_LAST)
+    StoryData(const QString &id,
+              const QString &desc,
+              const QString &notes,
+              const QString &htd,
+              const QString &imp,
+              const QString &est,
+              const QString &user,
+              const QString &typ,
+              const QString &sprint,
+              const QString status) : QVector<QString>(ST_LAST)
     {
 
 
@@ -39,13 +41,14 @@ public:
         (*this)[ST_IMP] = imp;
         (*this)[ST_EST] = est;
         (*this)[ST_USER] = user;
+        (*this)[ST_TYP] = typ;
         (*this)[ST_SPRINT] = sprint;
         (*this)[ST_STATUS] = status;
     }
     StoryData(const StoryData &t) : QVector<QString>(ST_LAST)
-     {
+    {
         (*this) = t;
-     }
+    }
 
 };
 

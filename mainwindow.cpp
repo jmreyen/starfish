@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     theLoader = new TracDataLoader(theStories, theSprints,
-              ui->estComboBox->model(),ui->impComboBox->model(),
+              ui->impComboBox->model(),ui->estComboBox->model(),
               ui->comComboBox->model(),ui->verComboBox->model(),
               ui->typComboBox->model(), this);
 
@@ -30,9 +30,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //setup story table
     ui->storyTable->setModel(&theStories);
     ui->storyTable->horizontalHeader()->show();
-    // setup card view
-    ui->cardView->setScene(&theCardScene);
-    theCardScene.setSceneRect(ui->cardView->rect());
     //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStories);
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
@@ -40,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
     theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
     theStoryDataMapper.addMapping(ui->impComboBox, ST_IMP);
-    theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
+    theStoryDataMapper.addMapping(ui->typComboBox, ST_TYP);
     theStoryDataMapper.toFirst();
     //signals and slots for the story table
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
@@ -73,6 +70,10 @@ MainWindow::MainWindow(QWidget *parent) :
             &theSprintDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
     connect(&theSprints, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onSprintModelDataChanged ( const QModelIndex & )));
+    // *** Index Card View ***
+    // setup card view
+    ui->cardView->setScene(&theCardScene);
+    theCardScene.setSceneRect(ui->cardView->rect());
     // *** Load Settings ***
     //TRAC settings
     QUrl url;
@@ -177,10 +178,10 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 }
 
 
-void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &ms, const QString &stat)
+void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &stat)
 {
 
-    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, ms, stat);
+    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, stat);
     theStories.addTicket(t);
 
 }

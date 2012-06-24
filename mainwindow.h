@@ -34,7 +34,7 @@ protected:
     void applySettings();
     void fillCard(int row, int col, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
-    void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &ms="none", const QString &stat="new");
+    void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &typ="", const QString &ms="none", const QString &stat="new");
 private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
