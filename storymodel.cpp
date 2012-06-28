@@ -2,6 +2,48 @@
 
 #include <QIcon>
 #include <QtAlgorithms>
+#include <QComboBox>
+
+void StoryModelItemDelegate::setEditorData ( QWidget * editor, const QModelIndex & index ) const
+{
+    switch (index.column()){
+    case ST_IMP:
+    case ST_EST:
+    case ST_TYP:
+    case ST_SPRINT:
+    case ST_COMP:
+    case ST_VERSION:
+    {
+        QComboBox *w = static_cast<QComboBox *>(editor);
+        int n = w->findText(index.data().toString());
+        w->setCurrentIndex(n);
+        break;
+    }
+    default:
+        QItemDelegate::setEditorData(editor, index);
+        break;
+    }
+}
+void StoryModelItemDelegate::setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const
+{
+    switch (index.column()){
+    case ST_IMP:
+    case ST_EST:
+    case ST_TYP:
+    case ST_SPRINT:
+    case ST_COMP:
+    case ST_VERSION:
+    {
+        QComboBox *w = static_cast<QComboBox *>(editor);
+        QString str = w->currentText();
+        model->setData(index, str, Qt::EditRole);
+        break;
+    }
+    default:
+        QItemDelegate::setModelData(editor, model, index);
+        break;
+    }
+}
 
 StoryModel::StoryModel(QObject *parent) :
     QAbstractTableModel(parent)
@@ -16,7 +58,7 @@ int StoryModel::rowCount ( const QModelIndex & parent ) const
 
 int StoryModel::columnCount ( const QModelIndex & parent ) const
 {
-    return 10;
+    return ST_MODELLAST;
 }
 
 QVariant StoryModel::data ( const QModelIndex & index, int role) const
@@ -37,7 +79,7 @@ QVariant StoryModel::data (int row, int col, int role) const
         break;
     case Qt::CheckStateRole:
         //Get status of the checkbox in the print column
-        if (col==9) return theList[row].printFlag;
+        if (col==ST_FLAG1) return theList[row].printFlag;
         break;
     }
     return QVariant();
@@ -49,7 +91,7 @@ bool StoryModel::setData ( const QModelIndex & index, const QVariant & value, in
 
     switch (role){
     case Qt::CheckStateRole :
-        if (index.column()==ST_LAST) {
+        if (index.column()==ST_FLAG1) {
             //Set status of the checkbox in the print column
             theList[index.row()].printFlag = value.toInt();
             emit dataChanged(index, index);
@@ -70,7 +112,7 @@ Qt::ItemFlags StoryModel::flags ( const QModelIndex & index ) const
     //Get flags from base class
     Qt::ItemFlags f = QAbstractTableModel::flags(index);
     //make item checkable if column = the print column
-    if (index.column()==9)
+    if (index.column()==ST_FLAG1)
         f = f | Qt::ItemIsUserCheckable;
 
     return f;
@@ -84,21 +126,23 @@ QVariant StoryModel::headerData ( int section, Qt::Orientation orientation, int 
             //retrun header strings
             switch (section)
             {
-            case ST_ID:     return "ID";
-            case ST_DESC:   return "Description";
-            case ST_NOTES:  return "Notes";
-            case ST_HTD:    return "How to Demo";
-            case ST_IMP:    return "Importance";
-            case ST_EST:    return "Estimation";
-            case ST_USER:   return "User";
-            case ST_TYP:    return "Type";
-            case ST_SPRINT: return "Sprint";
-            case ST_STATUS: return "Status";
+            case ST_ID:      return "ID";
+            case ST_DESC:    return "Description";
+            case ST_NOTES:   return "Notes";
+            case ST_HTD:     return "How to Demo";
+            case ST_IMP:     return "Importance";
+            case ST_EST:     return "Estimation";
+            case ST_USER:    return "User";
+            case ST_TYP:     return "Type";
+            case ST_STATUS:  return "Status";
+            case ST_SPRINT:  return "Sprint";
+            case ST_COMP:    return "Component";
+            case ST_VERSION: return "Version";
             }
             break;
         case Qt::DecorationRole:
             switch (section) {
-            case 9: return QIcon("c:/work/pic/printer.png");
+            case ST_FLAG1: return QIcon("printer.png");
             }
             break;
         }
@@ -110,25 +154,33 @@ static int sortColumn = 0;
 
 bool lt(const ModelData &t1, const ModelData &t2)
 {
-    return t1.storyData[sortColumn] < t2.storyData[sortColumn];
+    if (sortColumn == ST_ID)
+        return t1.storyData[sortColumn].toInt() < t2.storyData[sortColumn].toInt();
+    else
+        return t1.storyData[sortColumn] < t2.storyData[sortColumn];
 }
 
 bool gt(const ModelData &t1, const ModelData &t2)
 {
-    return t1.storyData[sortColumn] > t2.storyData[sortColumn];
+    if (sortColumn == ST_ID)
+        return t1.storyData[sortColumn].toInt() > t2.storyData[sortColumn].toInt();
+    else
+        return t1.storyData[sortColumn] > t2.storyData[sortColumn];
 }
 
 void StoryModel::sort ( int column, Qt::SortOrder order )
 {
-    sortColumn = column;
-    if (order==Qt::AscendingOrder)
-    {
-        qSort(theList.begin(), theList.end(), lt);
+    emit layoutAboutToBeChanged();
+    QModelIndexList index1 = persistentIndexList ();
+    if (column < ST_LAST) {
+        sortColumn = column;
+        if (order==Qt::AscendingOrder)
+            qSort(theList.begin(), theList.end(), lt);
+        else
+            qSort(theList.begin(), theList.end(), gt);
     }
-    else
-    {
-        qSort(theList.begin(), theList.end(), gt);
-    }
+    QModelIndexList index2 = persistentIndexList ();
+    changePersistentIndexList(index2, index1);
     emit layoutChanged();
 }
 

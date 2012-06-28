@@ -22,10 +22,10 @@ AbstractDataLoader::AbstractDataLoader(
 {
 }
 
-void AbstractDataLoader::addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &stat)
+void AbstractDataLoader::addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &co, const QString &ve, const QString &stat)
 {
 
-    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, stat);
+    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, co, ve, stat);
     theStories.addTicket(t);
 }
 

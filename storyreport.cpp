@@ -40,5 +40,15 @@ void StoryReport::endInsertStory()
 
 void StoryReport::insertStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &stat)
 {
-    theMap[stat] += "<tr><td align=right>" + QString::number(id)+ "</td><td align=left>"+sum+"</td><td align=left>" + usr + "</td></tr>";
+    //bool scratch = ...
+    theMap[stat] +=
+        QString("<tr><td align=right>") +
+        //QString(scratch?"<del>":"") +
+        QString::number(id) +
+        //QString(scratch?"</del>":"")  +
+        QString("</td><td align=left>")+
+        sum+
+        QString("</td><td align=left>") +
+        usr +
+        QString("</td></tr>");
 }

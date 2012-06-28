@@ -142,6 +142,8 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
             map["reporter"].toString(),
             map["type"].toString(),
             map["milestone"].toString(),
+            map["component"].toString(),
+            map["version"].toString(),
             getStatus(map));
     }
 //    statusBar()->showMessage("");
@@ -171,10 +173,10 @@ QString TracDataLoader::getStatus( QMap<QString,QVariant> &map) const {
         status = "waiting";
     else if (map["status"].toString().left(8) == QString("postponed"))
         status = "postponed";
-    else if (map["status"].toString().left(8) == QString("closed"))
-        status = "done";
     else if (map["milestone"]==QString("current"))
         status = "selected";
+    else if (map["status"].toString().left(8) == QString("closed"))
+        status = "done";
     else if ((map["status"]==QString("assigned") ||
               map["status"]==QString("accepted")) &&
              (map["milestone"]==QString("none") ||

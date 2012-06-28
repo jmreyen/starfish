@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>215</height>
+    <width>532</width>
+    <height>265</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -170,12 +170,12 @@
       <item row="7" column="0">
        <widget class="QCheckBox" name="checkBox_7">
         <property name="text">
-         <string>Status</string>
+         <string>Type</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QCheckBox" name="checkBox_8">
+      <item row="14" column="0">
+       <widget class="QCheckBox" name="checkBox_12">
         <property name="text">
          <string/>
         </property>
@@ -189,6 +189,34 @@
        <widget class="QCheckBox" name="checkBox_1">
         <property name="text">
          <string>Description</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QCheckBox" name="checkBox_8">
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QCheckBox" name="checkBox_10">
+        <property name="text">
+         <string>Component</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QCheckBox" name="checkBox_9">
+        <property name="text">
+         <string>Sprint</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QCheckBox" name="checkBox_11">
+        <property name="text">
+         <string>Version</string>
         </property>
        </widget>
       </item>

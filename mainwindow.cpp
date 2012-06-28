@@ -32,12 +32,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->storyTable->horizontalHeader()->show();
     //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStories);
+    theStoryDataMapper.setItemDelegate(new StoryModelItemDelegate());
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
     theStoryDataMapper.addMapping(ui->reporterEdit, ST_USER);
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
     theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
     theStoryDataMapper.addMapping(ui->impComboBox, ST_IMP);
     theStoryDataMapper.addMapping(ui->typComboBox, ST_TYP);
+    theStoryDataMapper.addMapping(ui->comComboBox, ST_COMP);
+    theStoryDataMapper.addMapping(ui->verComboBox, ST_VERSION);
     theStoryDataMapper.toFirst();
     //signals and slots for the story table
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
@@ -178,10 +181,10 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 }
 
 
-void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &stat)
+void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &co, const QString &ve, const QString &stat)
 {
 
-    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, stat);
+    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, co, ve, stat);
     theStories.addTicket(t);
 
 }
@@ -262,12 +265,12 @@ void MainWindow::on_printButton_clicked()
         QPainter painter(&thePrinter);
         painter.setRenderHint(QPainter::Antialiasing);
         for (int i=0; i<theStories.rowCount(); ++i) {
-//            if (((QCheckBox*)ui->storyTable->cellWidget(i,9))->isChecked()) {
+            if (theStories.printFlag(i)) {
                 fillCard(i, &theCardScene);
                 theCardScene.render(&painter);
                 thePrinter.newPage();
             }
-//        }
+        }
     }
 }
 

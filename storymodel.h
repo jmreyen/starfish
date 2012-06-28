@@ -1,10 +1,23 @@
 #ifndef STORYMODEL_H
 #define STORYMODEL_H
 
-#include <QAbstractTableModel>
 #include "storydata.h"
 
+#include <QAbstractTableModel>
+#include <QItemDelegate>
+
+
+class StoryModelItemDelegate : public QItemDelegate
+{
+public:
+  void setEditorData ( QWidget * editor, const QModelIndex & index ) const;
+  void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
+};
+
 typedef struct {StoryData storyData; int printFlag;} ModelData;
+
+const int ST_FLAG1     = ST_LAST;
+const int ST_MODELLAST = ST_LAST + 1;
 
 class StoryModel : public QAbstractTableModel
 {
@@ -21,6 +34,8 @@ public:
     void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
     void addTicket(const StoryData &t);
     void clear();
+
+    bool printFlag(int row) const {return theList[row].printFlag;}
 
 signals:
     
