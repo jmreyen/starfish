@@ -171,7 +171,6 @@ bool gt(const ModelData &t1, const ModelData &t2)
 void StoryModel::sort ( int column, Qt::SortOrder order )
 {
     emit layoutAboutToBeChanged();
-    QModelIndexList index1 = persistentIndexList ();
     if (column < ST_LAST) {
         sortColumn = column;
         if (order==Qt::AscendingOrder)
@@ -179,8 +178,6 @@ void StoryModel::sort ( int column, Qt::SortOrder order )
         else
             qSort(theList.begin(), theList.end(), gt);
     }
-    QModelIndexList index2 = persistentIndexList ();
-    changePersistentIndexList(index2, index1);
     emit layoutChanged();
 }
 

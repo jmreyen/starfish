@@ -40,6 +40,8 @@ private slots:
     void onStoryModelDataChanged(const QModelIndex &index);
     void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onSprintModelDataChanged(const QModelIndex &index);
+    void onStoryTableLayoutAboutToBeChanged();
+    void onStoryTableLayoutChanged();
     void on_addRowButton_clicked();
     void on_removeRowButton_clicked();
     void on_printButton_clicked();

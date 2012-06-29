@@ -51,6 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
     connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+    connect(&theStories, SIGNAL(layoutChanged()),
+            SLOT(onStoryTableLayoutChanged()));
+    connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
+            SLOT(onStoryTableLayoutAboutToBeChanged()));
     // *** sprint view ***
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
@@ -242,6 +246,29 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
     const SprintData &d = theSprints.sprint(index.row());
     theBurnDownScene.show(d.capacity(), d.workDays(), d.burnDown());
 }
+
+QVariantList tmpList;
+void MainWindow::onStoryTableLayoutAboutToBeChanged()
+{
+    // Store hidden rows
+    for( int i = 0; i < theStories.rowCount(); ++i ) {
+        if (ui->storyTable->isRowHidden(i))
+            tmpList.append(theStories.data(i, ST_ID, Qt::DisplayRole));
+    }
+}
+
+void MainWindow::onStoryTableLayoutChanged()
+{
+    // Restore hidden rows
+    for( int i = 0; i < theStories.rowCount(); ++i ) {
+        if (tmpList.contains(theStories.data(i, ST_ID, Qt::DisplayRole)))
+            ui->storyTable->setRowHidden(i, true);
+        else
+            ui->storyTable->setRowHidden(i, false);
+    }
+    tmpList.clear();
+}
+
 
 void MainWindow::on_addRowButton_clicked()
 {

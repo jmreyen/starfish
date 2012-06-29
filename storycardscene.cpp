@@ -79,6 +79,7 @@ void center(QGraphicsTextItem *item)
 
 void StoryCardScene::setID(const QString & txt){
     theStoryID->setPlainText(txt);
+    adjustFontSize(theStoryID, theIDRect.width(), theIDRect.height(), 10.);
 }
 
 void StoryCardScene::setDesc(const QString & txt)
@@ -176,7 +177,7 @@ void StoryCardScene::initCard(qreal x, qreal y, qreal width, qreal height)
 
 void StoryCardScene::initDefaultLayout(qreal x, qreal y, qreal width, qreal height)
 {
-    theIDRect.setRect(0,0,150,25);
+    theIDRect.setRect(0,0,160,30);
     theDescRect.setRect(5,30, 288,65);
     theNotesRect.setRect(5,110,233,50);
     theHTDRect.setRect(5,175,233,30);
