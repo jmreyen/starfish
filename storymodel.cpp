@@ -197,16 +197,29 @@ void StoryModel::sort ( int column, Qt::SortOrder order )
     emit layoutChanged();
 }
 
-void StoryModel::addStory(const StoryData &t)
+void StoryModel::addStory(const StoryData &d)
 {
     //add a row to the storylist and notify attached views
     StoryModelData m;
-    m.storyData = t;
+    m.storyData = d;
     m.printFlag = false;
     beginInsertRows(QModelIndex(), theList.count(), theList.count()+1);
     theList.append(m);
     endInsertRows();
 }
+
+void StoryModel::addStoryList(const QList<StoryData> &l)
+{
+    emit layoutAboutToBeChanged();
+    foreach(StoryData d, l){
+        StoryModelData m;
+        m.storyData = d;
+        m.printFlag = false;
+        theList.append(m);
+    }
+    emit layoutChanged();
+}
+
 
 void StoryModel::addNewStory()
 {

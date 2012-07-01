@@ -55,6 +55,9 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryTableLayoutChanged()));
     connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
             SLOT(onStoryTableLayoutAboutToBeChanged()));
+    connect(&theStories, SIGNAL(rowsInserted (const QModelIndex &, int, int)),
+            SLOT(onStoryRowsInserted(const QModelIndex &, int, int)));
+
     // *** sprint view ***
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
@@ -106,7 +109,7 @@ MainWindow::MainWindow(QWidget *parent) :
     thePrinter.setPageSize(QPrinter::A5);
     // if LoadOnStart flag ist set, load data
     if (loadOnStart)
-        on_importButton_clicked();
+        loadAll();
 }
 
 MainWindow::~MainWindow()
@@ -134,6 +137,26 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+void MainWindow::loadAll()
+{
+    theSprints.clear();
+    theStories.clear();
+    ui->impComboBox->clear();
+    ui->estComboBox->clear();
+    ui->comComboBox->clear();
+    ui->verComboBox->clear();
+    ui->typComboBox->clear();
+    ui->filterByStatusComboBox->clear();
+    ui->filterByStatusComboBox->addItem("all");
+    statusBar()->showMessage("Querying ...");
+    theLoader->loadMasterData();
+    theLoader->loadStories();
+    theLoader->loadSprints();
+    ui->filterByStatusComboBox->setCurrentIndex(0);
+    theSprints.sortByDate();
+
+}
 
 void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
 {
@@ -263,6 +286,14 @@ void MainWindow::onStoryTableLayoutChanged()
     tmpList.clear();
 }
 
+void MainWindow::onStoryRowsInserted(const QModelIndex & parent, int start, int end)
+{
+    ui->storyTable->selectRow(start);
+    ui->summaryEdit->setText("Enter story summary here ...");
+    ui->summaryEdit->selectAll();
+    ui->summaryEdit->setFocus();
+}
+
 
 void MainWindow::on_addRowButton_clicked()
 {
@@ -297,15 +328,7 @@ void MainWindow::on_printButton_clicked()
 
 void MainWindow::on_importButton_clicked()
 {
-    theSprints.clear();
-    theStories.clear();
-    ui->filterByStatusComboBox->setCurrentIndex(0);
-    statusBar()->showMessage("Querying ...");
-    theLoader->loadMasterData();
-    theLoader->loadStories();
-    theLoader->loadSprints();
-    theSprints.sortByDate();
-
+    loadAll();
 }
 
 

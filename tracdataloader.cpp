@@ -151,6 +151,7 @@ void TracDataLoader::sprintQueryResponseMethod(QVariant &arg) {
 void TracDataLoader::getTicketResponseMethod(QVariant &arg)
 {
     QVariantList ticketList = arg.toList();
+    beginAddStory();
     for (int i = 0; i < ticketList.size(); ++i) {
         QVariantList fieldList = ticketList[i].toList().at(0).toList();
         QMap<QString,QVariant> map = fieldList[3].toMap();
@@ -168,6 +169,7 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
             map["version"].toString(),
             map["status"].toString());
     }
+    endAddStory();
 //    statusBar()->showMessage("");
 }
 

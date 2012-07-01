@@ -26,6 +26,8 @@ signals:
 public slots:
 
 protected:
+    void beginAddStory();
+    void endAddStory();
     void addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &co, const QString &ve, const QString &stat);
     void addSprint(const QString &name, const QDate &date, bool completed, const QString &desc);
     void setPriorities(const QStringList &l);

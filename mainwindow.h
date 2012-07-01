@@ -31,7 +31,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 protected:
-    void applySettings();
+    void loadAll();
     void fillCard(int row, int col, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
 private slots:
@@ -41,6 +41,7 @@ private slots:
     void onSprintModelDataChanged(const QModelIndex &index);
     void onStoryTableLayoutAboutToBeChanged();
     void onStoryTableLayoutChanged();
+    void onStoryRowsInserted(const QModelIndex &parent, int start, int end);
     void on_addRowButton_clicked();
     void on_removeRowButton_clicked();
     void on_printButton_clicked();

@@ -33,6 +33,7 @@ public:
     Qt::ItemFlags	flags ( const QModelIndex & index ) const;
     void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
     void addStory(const StoryData &t);
+    void addStoryList(const QList<StoryData> &t);
     void addNewStory();
     void clear();
 
