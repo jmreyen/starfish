@@ -11,6 +11,7 @@ INPUT(
 ./release\storyreportdialog.o
 ./release\tracdataloader.o
 ./release\abstractdataloader.o
+./release\newstorydialog.o
 ./release\moc_mainwindow.o
 ./release\moc_storycardscene.o
 ./release\moc_setupdialog.o
@@ -21,4 +22,5 @@ INPUT(
 ./release\moc_storyreportdialog.o
 ./release\moc_tracdataloader.o
 ./release\moc_abstractdataloader.o
+./release\moc_newstorydialog.o
 );

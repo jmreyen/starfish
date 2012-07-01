@@ -188,13 +188,9 @@ void TracDataLoader::getSprintResponseMethod(QVariant &arg)
 //Feldnamen für TRAC. ACHTUNG: Die Reihenfolge muss die selbe sein wie in der Klasse StoryData (siehe storydata.h)
 const char *fieldnames[] = {"id", "summary", "description", "how_to_demo", "priority", "estimation", "reporter", "type", "status", "milestone", "component", "version"};
 
+
 void appendStoryArgs(const StoryData &d, QVariantList &args, int startPos)
 {
-    QVariantMap arg;
-    for (int i=startPos; i < ST_LAST; ++i) {
-        arg.insert(fieldnames[i], d[i]);
-    }
-    args.append(arg);
     qDebug() << args;
 }
 
@@ -202,9 +198,13 @@ void appendStoryArgs(const StoryData &d, QVariantList &args, int startPos)
 bool TracDataLoader::saveNewStory(const StoryData &d)
 {
     QVariantList args;
+    QVariantMap arg;
     args.append(d[ST_DESC]);
     args.append(d[ST_NOTES]);
-    appendStoryArgs(d, args, ST_HTD);
+    for (int i=ST_HTD; i < ST_LAST; ++i) {
+        arg.insert(fieldnames[i], d[i]);
+    }
+    args.append(arg);
     rpc.call("ticket.create", args,
                 this, SLOT(saveNewStoryResponseMethod(QVariant &)),
                 this, SLOT(myFaultResponse(int, const QString &)));
@@ -213,7 +213,7 @@ bool TracDataLoader::saveNewStory(const StoryData &d)
 
 void TracDataLoader::saveNewStoryResponseMethod(QVariant &arg)
 {
-
+    qDebug() << "New ID: " << arg.toInt() << "\n";
 }
 
 

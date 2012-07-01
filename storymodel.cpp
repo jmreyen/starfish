@@ -221,12 +221,6 @@ void StoryModel::addStoryList(const QList<StoryData> &l)
 }
 
 
-void StoryModel::addNewStory()
-{
-    StoryData t("-1", "", "", "", "?", "?", "", "", "", "", "", "new");
-    addStory(t);
-
-}
 
 void StoryModel::clear()
 {

@@ -41,9 +41,8 @@ private slots:
     void onSprintModelDataChanged(const QModelIndex &index);
     void onStoryTableLayoutAboutToBeChanged();
     void onStoryTableLayoutChanged();
-    void onStoryRowsInserted(const QModelIndex &parent, int start, int end);
     void on_addRowButton_clicked();
-    void on_removeRowButton_clicked();
+    void onNewStoryAccepted(QVariantMap map);
     void on_printButton_clicked();
     void on_importButton_clicked();
     void on_setupButton_clicked();

@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     storyreport.cpp \
     storyreportdialog.cpp \
     tracdataloader.cpp \
-    abstractdataloader.cpp
+    abstractdataloader.cpp \
+    newstorydialog.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -34,11 +35,13 @@ HEADERS  += mainwindow.h \
     storyreport.h \
     storyreportdialog.h \
     tracdataloader.h \
-    abstractdataloader.h
+    abstractdataloader.h \
+    newstorydialog.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \
-    reportdialog.ui
+    reportdialog.ui \
+    newstorydialog.ui
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a

@@ -34,7 +34,6 @@ public:
     void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
     void addStory(const StoryData &t);
     void addStoryList(const QList<StoryData> &t);
-    void addNewStory();
     void clear();
 
     const StoryData &story(int i) const {return theList[i].storyData;}

@@ -3,6 +3,7 @@
 #include "storyreport.h"
 #include "setupdialog.h"
 #include "storyreportdialog.h"
+#include "newstorydialog.h"
 
 #include <QPrinter>
 #include <QPrintDialog>
@@ -55,8 +56,6 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryTableLayoutChanged()));
     connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
             SLOT(onStoryTableLayoutAboutToBeChanged()));
-    connect(&theStories, SIGNAL(rowsInserted (const QModelIndex &, int, int)),
-            SLOT(onStoryRowsInserted(const QModelIndex &, int, int)));
 
     // *** sprint view ***
     //setup SprintTable
@@ -286,26 +285,22 @@ void MainWindow::onStoryTableLayoutChanged()
     tmpList.clear();
 }
 
-void MainWindow::onStoryRowsInserted(const QModelIndex & parent, int start, int end)
-{
-    ui->storyTable->selectRow(start);
-    ui->summaryEdit->setText("Enter story summary here ...");
-    ui->summaryEdit->selectAll();
-    ui->summaryEdit->setFocus();
-}
-
 
 void MainWindow::on_addRowButton_clicked()
 {
-    theStories.addNewStory();
+    NewStoryDialog dlg;
+
+    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
+                     this, SLOT(onNewStoryAccepted(QVariantMap)));
+    dlg.exec();
 }
 
-void MainWindow::on_removeRowButton_clicked()
+void MainWindow::onNewStoryAccepted(QVariantMap map)
 {
-//    int row = ui->storyTable->currentRow();
-//    theScene.clearCard();
-//    ui->storyTable->removeRow(row);
+
 }
+
+
 
 void MainWindow::on_printButton_clicked()
 {
@@ -413,7 +408,6 @@ void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
 
 void MainWindow::on_saveStoryButton_clicked()
 {
-    theLoader->saveNewStories();
 //    qDebug() << "*** Changes ***\n";
 //    foreach (QPersistentModelIndex i, theStoryChanges)
 //        qDebug() << "row: " << i.row() << "col: " << i.column() << "data: " << theStories.data(i).toString() << "\n" ;

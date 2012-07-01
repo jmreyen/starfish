@@ -11,6 +11,7 @@ INPUT(
 ./debug\storyreportdialog.o
 ./debug\tracdataloader.o
 ./debug\abstractdataloader.o
+./debug\newstorydialog.o
 ./debug\moc_mainwindow.o
 ./debug\moc_storycardscene.o
 ./debug\moc_setupdialog.o
@@ -21,4 +22,5 @@ INPUT(
 ./debug\moc_storyreportdialog.o
 ./debug\moc_tracdataloader.o
 ./debug\moc_abstractdataloader.o
+./debug\moc_newstorydialog.o
 );
