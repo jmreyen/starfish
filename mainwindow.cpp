@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theLoader = new TracDataLoader(theStories, theSprints,
               ui->impComboBox->model(),ui->estComboBox->model(),
               ui->comComboBox->model(),ui->verComboBox->model(),
-              ui->typComboBox->model(), this);
+              ui->typComboBox->model(), ui->filterByStatusComboBox->model(), this);
 
     //*** story view ***
     //setup story table
@@ -185,13 +185,6 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 }
 
 
-void MainWindow::insertStoryRow(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &co, const QString &ve, const QString &stat)
-{
-
-    StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, co, ve, stat);
-    theStories.addTicket(t);
-
-}
 
 
 void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -204,6 +197,7 @@ void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , con
 void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 {
     fillCard(index.row());
+    theStoryChanges.append(index);
 }
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -272,7 +266,7 @@ void MainWindow::onStoryTableLayoutChanged()
 
 void MainWindow::on_addRowButton_clicked()
 {
-    insertStoryRow();
+    theStories.addNewStory();
 }
 
 void MainWindow::on_removeRowButton_clicked()
@@ -303,11 +297,9 @@ void MainWindow::on_printButton_clicked()
 
 void MainWindow::on_importButton_clicked()
 {
-
-
     theSprints.clear();
     theStories.clear();
-    ui->comboBox->setCurrentIndex(0);
+    ui->filterByStatusComboBox->setCurrentIndex(0);
     statusBar()->showMessage("Querying ...");
     theLoader->loadMasterData();
     theLoader->loadStories();
@@ -394,4 +386,12 @@ void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
         else
             ui->storyTable->setRowHidden( i, false);
     }
+}
+
+void MainWindow::on_saveStoryButton_clicked()
+{
+    theLoader->saveNewStories();
+//    qDebug() << "*** Changes ***\n";
+//    foreach (QPersistentModelIndex i, theStoryChanges)
+//        qDebug() << "row: " << i.row() << "col: " << i.column() << "data: " << theStories.data(i).toString() << "\n" ;
 }

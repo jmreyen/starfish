@@ -152,7 +152,7 @@ QVariant StoryModel::headerData ( int section, Qt::Orientation orientation, int 
 
 static int sortColumn = 0;
 
-bool lt(const ModelData &t1, const ModelData &t2)
+bool lt(const StoryModelData &t1, const StoryModelData &t2)
 {
     if (sortColumn == ST_ID)
         return t1.storyData[sortColumn].toInt() < t2.storyData[sortColumn].toInt();
@@ -160,7 +160,7 @@ bool lt(const ModelData &t1, const ModelData &t2)
         return t1.storyData[sortColumn] < t2.storyData[sortColumn];
 }
 
-bool gt(const ModelData &t1, const ModelData &t2)
+bool gt(const StoryModelData &t1, const StoryModelData &t2)
 {
     if (sortColumn == ST_ID)
         return t1.storyData[sortColumn].toInt() > t2.storyData[sortColumn].toInt();
@@ -170,26 +170,49 @@ bool gt(const ModelData &t1, const ModelData &t2)
 
 void StoryModel::sort ( int column, Qt::SortOrder order )
 {
+    if (column >= ST_LAST)
+        return;
+
     emit layoutAboutToBeChanged();
-    if (column < ST_LAST) {
-        sortColumn = column;
-        if (order==Qt::AscendingOrder)
-            qSort(theList.begin(), theList.end(), lt);
-        else
-            qSort(theList.begin(), theList.end(), gt);
+
+    for (int i=0; i<theList.count(); ++i)
+        theList[i].sortPos=i;
+
+    sortColumn = column;
+    if (order==Qt::AscendingOrder)
+        qSort(theList.begin(), theList.end(), lt);
+    else
+        qSort(theList.begin(), theList.end(), gt);
+
+    QModelIndexList fromIndexes;
+    QModelIndexList toIndexes;
+    for (int r = 0; r < rowCount(); ++r) {
+        for (int c = 0; c < columnCount(); ++c) {
+            toIndexes.append(createIndex(r, c, 0));
+            fromIndexes.append(createIndex(theList[r].sortPos, c, 0));
+        }
     }
+    changePersistentIndexList(fromIndexes, toIndexes);
+
     emit layoutChanged();
 }
 
-void StoryModel::addTicket(const StoryData &t)
+void StoryModel::addStory(const StoryData &t)
 {
     //add a row to the storylist and notify attached views
-    ModelData m;
+    StoryModelData m;
     m.storyData = t;
     m.printFlag = false;
     beginInsertRows(QModelIndex(), theList.count(), theList.count()+1);
     theList.append(m);
     endInsertRows();
+}
+
+void StoryModel::addNewStory()
+{
+    StoryData t("-1", "", "", "", "?", "?", "", "", "", "", "", "new");
+    addStory(t);
+
 }
 
 void StoryModel::clear()

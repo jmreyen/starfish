@@ -1,15 +1,16 @@
 #include "tracdataloader.h"
 
 TracDataLoader::TracDataLoader(
-        StoryModel  &st,
+        StoryModel  &sm,
         SprintModel &sp,
         QAbstractItemModel *pr,
         QAbstractItemModel *es,
         QAbstractItemModel *co,
         QAbstractItemModel *ve,
         QAbstractItemModel *ty,
+        QAbstractItemModel *st,
         QObject *parent) :
-AbstractDataLoader(st, sp, pr, es, co, ve, ty, parent),
+AbstractDataLoader(sm, sp, pr, es, co, ve, ty, st, parent),
     rpc(this),
     theUrl()
 {
@@ -60,13 +61,21 @@ bool TracDataLoader::loadMasterData()
              this, SLOT(versionQueryResponseMethod(QVariant &)),
              this, SLOT(myFaultResponse(int, const QString &)));
 
+    rpc.call("ticket.status.getAll", args,
+             this, SLOT(statusQueryResponseMethod(QVariant &)),
+             this, SLOT(myFaultResponse(int, const QString &)));
+
+//    rpc.call("ticket.estimation.getAll", args,
+//             this, SLOT(estimationQueryResponseMethod(QVariant &)),
+//             this, SLOT(myFaultResponse(int, const QString &)));
+
     QStringList estimations;
-    estimations << "?" << "1" << "3" << "5" << "8" << "13" << "20" << "40" << "100";
+    estimations <<"?"<<"0"<<"0.5"<<"1"<<"2"<<"3"<<"5"<<"8"<<"13"<<"20"<<"40"<<"100";
     setEstimations(estimations);
+
     return true;
 
 }
-
 
 void TracDataLoader::componentQueryResponseMethod(QVariant &arg)
 {
@@ -91,6 +100,19 @@ void TracDataLoader::versionQueryResponseMethod(QVariant &arg)
     QStringList list = arg.toStringList();
     setVersions(list);
 }
+
+void TracDataLoader::statusQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setStatus(list);
+}
+
+void TracDataLoader::estimationQueryResponseMethod(QVariant &arg)
+{
+    QStringList list = arg.toStringList();
+    setEstimations(list);
+}
+
 
 void TracDataLoader::ticketQueryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
@@ -144,7 +166,7 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
             map["milestone"].toString(),
             map["component"].toString(),
             map["version"].toString(),
-            getStatus(map));
+            map["status"].toString());
     }
 //    statusBar()->showMessage("");
 }
@@ -161,29 +183,35 @@ void TracDataLoader::getSprintResponseMethod(QVariant &arg)
         addSprint(nam, dat, cmp, dsc);
     }
 }
+//Feldnamen für TRAC. ACHTUNG: Die Reihenfolge muss die selbe sein wie in der Klasse StoryData (siehe storydata.h)
+const char *fieldnames[] = {"id", "summary", "description", "how_to_demo", "priority", "estimation", "reporter", "type", "status", "milestone", "component", "version"};
+
+void appendStoryArgs(const StoryData &d, QVariantList &args, int startPos)
+{
+    QVariantMap arg;
+    for (int i=startPos; i < ST_LAST; ++i) {
+        arg.insert(fieldnames[i], d[i]);
+    }
+    args.append(arg);
+    qDebug() << args;
+}
 
 
+bool TracDataLoader::saveNewStory(const StoryData &d)
+{
+    QVariantList args;
+    args.append(d[ST_DESC]);
+    args.append(d[ST_NOTES]);
+    appendStoryArgs(d, args, ST_HTD);
+    rpc.call("ticket.create", args,
+                this, SLOT(saveNewStoryResponseMethod(QVariant &)),
+                this, SLOT(myFaultResponse(int, const QString &)));
+    return true;
+}
 
-QString TracDataLoader::getStatus( QMap<QString,QVariant> &map) const {
+void TracDataLoader::saveNewStoryResponseMethod(QVariant &arg)
+{
 
-    QString status = "unknown";
-    if (map["status"].toString().left(8) == QString("new"))
-        status = "new";
-    else if (map["milestone"]==QString("waiting"))
-        status = "waiting";
-    else if (map["status"].toString().left(8) == QString("postponed"))
-        status = "postponed";
-    else if (map["milestone"]==QString("current"))
-        status = "selected";
-    else if (map["status"].toString().left(8) == QString("closed"))
-        status = "done";
-    else if ((map["status"]==QString("assigned") ||
-              map["status"]==QString("accepted")) &&
-             (map["milestone"]==QString("none") ||
-              map["milestone"]==QString("")))
-         status = "backlog";
-
-    return status;
 }
 
 

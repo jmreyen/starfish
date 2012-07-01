@@ -3,22 +3,24 @@
 #include <QStandardItemModel>
 
 AbstractDataLoader::AbstractDataLoader(
-        StoryModel &st,
+        StoryModel &sm,
         SprintModel &sp,
         QAbstractItemModel *pr,
         QAbstractItemModel *es,
         QAbstractItemModel *co,
         QAbstractItemModel *ve,
         QAbstractItemModel *ty,
+        QAbstractItemModel *st,
         QObject *parent) :
     QObject(parent),
-    theStories(st),
+    theStories(sm),
     theSprints(sp),
     thePriorities(pr),
     theEstimations(es),
     theComponents(co),
     theVersions(ve),
-    theTypes(ty)
+    theTypes(ty),
+    theStatus(st)
 {
 }
 
@@ -26,7 +28,7 @@ void AbstractDataLoader::addStory(int id, const QString &sum, const QString &des
 {
 
     StoryData t(QString::number(id), sum, desc, htd, prio, est, usr, typ, ms, co, ve, stat);
-    theStories.addTicket(t);
+    theStories.addStory(t);
 }
 
 void AbstractDataLoader::addSprint(const QString &name, const QDate &date, bool completed, const QString &description)
@@ -56,9 +58,23 @@ void AbstractDataLoader::setTypes(const QStringList &l)
 {
     setStandardItemModel(l, theTypes);
 }
+void AbstractDataLoader::setStatus(const QStringList &l)
+{
+    setStandardItemModel(l, theStatus);
+}
 void AbstractDataLoader::setStandardItemModel(const QStringList &l, QAbstractItemModel *m)
 {
     QStandardItemModel *ms = static_cast<QStandardItemModel *>(m);
     foreach (const QString &str, l)
         ms->appendRow(new QStandardItem(str));
+}
+
+bool AbstractDataLoader::saveNewStories()
+{
+    for (int i = 0; i < theStories.rowCount(); ++i){
+        StoryData d = theStories.story(i);
+        if (d[ST_ID].toInt()==-1)
+            saveNewStory(d);
+    }
+    return true;
 }

@@ -34,7 +34,6 @@ protected:
     void applySettings();
     void fillCard(int row, int col, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
-    void insertStoryRow(int id = -1, const QString &sum="", const QString &desc="", const QString &htd="", const QString &prio="?", const QString &est="?", const QString &usr="", const QString &typ="", const QString &ms="none",const QString &co="",const QString &ve="", const QString &stat="new");
 private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
@@ -52,6 +51,8 @@ private slots:
     void on_reportButton_clicked();
     void on_filterBySprintCheckBox_clicked(bool checked);
 
+    void on_saveStoryButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     StoryModel theStories;
@@ -64,6 +65,7 @@ private:
     QSettings theSettings;
     bool loadOnStart;
     TracDataLoader *theLoader;
+    QList<QPersistentModelIndex> theStoryChanges;
 };
 
 

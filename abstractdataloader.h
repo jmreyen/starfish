@@ -11,12 +11,15 @@ class AbstractDataLoader : public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractDataLoader(StoryModel  &st, SprintModel &sp,  QAbstractItemModel *pr,
+    explicit AbstractDataLoader(StoryModel  &sm, SprintModel &sp,  QAbstractItemModel *pr,
                                 QAbstractItemModel *es, QAbstractItemModel *co,
-                                QAbstractItemModel *ve, QAbstractItemModel *ty, QObject *parent = 0);
+                                QAbstractItemModel *ve, QAbstractItemModel *ty,
+                                QAbstractItemModel *st, QObject *parent = 0);
     virtual bool loadStories() = 0;
     virtual bool loadSprints() = 0;
     virtual bool loadMasterData() = 0;
+    virtual bool saveNewStory(const StoryData &d) = 0;
+    virtual bool saveNewStories();
 
 signals:
 
@@ -30,6 +33,7 @@ protected:
     void setVersions(const QStringList &l);
     void setComponents(const QStringList &l);
     void setTypes(const QStringList &l);
+    void setStatus(const QStringList &l);
 private:
     void setStandardItemModel(const QStringList &l, QAbstractItemModel *m);
 
@@ -42,6 +46,7 @@ private:
     QAbstractItemModel *theOwners;
     QAbstractItemModel *theVersions;
     QAbstractItemModel *theTypes;
+    QAbstractItemModel *theStatus;
 
 };
 

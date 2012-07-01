@@ -14,7 +14,7 @@ public:
   void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
 };
 
-typedef struct {StoryData storyData; int printFlag;} ModelData;
+typedef struct {StoryData storyData; int printFlag; int sortPos;} StoryModelData;
 
 const int ST_FLAG1     = ST_LAST;
 const int ST_MODELLAST = ST_LAST + 1;
@@ -32,9 +32,12 @@ public:
     bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
     Qt::ItemFlags	flags ( const QModelIndex & index ) const;
     void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
-    void addTicket(const StoryData &t);
+    void addStory(const StoryData &t);
+    void addNewStory();
     void clear();
 
+    const StoryData &story(int i) const {return theList[i].storyData;}
+    int id(int row){return theList[row].storyData[ST_ID].toInt();}
     bool printFlag(int row) const {return theList[row].printFlag;}
 
 signals:
@@ -42,7 +45,7 @@ signals:
 public slots:
 
 private:
-    QList<ModelData> theList;
+    QList<StoryModelData> theList;
     
 };
 
