@@ -42,7 +42,7 @@ private slots:
     void onActionStoreStories();
     void onActionLoad();
     void onActionSettings();
-    void onSetupAccepted(QVariantMap &map);
+    void onSetupAccepted(const QVariantMap &map);
     void onActionReport();
     void onActionPrint();
     //Story Table

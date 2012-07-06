@@ -91,7 +91,7 @@
     <item row="0" column="0" colspan="9">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -683,13 +683,6 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="printButton">
-             <property name="text">
-              <string>Print Index Cards</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>
@@ -762,6 +755,7 @@
    <addaction name="actionStore"/>
    <addaction name="actionSettings"/>
    <addaction name="actionShow_Report"/>
+   <addaction name="actionPrint"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAdd_Story">
@@ -810,6 +804,14 @@
     <string>Ctrl+R</string>
    </property>
   </action>
+  <action name="actionPrint">
+   <property name="text">
+    <string>Print</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
@@ -834,7 +836,4 @@
  <slots>
   <slot>onFilterRow(QString)</slot>
  </slots>
- <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
- </buttongroups>
 </ui>

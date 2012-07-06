@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionStore, SIGNAL(triggered()), SLOT(onActionStoreStories()));
     connect(ui->actionSettings, SIGNAL(triggered()), SLOT(onActionSettings()));
     connect(ui->actionShow_Report, SIGNAL(triggered()), SLOT(onActionReport()));
+    connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
 
     //*** story view ***
     //setup story table
@@ -285,12 +286,12 @@ void MainWindow::onActionSettings()
     for (int i=0; i<theStories.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
 
-    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
-                     this, SLOT(onSetupAccepted(QVariantMap)));
+    QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
+                     this, SLOT(onSetupAccepted(const QVariantMap &)));
     dlg.exec();
 }
 
-void MainWindow::onSetupAccepted(QVariantMap &map)
+void MainWindow::onSetupAccepted(const QVariantMap &map)
 {
     theLoader->setUrl(map["Url"].toUrl());
     theLoader->setQueryString(map["QueryString"].toString());
