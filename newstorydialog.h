@@ -2,6 +2,7 @@
 #define NEWSTORYDIALOG_H
 
 #include <QDialog>
+#include <QVariant>
 
 namespace Ui {
 class NewStoryDialog;
@@ -14,6 +15,9 @@ class NewStoryDialog : public QDialog
 public:
     explicit NewStoryDialog(QWidget *parent = 0);
     ~NewStoryDialog();
+
+signals:
+    void accepted(const QVariantMap &map);
     
 private slots:
     void on_buttonBox_accepted();

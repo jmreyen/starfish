@@ -70,6 +70,17 @@ void SprintModel::addSprint(const SprintData &d)
     endInsertRows();
 }
 
+void SprintModel::fromList(const QVariantList &list)
+{
+    emit layoutAboutToBeChanged();
+    foreach (QVariant v, list) {
+        QVariantMap map = v.toMap();
+        SprintData d(map);
+        theList.append(d);
+    }
+    emit layoutChanged();
+}
+
 void SprintModel::clear()
 {
     beginResetModel();

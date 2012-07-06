@@ -11,7 +11,7 @@
 #include <QCheckBox>
 #include <QItemDelegate>
 #include <QTableWidget>
-
+#include <QMessageBox>
 
 
 
@@ -22,10 +22,45 @@ MainWindow::MainWindow(QWidget *parent) :
     theSettings("pic.ini", QSettings::IniFormat)
 {
     ui->setupUi(this);
-    theLoader = new TracDataLoader(theStories, theSprints,
-              ui->impComboBox->model(),ui->estComboBox->model(),
-              ui->comComboBox->model(),ui->verComboBox->model(),
-              ui->typComboBox->model(), ui->filterByStatusComboBox->model(), this);
+    // *** Load Settings ***
+    //TRAC settings
+    QUrl url;
+    url.setUrl(theSettings.value("TRAC/Server").toString());
+    url.setPort(theSettings.value("TRAC/Port").toInt());
+    url.setUserName(theSettings.value("TRAC/UserName").toString());
+    url.setPassword(theSettings.value("TRAC/Password").toString());
+    loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
+    //Layout settings
+    int size = theSettings.beginReadArray("columns");
+    for (int i = 0; i < size; ++i) {
+        theSettings.setArrayIndex(i);
+        bool show = theSettings.value(QString("show"), false).toBool();
+        int width = theSettings.value(QString("width"), 100).toInt();
+        ui->storyTable->setColumnHidden(i, !show);
+        ui->storyTable->setColumnWidth(i, width==0?100:width);
+    }
+    theSettings.endArray();
+
+    // *** Setup Loader ***
+    theLoader = new TracDataLoader(this);
+    theLoader->setUrl(url);
+    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
+    // connect slots for loading data
+    connect(theLoader, SIGNAL(storiesLoaded(const QVariantList &)), SLOT(setStories(const QVariantList &)));
+    connect(theLoader, SIGNAL(sprintsLoaded(const QVariantList &)), SLOT(setSprints(const QVariantList &)));
+    connect(theLoader, SIGNAL(estimationsLoaded(const QStringList &)), SLOT(setEstimations(const QStringList &)));
+    connect(theLoader, SIGNAL(prioritiesLoaded(const QStringList &)), SLOT(setPriorities(const QStringList &)));
+    connect(theLoader, SIGNAL(versionsLoaded(const QStringList &)), SLOT(setVersions(const QStringList &)));
+    connect(theLoader, SIGNAL(typesLoaded(const QStringList &)), SLOT(setTypes(const QStringList &)));
+    connect(theLoader, SIGNAL(componentsLoaded(const QStringList &)), SLOT(setComponents(const QStringList &)));
+
+    //*** main Toolbar ***
+    // conect slots for performing toolbar actions
+    connect(ui->actionAdd_Story, SIGNAL(triggered()), SLOT(onActionAddStory()));
+    connect(ui->actionLoad, SIGNAL(triggered()), SLOT(onActionLoad()));
+    connect(ui->actionStore, SIGNAL(triggered()), SLOT(onActionStoreStories()));
+    connect(ui->actionSettings, SIGNAL(triggered()), SLOT(onActionSettings()));
+    connect(ui->actionShow_Report, SIGNAL(triggered()), SLOT(onActionReport()));
 
     //*** story view ***
     //setup story table
@@ -39,13 +74,14 @@ MainWindow::MainWindow(QWidget *parent) :
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
     theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
     theStoryDataMapper.addMapping(ui->impComboBox, ST_IMP);
+    theStoryDataMapper.addMapping(ui->sprComboBox, ST_SPRINT);
     theStoryDataMapper.addMapping(ui->typComboBox, ST_TYP);
     theStoryDataMapper.addMapping(ui->comComboBox, ST_COMP);
     theStoryDataMapper.addMapping(ui->verComboBox, ST_VERSION);
     theStoryDataMapper.toFirst();
-    //signals and slots for the story table
+    //connect slots for story table events
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
-           SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
+            SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
     connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
     connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
@@ -72,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theSprintDataMapper.addMapping(ui->workDayEdit, SP_DAYS);
     theSprintDataMapper.addMapping(ui->burnDownTable, SP_BURN);
     theSprintDataMapper.toFirst();
-    //Signals & Slots for the sprint table and the sprint model
+    //Connect slots for the sprint table and the sprint model
     connect(ui->sprintTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             SLOT(onSprintTableCurrentCellChanged ( const QModelIndex & , const QModelIndex & )));
     connect(ui->sprintTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
@@ -83,26 +119,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // setup card view
     ui->cardView->setScene(&theCardScene);
     theCardScene.setSceneRect(ui->cardView->rect());
-    // *** Load Settings ***
-    //TRAC settings
-    QUrl url;
-    url.setUrl(theSettings.value("TRAC/Server").toString());
-    url.setPort(theSettings.value("TRAC/Port").toInt());
-    url.setUserName(theSettings.value("TRAC/UserName").toString());
-    url.setPassword(theSettings.value("TRAC/Password").toString());
-    theLoader->setUrl(url);
-    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
-    loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
-    //Layout settings
-    int size = theSettings.beginReadArray("columns");
-    for (int i = 0; i < size; ++i) {
-        theSettings.setArrayIndex(i);
-        bool show = theSettings.value(QString("show"), false).toBool();
-        int width = theSettings.value(QString("width"), 100).toInt();
-        ui->storyTable->setColumnHidden(i, !show);
-        ui->storyTable->setColumnWidth(i, width==0?100:width);
-    }
-    theSettings.endArray();
+
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
     thePrinter.setPageSize(QPrinter::A5);
@@ -113,26 +130,26 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-   // Save Settings
-   //TRAC
-   theSettings.setValue("TRAC/Server", theLoader->url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-   theSettings.setValue("TRAC/Port", theLoader->url().port());
-   theSettings.setValue("TRAC/UserName", theLoader->url().userName());
-   theSettings.setValue("TRAC/Password", theLoader->url().password());
-   theSettings.setValue("TRAC/QueryString", theLoader->queryString());
-   theSettings.setValue("TRAC/LoadOnStart", loadOnStart);
+    // Save Settings
+    //TRAC
+    theSettings.setValue("TRAC/Server", theLoader->url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+    theSettings.setValue("TRAC/Port", theLoader->url().port());
+    theSettings.setValue("TRAC/UserName", theLoader->url().userName());
+    theSettings.setValue("TRAC/Password", theLoader->url().password());
+    theSettings.setValue("TRAC/QueryString", theLoader->queryString());
+    theSettings.setValue("TRAC/LoadOnStart", loadOnStart);
 
-   // Columns
-   theSettings.beginWriteArray("columns");
-   for (int i=0; i<theStories.columnCount(); ++i){
-       theSettings.setArrayIndex(i);
-       bool show = !ui->storyTable->isColumnHidden(i);
-       ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
-       int width = ui->storyTable->columnWidth(i);
-       theSettings.setValue(QString("show"), show);
-       theSettings.setValue(QString("width"), width);
-   }
-   theSettings.endArray();
+    // Columns
+    theSettings.beginWriteArray("columns");
+    for (int i=0; i<theStories.columnCount(); ++i){
+        theSettings.setArrayIndex(i);
+        bool show = !ui->storyTable->isColumnHidden(i);
+        ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
+        int width = ui->storyTable->columnWidth(i);
+        theSettings.setValue(QString("show"), show);
+        theSettings.setValue(QString("width"), width);
+    }
+    theSettings.endArray();
     delete ui;
 }
 
@@ -149,9 +166,7 @@ void MainWindow::loadAll()
     ui->filterByStatusComboBox->clear();
     ui->filterByStatusComboBox->addItem("all");
     statusBar()->showMessage("Querying ...");
-    theLoader->loadMasterData();
-    theLoader->loadStories();
-    theLoader->loadSprints();
+    theLoader->load();
     ui->filterByStatusComboBox->setCurrentIndex(0);
     theSprints.sortByDate();
 
@@ -206,8 +221,127 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
     fillCard(row, 6, scene);
 }
 
+void MainWindow::onActionAddStory()
+{
+    NewStoryDialog dlg;
 
+    QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
+                     theLoader, SLOT(onSaveNewStory(const QVariantMap &)));
 
+    dlg.exec();
+}
+
+void MainWindow::onActionStoreStories()
+{
+    if (theStoryChanges.isEmpty())
+        return;
+
+    QMap<QString, QVariantMap> updateMap;
+    foreach (QPersistentModelIndex i, theStoryChanges) {
+        QString id = theStories.data(i.row(), ST_ID).toString();
+        QString attribute = storyFieldNames[i.column()];
+        updateMap[id][attribute] = theStories.data(i);
+    }
+
+    QString changedStories;
+    for (QMap<QString, QVariantMap>::iterator itr = updateMap.begin(); itr != updateMap.end(); ++itr) {
+        changedStories += (changedStories.isEmpty()?"":",") + itr.key();
+        changedStories += "(";
+        for (QMap<QString, QVariant>::iterator itr2 = itr.value().begin(); itr2 != itr.value().end(); ++itr2)
+            changedStories += itr2.key() + " = " + itr2.value().toString();
+        changedStories += ")";
+
+    }
+
+    QMessageBox msgBox;
+    msgBox.setText(QString("The following stories have been modified: ")+changedStories);
+    msgBox.setInformativeText("Do you want to save your changes?");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+    switch (ret) {
+    case QMessageBox::Save:
+        theLoader->updateStories(updateMap);
+        theStoryChanges.clear();
+        break;
+    case QMessageBox::Discard:
+    case QMessageBox::Cancel:
+    default:
+        break;
+    }
+}
+
+void MainWindow::onActionLoad()
+{
+    loadAll();
+}
+
+void MainWindow::onActionSettings()
+{
+    SetupDialog dlg;
+    dlg.setUrl(theLoader->url());
+    dlg.setQueryString(theLoader->queryString());
+    dlg.setLoadOnStart(loadOnStart);
+    for (int i=0; i<theStories.columnCount(); ++i)
+        dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
+
+    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
+                     this, SLOT(onSetupAccepted(QVariantMap)));
+    dlg.exec();
+}
+
+void MainWindow::onSetupAccepted(QVariantMap &map)
+{
+    theLoader->setUrl(map["Url"].toUrl());
+    theLoader->setQueryString(map["QueryString"].toString());
+    QVariantList list = map["Columns"].toList();
+    for (int i=0; i<list.size(); ++i)
+        ui->storyTable->setColumnHidden(i, !list[i].toBool());
+    loadOnStart = map["LoadOnStart"].toBool();
+}
+
+void MainWindow::onActionReport()
+{
+    StoryReport d;
+    d.beginInsertStory();
+    for (int i=0; i<theStories.rowCount(); ++i) {
+        d.insertStory(
+                    theStories.data(i,0).toInt(),
+                    theStories.data(i,1).toString(),
+                    theStories.data(i,2).toString(),
+                    theStories.data(i,3).toString(),
+                    theStories.data(i,4).toString(),
+                    theStories.data(i,5).toString(),
+                    theStories.data(i,6).toString(),
+                    theStories.data(i,8).toString());
+
+    }
+    d.endInsertStory();
+
+    ReportDialog dlg;
+    dlg.setTextDocument(&d);
+    dlg.exec();
+
+}
+
+void MainWindow::onActionPrint()
+{
+
+    QPrintDialog printDialog(&thePrinter);
+    StoryCardScene scene;
+
+    if (printDialog.exec() == QDialog::Accepted) {
+        QPainter painter(&thePrinter);
+        painter.setRenderHint(QPainter::Antialiasing);
+        for (int i=0; i<theStories.rowCount(); ++i) {
+            if (theStories.printFlag(i)) {
+                fillCard(i, &theCardScene);
+                theCardScene.render(&painter);
+                thePrinter.newPage();
+            }
+        }
+    }
+}
 
 void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
@@ -220,6 +354,57 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 {
     fillCard(index.row());
     theStoryChanges.append(index);
+}
+
+QVariantList tmpList;
+void MainWindow::onStoryTableLayoutAboutToBeChanged()
+{
+    // Store hidden rows
+    for( int i = 0; i < theStories.rowCount(); ++i ) {
+        if (ui->storyTable->isRowHidden(i))
+            tmpList.append(theStories.data(i, ST_ID, Qt::DisplayRole));
+    }
+}
+
+void MainWindow::onStoryTableLayoutChanged()
+{
+    // Restore hidden rows
+    for( int i = 0; i < theStories.rowCount(); ++i ) {
+        if (tmpList.contains(theStories.data(i, ST_ID, Qt::DisplayRole)))
+            ui->storyTable->setRowHidden(i, true);
+        else
+            ui->storyTable->setRowHidden(i, false);
+    }
+    tmpList.clear();
+}
+
+void MainWindow::onFilterRow(QString arg)
+{
+    for( int i = 0; i < theStories.rowCount(); ++i )
+    {
+        QString str = theStories.data(i,ST_STATUS).toString();
+        if(arg == "all" || str.contains(arg) )
+            ui->storyTable->setRowHidden( i, false);
+        else
+            ui->storyTable->setRowHidden( i, true);
+    }
+}
+
+void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
+{
+    QModelIndexList indexList = ui->sprintTable->selectionModel()->selection().indexes();
+    QStringList stringList;
+    foreach (QModelIndex index, indexList)
+        stringList.append(theSprints.sprint(index.row()).name());
+    for( int i = 0; i < theStories.rowCount(); ++i )
+    {
+        if (checked) {
+            QString str = theStories.data(i,ST_SPRINT).toString();
+            ui->storyTable->setRowHidden( i, !stringList.contains(str));
+        }
+        else
+            ui->storyTable->setRowHidden( i, false);
+    }
 }
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -256,6 +441,7 @@ void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , co
     }
 }
 
+
 void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
 {
     //set Data to BurnDownView
@@ -263,152 +449,46 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
     theBurnDownScene.show(d.capacity(), d.workDays(), d.burnDown());
 }
 
-QVariantList tmpList;
-void MainWindow::onStoryTableLayoutAboutToBeChanged()
+
+void MainWindow::setStories(const QVariantList &list)
 {
-    // Store hidden rows
-    for( int i = 0; i < theStories.rowCount(); ++i ) {
-        if (ui->storyTable->isRowHidden(i))
-            tmpList.append(theStories.data(i, ST_ID, Qt::DisplayRole));
-    }
+    theStories.fromList(list);
 }
 
-void MainWindow::onStoryTableLayoutChanged()
+void MainWindow::setSprints(const QVariantList &list)
 {
-    // Restore hidden rows
-    for( int i = 0; i < theStories.rowCount(); ++i ) {
-        if (tmpList.contains(theStories.data(i, ST_ID, Qt::DisplayRole)))
-            ui->storyTable->setRowHidden(i, true);
-        else
-            ui->storyTable->setRowHidden(i, false);
-    }
-    tmpList.clear();
+    theSprints.fromList(list);
+    theSprints.sortByDate();
+    QStandardItemModel *ms = static_cast<QStandardItemModel *>(ui->sprComboBox->model());
+    for (int i=0; i<theSprints.rowCount();++i)
+        ms->appendRow(new QStandardItem(theSprints.data(i, SP_NAME).toString()));
 }
 
-
-void MainWindow::on_addRowButton_clicked()
+void setStandardItemModel(const QStringList &list, QAbstractItemModel *model)
 {
-    NewStoryDialog dlg;
-
-    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
-                     this, SLOT(onNewStoryAccepted(QVariantMap)));
-    dlg.exec();
+    QStandardItemModel *ms = static_cast<QStandardItemModel *>(model);
+    foreach (const QString &v, list)
+        ms->appendRow(new QStandardItem(v));
 }
 
-void MainWindow::onNewStoryAccepted(QVariantMap map)
+void MainWindow::setPriorities(const QStringList &list)
 {
-
+    setStandardItemModel(list, ui->impComboBox->model());
 }
 
-
-
-void MainWindow::on_printButton_clicked()
+void MainWindow::setEstimations(const QStringList &list)
 {
-
-    QPrintDialog printDialog(&thePrinter);
-    StoryCardScene scene;
-
-    if (printDialog.exec() == QDialog::Accepted) {
-        QPainter painter(&thePrinter);
-        painter.setRenderHint(QPainter::Antialiasing);
-        for (int i=0; i<theStories.rowCount(); ++i) {
-            if (theStories.printFlag(i)) {
-                fillCard(i, &theCardScene);
-                theCardScene.render(&painter);
-                thePrinter.newPage();
-            }
-        }
-    }
+    setStandardItemModel(list, ui->estComboBox->model());
 }
-
-void MainWindow::on_importButton_clicked()
+void MainWindow::setVersions(const QStringList &list)
 {
-    loadAll();
+    setStandardItemModel(list, ui->verComboBox->model());
 }
-
-
-void MainWindow::on_setupButton_clicked()
+void MainWindow::setComponents(const QStringList &list)
 {
-    SetupDialog dlg;
-    dlg.setUrl(theLoader->url());
-    dlg.setQueryString(theLoader->queryString());
-    dlg.setLoadOnStart(loadOnStart);
-    for (int i=0; i<theStories.columnCount(); ++i)
-        dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
-
-    QObject::connect(&dlg, SIGNAL(accepted(QVariantMap)),
-                     this, SLOT(onSetupAccepted(QVariantMap)));
-    dlg.exec();
+    setStandardItemModel(list, ui->comComboBox->model());
 }
-
-void MainWindow::onSetupAccepted(QVariantMap map)
+void MainWindow::setTypes(const QStringList &list)
 {
-    theLoader->setUrl(map["Url"].toUrl());
-    theLoader->setQueryString(map["QueryString"].toString());
-    QVariantList list = map["Columns"].toList();
-    for (int i=0; i<list.size(); ++i)
-        ui->storyTable->setColumnHidden(i, !list[i].toBool());
-    loadOnStart = map["LoadOnStart"].toBool();
-}
-
-
-void MainWindow::onFilterRow(QString arg)
-{
-    for( int i = 0; i < theStories.rowCount(); ++i )
-    {
-        QString str = theStories.data(i,ST_STATUS).toString();
-        if(arg == "all" || str.contains(arg) )
-            ui->storyTable->setRowHidden( i, false);
-        else
-            ui->storyTable->setRowHidden( i, true);
-    }
-}
-
-
-void MainWindow::on_reportButton_clicked()
-{
-   StoryReport d;
-    d.beginInsertStory();
-    for (int i=0; i<theStories.rowCount(); ++i) {
-        d.insertStory(
-            theStories.data(i,0).toInt(),
-            theStories.data(i,1).toString(),
-            theStories.data(i,2).toString(),
-            theStories.data(i,3).toString(),
-            theStories.data(i,4).toString(),
-            theStories.data(i,5).toString(),
-            theStories.data(i,6).toString(),
-            theStories.data(i,8).toString());
-
-    }
-    d.endInsertStory();
-
-    ReportDialog dlg;
-    dlg.setTextDocument(&d);
-    dlg.exec();
-
-}
-
-void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
-{
-    QModelIndexList indexList = ui->sprintTable->selectionModel()->selection().indexes();
-    QStringList stringList;
-    foreach (QModelIndex index, indexList)
-        stringList.append(theSprints.sprint(index.row()).name());
-    for( int i = 0; i < theStories.rowCount(); ++i )
-    {
-        if (checked) {
-            QString str = theStories.data(i,ST_SPRINT).toString();
-            ui->storyTable->setRowHidden( i, !stringList.contains(str));
-        }
-        else
-            ui->storyTable->setRowHidden( i, false);
-    }
-}
-
-void MainWindow::on_saveStoryButton_clicked()
-{
-//    qDebug() << "*** Changes ***\n";
-//    foreach (QPersistentModelIndex i, theStoryChanges)
-//        qDebug() << "row: " << i.row() << "col: " << i.column() << "data: " << theStories.data(i).toString() << "\n" ;
+    setStandardItemModel(list, ui->typComboBox->model());
 }

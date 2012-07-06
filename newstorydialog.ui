@@ -198,7 +198,7 @@
        </widget>
       </item>
       <item row="9" column="3">
-       <widget class="QTextEdit" name="textEdit"/>
+       <widget class="QTextEdit" name="htdEdit"/>
       </item>
       <item row="9" column="2">
        <widget class="QLabel" name="label_24">

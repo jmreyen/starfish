@@ -31,27 +31,40 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 protected:
+    // Load/Store
     void loadAll();
+    //Display Index Card
     void fillCard(int row, int col, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
 private slots:
+    //Toolbar Actions
+    void onActionAddStory();
+    void onActionStoreStories();
+    void onActionLoad();
+    void onActionSettings();
+    void onSetupAccepted(QVariantMap &map);
+    void onActionReport();
+    void onActionPrint();
+    //Story Table
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
-    void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
-    void onSprintModelDataChanged(const QModelIndex &index);
     void onStoryTableLayoutAboutToBeChanged();
     void onStoryTableLayoutChanged();
-    void on_addRowButton_clicked();
-    void onNewStoryAccepted(QVariantMap map);
-    void on_printButton_clicked();
-    void on_importButton_clicked();
-    void on_setupButton_clicked();
-    void onSetupAccepted(QVariantMap);
+    // Story Table Filters
     void onFilterRow(QString arg);
-    void on_reportButton_clicked();
     void on_filterBySprintCheckBox_clicked(bool checked);
+    //Sprint Table
+    void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
+    void onSprintModelDataChanged(const QModelIndex &index);
+    //Data Loader Response Methods
+    void setStories(const QVariantList &list);
+    void setSprints(const QVariantList &list);
+    void setPriorities(const QStringList &list);
+    void setEstimations(const QStringList &list);
+    void setVersions(const QStringList &list);
+    void setComponents(const QStringList &list);
+    void setTypes(const QStringList &list);
 
-    void on_saveStoryButton_clicked();
 
 private:
     Ui::MainWindow *ui;

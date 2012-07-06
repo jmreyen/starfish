@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QVector>
+#include <QMap>
+#include <QVariant>
 
 const int ST_ID     = 0;
 const int ST_DESC   = 1;
@@ -18,6 +20,8 @@ const int ST_COMP   = 10;
 const int ST_VERSION= 11;
 const int ST_LAST   = 12;
 
+extern const char *storyFieldNames[];
+extern const char *storyDisplayNames[];
 
 class StoryData : public QVector<QString>
 {
@@ -34,7 +38,7 @@ public:
               const QString &sprint,
               const QString &comp,
               const QString &ver,
-              const QString status) : QVector<QString>(ST_LAST)
+              const QString &status) : QVector<QString>(ST_LAST)
     {
 
 
@@ -51,10 +55,25 @@ public:
         (*this)[ST_VERSION] = ver;
         (*this)[ST_STATUS] = status;
     }
+    StoryData(const QVariantMap &map){fromMap(map);}
     StoryData(const StoryData &t) : QVector<QString>(ST_LAST)
     {
         (*this) = t;
     }
+    QVariantMap toMap() const;
+    static QVariantMap toMap(const QString &id,
+                             const QString &desc,
+                             const QString &notes,
+                             const QString &htd,
+                             const QString &imp,
+                             const QString &est,
+                             const QString &user,
+                             const QString &typ,
+                             const QString &sprint,
+                             const QString &comp,
+                             const QString &ver,
+                             const QString status);
+    const StoryData &fromMap(const QVariantMap &map);
 
 };
 

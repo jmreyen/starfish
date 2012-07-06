@@ -123,23 +123,8 @@ QVariant StoryModel::headerData ( int section, Qt::Orientation orientation, int 
     if (orientation == Qt::Horizontal) {
         switch(role) {
         case Qt::DisplayRole:
-            //retrun header strings
-            switch (section)
-            {
-            case ST_ID:      return "ID";
-            case ST_DESC:    return "Description";
-            case ST_NOTES:   return "Notes";
-            case ST_HTD:     return "How to Demo";
-            case ST_IMP:     return "Importance";
-            case ST_EST:     return "Estimation";
-            case ST_USER:    return "User";
-            case ST_TYP:     return "Type";
-            case ST_STATUS:  return "Status";
-            case ST_SPRINT:  return "Sprint";
-            case ST_COMP:    return "Component";
-            case ST_VERSION: return "Version";
-            }
-            break;
+            //return header strings
+            return storyDisplayNames[section];
         case Qt::DecorationRole:
             switch (section) {
             case ST_FLAG1: return QIcon("printer.png");
@@ -208,12 +193,13 @@ void StoryModel::addStory(const StoryData &d)
     endInsertRows();
 }
 
-void StoryModel::addStoryList(const QList<StoryData> &l)
+void StoryModel::fromList(const QVariantList &list)
 {
     emit layoutAboutToBeChanged();
-    foreach(StoryData d, l){
+    foreach (QVariant v, list) {
+        QVariantMap map = v.toMap();
         StoryModelData m;
-        m.storyData = d;
+        m.storyData.fromMap(map);
         m.printFlag = false;
         theList.append(m);
     }

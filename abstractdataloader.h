@@ -1,54 +1,35 @@
 #ifndef ABSTRACTDATALOADER_H
 #define ABSTRACTDATALOADER_H
 
-#include "storymodel.h"
-#include "sprintmodel.h"
-
 #include <QObject>
-#include <QAbstractItemModel>
+#include <QVariant>
 
 class AbstractDataLoader : public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractDataLoader(StoryModel  &sm, SprintModel &sp,  QAbstractItemModel *pr,
-                                QAbstractItemModel *es, QAbstractItemModel *co,
-                                QAbstractItemModel *ve, QAbstractItemModel *ty,
-                                QAbstractItemModel *st, QObject *parent = 0);
-    virtual bool loadStories() = 0;
-    virtual bool loadSprints() = 0;
-    virtual bool loadMasterData() = 0;
-    virtual bool saveNewStory(const StoryData &d) = 0;
-    virtual bool saveNewStories();
+    explicit AbstractDataLoader(QObject *parent = 0) {}
+    virtual bool load() = 0;
+    virtual bool saveNewStory(const QVariantMap &map) = 0;
+    virtual bool updateStories(QMap<QString, QVariantMap> &map) = 0;
 
 signals:
+    void storiesLoaded(const QVariantList &l);
+    void newStoryLoaded(QVariantMap &m);
+    void sprintsLoaded(const QVariantList &list);
+    void prioritiesLoaded(const QStringList &list);
+    void estimationsLoaded(const QStringList &list);
+    void versionsLoaded(const QStringList &list);
+    void componentsLoaded(const QStringList &list);
+    void statusLoaded(const QStringList &list);
+    void typesLoaded(const QStringList &list);
 
 public slots:
+    void onSaveNewStory(const QVariantMap &map){saveNewStory(map);}
 
 protected:
-    void beginAddStory();
-    void endAddStory();
-    void addStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &typ, const QString &ms, const QString &co, const QString &ve, const QString &stat);
-    void addSprint(const QString &name, const QDate &date, bool completed, const QString &desc);
-    void setPriorities(const QStringList &l);
-    void setEstimations(const QStringList &l);
-    void setVersions(const QStringList &l);
-    void setComponents(const QStringList &l);
-    void setTypes(const QStringList &l);
-    void setStatus(const QStringList &l);
-private:
-    void setStandardItemModel(const QStringList &l, QAbstractItemModel *m);
 
 private:
-    StoryModel  &theStories;
-    SprintModel &theSprints;
-    QAbstractItemModel *thePriorities;
-    QAbstractItemModel *theEstimations;
-    QAbstractItemModel *theComponents;
-    QAbstractItemModel *theOwners;
-    QAbstractItemModel *theVersions;
-    QAbstractItemModel *theTypes;
-    QAbstractItemModel *theStatus;
 
 };
 

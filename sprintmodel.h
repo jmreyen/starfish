@@ -24,6 +24,7 @@ public:
     QVariant data (int row, int col, int role = Qt::DisplayRole ) const;
     SprintData sprint(int row) const;
     void addSprint(const SprintData &t);
+    void fromList(const QVariantList &list);
     void sortByDate();
     void clear();
     bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);

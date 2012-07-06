@@ -52,7 +52,7 @@ void BurnDownScene::show(int cap, int workDays, const QList<int> & list)
         pt += QPointF(dx, dy**i);
         QLineF lf(prevPt, pt);
         addLine(lf);
-        QGraphicsEllipseItem *e = addEllipse(pt.x(),pt.y(),3,3, QPen(Qt::black), QBrush(Qt::black));
+        addEllipse(pt.x(),pt.y(),3,3, QPen(Qt::black), QBrush(Qt::black));
         QGraphicsTextItem *item = addText(QString("-")+QString::number(*i));
         item->setPos(pt.x()-5, pt.y()-20);
     }

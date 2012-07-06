@@ -21,8 +21,8 @@ SOURCES += main.cpp\
     storyreport.cpp \
     storyreportdialog.cpp \
     tracdataloader.cpp \
-    abstractdataloader.cpp \
-    newstorydialog.cpp
+    newstorydialog.cpp \
+    storydata.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -46,3 +46,6 @@ FORMS    += mainwindow.ui \
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a
 QT   += xml network
+
+RESOURCES += \
+    images.qrc

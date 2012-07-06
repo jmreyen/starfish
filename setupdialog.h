@@ -20,7 +20,7 @@ public:
     void setQueryString(const QString &str);
     void setLoadOnStart(bool b);
 signals:
-    void accepted(QVariantMap q);
+    void accepted(QVariantMap &map);
     
 private slots:
     void on_buttonBox_accepted();
