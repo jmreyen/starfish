@@ -46,7 +46,10 @@ void StoryModelItemDelegate::setModelData ( QWidget * editor, QAbstractItemModel
 }
 
 StoryModel::StoryModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    sorted(false),
+    sortColumn(ST_ID),
+    sortOrder(Qt::DescendingOrder)
 {
 }
 
@@ -135,40 +138,41 @@ QVariant StoryModel::headerData ( int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-static int sortColumn = 0;
+static int tmpSortColumn = 0;
 
 bool lt(const StoryModelData &t1, const StoryModelData &t2)
 {
-    if (sortColumn == ST_ID)
-        return t1.storyData[sortColumn].toInt() < t2.storyData[sortColumn].toInt();
+    if (tmpSortColumn  == ST_ID)
+        return t1.storyData[tmpSortColumn ].toInt() < t2.storyData[tmpSortColumn ].toInt();
     else
-        return t1.storyData[sortColumn] < t2.storyData[sortColumn];
+        return t1.storyData[tmpSortColumn ] < t2.storyData[tmpSortColumn ];
 }
 
 bool gt(const StoryModelData &t1, const StoryModelData &t2)
 {
-    if (sortColumn == ST_ID)
-        return t1.storyData[sortColumn].toInt() > t2.storyData[sortColumn].toInt();
+    if (tmpSortColumn == ST_ID)
+        return t1.storyData[tmpSortColumn ].toInt() > t2.storyData[tmpSortColumn ].toInt();
     else
-        return t1.storyData[sortColumn] > t2.storyData[sortColumn];
+        return t1.storyData[tmpSortColumn ] > t2.storyData[tmpSortColumn ];
 }
 
 void StoryModel::sort ( int column, Qt::SortOrder order )
 {
+    // invalid column - nothing to do
     if (column >= ST_LAST)
         return;
-
+    // tell all views that the layout will change
     emit layoutAboutToBeChanged();
-
+    //store the row numbers before sorting
     for (int i=0; i<theList.count(); ++i)
         theList[i].sortPos=i;
-
-    sortColumn = column;
+    //sort
+    tmpSortColumn  = column;
     if (order==Qt::AscendingOrder)
         qSort(theList.begin(), theList.end(), lt);
     else
         qSort(theList.begin(), theList.end(), gt);
-
+    //restore persistent model indices
     QModelIndexList fromIndexes;
     QModelIndexList toIndexes;
     for (int r = 0; r < rowCount(); ++r) {
@@ -178,11 +182,15 @@ void StoryModel::sort ( int column, Qt::SortOrder order )
         }
     }
     changePersistentIndexList(fromIndexes, toIndexes);
-
+    // tell all attached views the the layout has been changesd
     emit layoutChanged();
+    // remember the sort order
+    sorted = true;
+    sortColumn = column;
+    sortOrder = order;
 }
 
-void StoryModel::addStory(const StoryData &d)
+int StoryModel::addStory(const StoryData &d)
 {
     //add a row to the storylist and notify attached views
     StoryModelData m;
@@ -191,6 +199,15 @@ void StoryModel::addStory(const StoryData &d)
     beginInsertRows(QModelIndex(), theList.count(), theList.count()+1);
     theList.append(m);
     endInsertRows();
+    // if the model was previously sorted ...
+    if (sorted) {
+        // ... sort it again and return new row number
+        QPersistentModelIndex i = createIndex(theList.count()-1, ST_ID);
+        sort(sortColumn, sortOrder);
+        return i.row();
+    }
+    else
+        return theList.count()-1;
 }
 
 void StoryModel::fromList(const QVariantList &list)

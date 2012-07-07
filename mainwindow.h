@@ -58,6 +58,7 @@ private slots:
     void onSprintModelDataChanged(const QModelIndex &index);
     //Data Loader Response Methods
     void setStories(const QVariantList &list);
+    void addNewlySavedStory(const QVariantMap &map);
     void setSprints(const QVariantList &list);
     void setPriorities(const QStringList &list);
     void setEstimations(const QStringList &list);

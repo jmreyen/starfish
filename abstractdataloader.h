@@ -15,7 +15,7 @@ public:
 
 signals:
     void storiesLoaded(const QVariantList &l);
-    void newStoryLoaded(QVariantMap &m);
+    void newStoryLoaded(const QVariantMap &m);
     void sprintsLoaded(const QVariantList &list);
     void prioritiesLoaded(const QStringList &list);
     void estimationsLoaded(const QStringList &list);

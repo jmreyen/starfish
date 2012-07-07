@@ -55,11 +55,8 @@ public:
         (*this)[ST_VERSION] = ver;
         (*this)[ST_STATUS] = status;
     }
-    StoryData(const QVariantMap &map){fromMap(map);}
-    StoryData(const StoryData &t) : QVector<QString>(ST_LAST)
-    {
-        (*this) = t;
-    }
+    StoryData(const QVariantMap &map): QVector<QString>(ST_LAST){fromMap(map);}
+    StoryData(const StoryData &t) : QVector<QString>(ST_LAST) {(*this) = t;}
     QVariantMap toMap() const;
     static QVariantMap toMap(const QString &id,
                              const QString &desc,

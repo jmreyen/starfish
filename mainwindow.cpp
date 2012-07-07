@@ -22,39 +22,8 @@ MainWindow::MainWindow(QWidget *parent) :
     theSettings("pic.ini", QSettings::IniFormat)
 {
     ui->setupUi(this);
-    // *** Load Settings ***
-    //TRAC settings
-    QUrl url;
-    url.setUrl(theSettings.value("TRAC/Server").toString());
-    url.setPort(theSettings.value("TRAC/Port").toInt());
-    url.setUserName(theSettings.value("TRAC/UserName").toString());
-    url.setPassword(theSettings.value("TRAC/Password").toString());
-    loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
-    //Layout settings
-    int size = theSettings.beginReadArray("columns");
-    for (int i = 0; i < size; ++i) {
-        theSettings.setArrayIndex(i);
-        bool show = theSettings.value(QString("show"), false).toBool();
-        int width = theSettings.value(QString("width"), 100).toInt();
-        ui->storyTable->setColumnHidden(i, !show);
-        ui->storyTable->setColumnWidth(i, width==0?100:width);
-    }
-    theSettings.endArray();
 
-    // *** Setup Loader ***
-    theLoader = new TracDataLoader(this);
-    theLoader->setUrl(url);
-    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
-    // connect slots for loading data
-    connect(theLoader, SIGNAL(storiesLoaded(const QVariantList &)), SLOT(setStories(const QVariantList &)));
-    connect(theLoader, SIGNAL(sprintsLoaded(const QVariantList &)), SLOT(setSprints(const QVariantList &)));
-    connect(theLoader, SIGNAL(estimationsLoaded(const QStringList &)), SLOT(setEstimations(const QStringList &)));
-    connect(theLoader, SIGNAL(prioritiesLoaded(const QStringList &)), SLOT(setPriorities(const QStringList &)));
-    connect(theLoader, SIGNAL(versionsLoaded(const QStringList &)), SLOT(setVersions(const QStringList &)));
-    connect(theLoader, SIGNAL(typesLoaded(const QStringList &)), SLOT(setTypes(const QStringList &)));
-    connect(theLoader, SIGNAL(componentsLoaded(const QStringList &)), SLOT(setComponents(const QStringList &)));
-
-    //*** main Toolbar ***
+    //*** Setup MainWindow Elements ***
     // conect slots for performing toolbar actions
     connect(ui->actionAdd_Story, SIGNAL(triggered()), SLOT(onActionAddStory()));
     connect(ui->actionLoad, SIGNAL(triggered()), SLOT(onActionLoad()));
@@ -62,11 +31,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSettings, SIGNAL(triggered()), SLOT(onActionSettings()));
     connect(ui->actionShow_Report, SIGNAL(triggered()), SLOT(onActionReport()));
     connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
-
-    //*** story view ***
     //setup story table
     ui->storyTable->setModel(&theStories);
     ui->storyTable->horizontalHeader()->show();
+    ui->storyTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->storyTable->setSelectionMode(QAbstractItemView::SingleSelection);
     //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStories);
     theStoryDataMapper.setItemDelegate(new StoryModelItemDelegate());
@@ -93,8 +62,6 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryTableLayoutChanged()));
     connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
             SLOT(onStoryTableLayoutAboutToBeChanged()));
-
-    // *** sprint view ***
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
     //setup burndown view
@@ -116,10 +83,50 @@ MainWindow::MainWindow(QWidget *parent) :
             &theSprintDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
     connect(&theSprints, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onSprintModelDataChanged ( const QModelIndex & )));
-    // *** Index Card View ***
     // setup card view
     ui->cardView->setScene(&theCardScene);
     theCardScene.setSceneRect(ui->cardView->rect());
+
+    // *** Load Settings ***
+    //TRAC settings
+    QUrl url;
+    url.setUrl(theSettings.value("TRAC/Server").toString());
+    url.setPort(theSettings.value("TRAC/Port").toInt());
+    url.setUserName(theSettings.value("TRAC/UserName").toString());
+    url.setPassword(theSettings.value("TRAC/Password").toString());
+    loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
+    //Layout settings
+    int size = theSettings.beginReadArray("columns");
+    for (int i = 0; i < size; ++i) {
+        theSettings.setArrayIndex(i);
+        bool show = theSettings.value(QString("show"), false).toBool();
+        int width = theSettings.value(QString("width"), 100).toInt();
+        ui->storyTable->setColumnHidden(i, !show);
+        ui->storyTable->setColumnWidth(i, width==0?100:width);
+    }
+    theSettings.endArray();
+
+    // *** Setup Loader ***
+    theLoader = new TracDataLoader(this);
+    theLoader->setUrl(url);
+    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
+    // connect slots for loading data
+    connect(theLoader, SIGNAL(storiesLoaded(const QVariantList &)),
+            SLOT(setStories(const QVariantList &)));
+    connect(theLoader, SIGNAL(sprintsLoaded(const QVariantList &)),
+            SLOT(setSprints(const QVariantList &)));
+    connect(theLoader, SIGNAL(estimationsLoaded(const QStringList &)),
+            SLOT(setEstimations(const QStringList &)));
+    connect(theLoader, SIGNAL(prioritiesLoaded(const QStringList &)),
+            SLOT(setPriorities(const QStringList &)));
+    connect(theLoader, SIGNAL(versionsLoaded(const QStringList &)),
+            SLOT(setVersions(const QStringList &)));
+    connect(theLoader, SIGNAL(typesLoaded(const QStringList &)),
+            SLOT(setTypes(const QStringList &)));
+    connect(theLoader, SIGNAL(componentsLoaded(const QStringList &)),
+            SLOT(setComponents(const QStringList &)));
+    connect(theLoader, SIGNAL(newStoryLoaded(const QVariantMap &)),
+            SLOT(addNewlySavedStory(const QVariantMap &)));
 
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
@@ -224,7 +231,12 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 
 void MainWindow::onActionAddStory()
 {
-    NewStoryDialog dlg;
+    NewStoryDialog dlg(ui->estComboBox->model(),
+                       ui->impComboBox->model(),
+                       ui->sprComboBox->model(),
+                       ui->typComboBox->model(),
+                       ui->comComboBox->model(),
+                       ui->verComboBox->model());
 
     QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
                      theLoader, SLOT(onSaveNewStory(const QVariantMap &)));
@@ -455,6 +467,12 @@ void MainWindow::setStories(const QVariantList &list)
 {
     theStories.fromList(list);
 }
+void MainWindow::addNewlySavedStory(const QVariantMap &map)
+{
+    StoryData d(map);
+    int row = theStories.addStory(d);
+    ui->storyTable->selectRow(row);
+}
 
 void MainWindow::setSprints(const QVariantList &list)
 {
@@ -464,6 +482,7 @@ void MainWindow::setSprints(const QVariantList &list)
     for (int i=0; i<theSprints.rowCount();++i)
         ms->appendRow(new QStandardItem(theSprints.data(i, SP_NAME).toString()));
 }
+
 
 void setStandardItemModel(const QStringList &list, QAbstractItemModel *model)
 {

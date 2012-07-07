@@ -32,7 +32,7 @@ public:
     bool setData ( const QModelIndex &index, const QVariant & value, int role = Qt::EditRole );
     Qt::ItemFlags	flags ( const QModelIndex &index ) const;
     void sort ( int column, Qt::SortOrder order = Qt::AscendingOrder );
-    void addStory(const StoryData &t);
+    int addStory(const StoryData &t);
     void fromList(const QVariantList &list);
     void clear();
     const StoryData &story(int i) const {return theList[i].storyData;}
@@ -45,6 +45,9 @@ public slots:
 
 private:
     QList<StoryModelData> theList;
+    bool sorted;
+    int sortColumn;
+    Qt::SortOrder sortOrder;
     
 };
 
