@@ -4,6 +4,7 @@
 #include "burndownscene.h"
 #include "storycardscene.h"
 #include "storymodel.h"
+#include "storyitemmodel.h"
 #include "sprintmodel.h"
 #include "tracdataloader.h"
 
@@ -70,6 +71,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     StoryModel theStories;
+    StoryItemModel theStoryTree;
     SprintModel theSprints;
     QDataWidgetMapper theStoryDataMapper;
     QDataWidgetMapper theSprintDataMapper;

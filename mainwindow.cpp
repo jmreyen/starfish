@@ -17,6 +17,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    theStories(this),
+    theStoryTree(this),
     ui(new Ui::MainWindow),
     thePrinter(QPrinter::HighResolution),
     theSettings("pic.ini", QSettings::IniFormat)
@@ -62,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryTableLayoutChanged()));
     connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
             SLOT(onStoryTableLayoutAboutToBeChanged()));
+    //setup storyitemmodel
+    ui->storyTreeView->setModel(&theStoryTree);
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
     //setup burndown view
@@ -466,6 +470,7 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
 void MainWindow::setStories(const QVariantList &list)
 {
     theStories.fromList(list);
+    theStoryTree.setupModelData(list);
 }
 void MainWindow::addNewlySavedStory(const QVariantMap &map)
 {

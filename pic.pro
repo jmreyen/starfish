@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     storyreportdialog.cpp \
     tracdataloader.cpp \
     newstorydialog.cpp \
-    storydata.cpp
+    storydata.cpp \
+    storyitem.cpp \
+    storyitemmodel.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -36,7 +38,9 @@ HEADERS  += mainwindow.h \
     storyreportdialog.h \
     tracdataloader.h \
     abstractdataloader.h \
-    newstorydialog.h
+    newstorydialog.h \
+    storyitem.h \
+    storyitemmodel.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \
