@@ -6,14 +6,46 @@
 #include "storyitem.h"
 
 
+const char *storyFieldNames[] = {
+    "id",
+    "summary",
+    "description",
+    "how_to_demo",
+    "priority",
+    "estimation",
+    "reporter",
+    "type",
+    "status",
+    "milestone",
+    "component",
+    "version"};
 
-StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent)
+const char *storyDisplayNames[ST_LAST] = {
+    "ID",
+    "Description",
+    "Notes",
+    "How to Demo",
+    "Importance",
+    "Estimation",
+    "User",
+    "Type",
+    "Status",
+    "Sprint",
+    "Component",
+    "Version"};
+
+StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
+    thePrintFlag(false),
+    sortPosition(-1)
+
 {
     parentItem = parent;
     itemData = list;
 }
 
-StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent)
+StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent) :
+    thePrintFlag(false),
+    sortPosition(-1)
 {
     parentItem = parent;
     fromMap(map);
@@ -69,3 +101,9 @@ const StoryItem &StoryItem::fromMap(const QVariantMap &map)
     }
     return *this;
 }
+
+void StoryItem::clear()
+{
+    childItems.clear();
+}
+

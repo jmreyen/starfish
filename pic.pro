@@ -17,14 +17,13 @@ SOURCES += main.cpp\
     sprintmodel.cpp \
     sprintdata.cpp \
     burndownscene.cpp \
-    storymodel.cpp \
     storyreport.cpp \
     storyreportdialog.cpp \
     tracdataloader.cpp \
     newstorydialog.cpp \
-    storydata.cpp \
     storyitem.cpp \
-    storyitemmodel.cpp
+    storyitemmodel.cpp \
+    storyitemdelegate.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -32,15 +31,14 @@ HEADERS  += mainwindow.h \
     sprintmodel.h \
     sprintdata.h \
     burndownscene.h \
-    storydata.h \
-    storymodel.h \
     storyreport.h \
     storyreportdialog.h \
     tracdataloader.h \
     abstractdataloader.h \
     newstorydialog.h \
     storyitem.h \
-    storyitemmodel.h
+    storyitemmodel.h \
+    storyitemdelegate.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \

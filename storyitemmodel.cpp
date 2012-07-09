@@ -1,16 +1,14 @@
-#include "storyitemmodel.h"
-
 #include <QtGui>
 
- #include "storyitem.h"
- #include "storyitemmodel.h"
+#include "storyitem.h"
+#include "storyitemmodel.h"
 
  StoryItemModel::StoryItemModel(/*const QString &data, */QObject *parent)
      : QAbstractItemModel(parent)
  {
      QList<QVariant> rootData;
      for (int i=ST_ID; i<ST_LAST; ++i)
-         rootData << storyFieldNames[i];
+         rootData << storyDisplayNames[i];
      rootItem = new StoryItem(rootData);
      //setupModelData(data.split(QString("\n")), rootItem);
  }
@@ -33,12 +31,22 @@
      if (!index.isValid())
          return QVariant();
 
-     if (role != Qt::DisplayRole)
-         return QVariant();
-
      StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
 
-     return item->data(index.column());
+     switch (role) {
+     case Qt::EditRole:
+     case Qt::DisplayRole:
+         if (index.column()<ST_LAST)
+             return item->data(index.column());
+         break;
+     case Qt::CheckStateRole:
+         //Get status of the checkbox in the print column
+         if (index.column()==ST_FLAG1)
+             return item->printFlag();
+         break;
+     }
+     return QVariant();
+
  }
 
  Qt::ItemFlags StoryItemModel::flags(const QModelIndex &index) const
@@ -107,7 +115,7 @@
  }
 
 
- void StoryItemModel::setupModelData(const QVariantList &list)
+ void StoryItemModel::fromList(const QVariantList &list)
  {
      for (int i=0; i<list.count(); ++i) {
          QVariantMap map = list[i].toMap();
@@ -115,3 +123,12 @@
          rootItem->appendChild(story);
      }
  }
+
+ void StoryItemModel::clear()
+ {
+     //remove all rows from the storylist and notify attached views
+     beginResetModel();
+     rootItem->clear();
+     endResetModel();
+ }
+

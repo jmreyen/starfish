@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "storyitemdelegate.h"
 #include "storyreport.h"
 #include "setupdialog.h"
 #include "storyreportdialog.h"
@@ -17,7 +18,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    theStories(this),
+//    theStories(this),
     theStoryTree(this),
     ui(new Ui::MainWindow),
     thePrinter(QPrinter::HighResolution),
@@ -33,14 +34,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSettings, SIGNAL(triggered()), SLOT(onActionSettings()));
     connect(ui->actionShow_Report, SIGNAL(triggered()), SLOT(onActionReport()));
     connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
-    //setup story table
-    ui->storyTable->setModel(&theStories);
-    ui->storyTable->horizontalHeader()->show();
-    ui->storyTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->storyTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    //setup story tree
+    ui->storyTreeView->setModel(&theStoryTree);
+
     //map story table entries to editor widgets
-    theStoryDataMapper.setModel(&theStories);
-    theStoryDataMapper.setItemDelegate(new StoryModelItemDelegate());
+    theStoryDataMapper.setModel(&theStoryTree);
+    theStoryDataMapper.setItemDelegate(new StoryItemDelegate());
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
     theStoryDataMapper.addMapping(ui->reporterEdit, ST_USER);
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
@@ -52,20 +51,18 @@ MainWindow::MainWindow(QWidget *parent) :
     theStoryDataMapper.addMapping(ui->verComboBox, ST_VERSION);
     theStoryDataMapper.toFirst();
     //connect slots for story table events
-    connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
+    connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
             SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
-    connect(ui->storyTable->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
+    connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
-    connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+    connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
-    connect(&theStories, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+    connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
-    connect(&theStories, SIGNAL(layoutChanged()),
+    connect(&theStoryTree, SIGNAL(layoutChanged()),
             SLOT(onStoryTableLayoutChanged()));
-    connect(&theStories, SIGNAL(layoutAboutToBeChanged()),
+    connect(&theStoryTree, SIGNAL(layoutAboutToBeChanged()),
             SLOT(onStoryTableLayoutAboutToBeChanged()));
-    //setup storyitemmodel
-    ui->storyTreeView->setModel(&theStoryTree);
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
     //setup burndown view
@@ -105,8 +102,8 @@ MainWindow::MainWindow(QWidget *parent) :
         theSettings.setArrayIndex(i);
         bool show = theSettings.value(QString("show"), false).toBool();
         int width = theSettings.value(QString("width"), 100).toInt();
-        ui->storyTable->setColumnHidden(i, !show);
-        ui->storyTable->setColumnWidth(i, width==0?100:width);
+        ui->storyTreeView->setColumnHidden(i, !show);
+        ui->storyTreeView->setColumnWidth(i, width==0?100:width);
     }
     theSettings.endArray();
 
@@ -153,11 +150,11 @@ MainWindow::~MainWindow()
 
     // Columns
     theSettings.beginWriteArray("columns");
-    for (int i=0; i<theStories.columnCount(); ++i){
+    for (int i=0; i<theStoryTree.columnCount(); ++i){
         theSettings.setArrayIndex(i);
-        bool show = !ui->storyTable->isColumnHidden(i);
-        ui->storyTable->setColumnHidden(i, false); // show column, otherwise width=0
-        int width = ui->storyTable->columnWidth(i);
+        bool show = !ui->storyTreeView->isColumnHidden(i);
+        ui->storyTreeView->setColumnHidden(i, false); // show column, otherwise width=0
+        int width = ui->storyTreeView->columnWidth(i);
         theSettings.setValue(QString("show"), show);
         theSettings.setValue(QString("width"), width);
     }
@@ -169,7 +166,7 @@ MainWindow::~MainWindow()
 void MainWindow::loadAll()
 {
     theSprints.clear();
-    theStories.clear();
+    theStoryTree.clear();
     ui->impComboBox->clear();
     ui->estComboBox->clear();
     ui->comComboBox->clear();
@@ -184,17 +181,17 @@ void MainWindow::loadAll()
 
 }
 
-void MainWindow::fillCard(int row, int col, StoryCardScene *scene)
+void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
 {
-    QString txt = theStories.data(row, col).toString();
+    if (theStoryTree.rowCount()==0 || !index.isValid())
+        return;
 
     if (scene==0x0)
         scene = &theCardScene;
 
-    if (theStories.rowCount()==0 || row == -1)
-        return;
+    QString txt = theStoryTree.data(index).toString();
 
-    switch (col) {
+    switch (index.column()) {
     case 0:
         txt = "Backlog Item #"  + txt;
         scene->setID(txt);
@@ -224,13 +221,13 @@ void MainWindow::fillCard(int row, StoryCardScene *scene)
 {
     if (scene==0x0)
         scene = &theCardScene;
-    fillCard(row, 0, scene);
-    fillCard(row, 1, scene);
-    fillCard(row, 2, scene);
-    fillCard(row, 3, scene);
-    fillCard(row, 4, scene);
-    fillCard(row, 5, scene);
-    fillCard(row, 6, scene);
+    fillCard(theStoryTree.index(row, 0), scene);
+    fillCard(theStoryTree.index(row, 1), scene);
+    fillCard(theStoryTree.index(row, 2), scene);
+    fillCard(theStoryTree.index(row, 3), scene);
+    fillCard(theStoryTree.index(row, 4), scene);
+    fillCard(theStoryTree.index(row, 5), scene);
+    fillCard(theStoryTree.index(row, 6), scene);
 }
 
 void MainWindow::onActionAddStory()
@@ -255,18 +252,18 @@ void MainWindow::onActionStoreStories()
 
     QMap<QString, QVariantMap> updateMap;
     foreach (QPersistentModelIndex i, theStoryChanges) {
-        QString id = theStories.data(i.row(), ST_ID).toString();
+        QString id = theStoryTree.data(theStoryTree.index(i.row(), ST_ID, i.parent()), Qt::DisplayRole).toString();
         QString attribute = storyFieldNames[i.column()];
-        updateMap[id][attribute] = theStories.data(i);
+        updateMap[id][attribute] = theStoryTree.data(i);
     }
 
     QString changedStories;
     for (QMap<QString, QVariantMap>::iterator itr = updateMap.begin(); itr != updateMap.end(); ++itr) {
-        changedStories += (changedStories.isEmpty()?"":",") + itr.key();
-        changedStories += "(";
-        for (QMap<QString, QVariant>::iterator itr2 = itr.value().begin(); itr2 != itr.value().end(); ++itr2)
-            changedStories += itr2.key() + " = " + itr2.value().toString();
-        changedStories += ")";
+        changedStories += (changedStories.isEmpty()?"":", ") + itr.key();
+//        changedStories += "(";
+//        for (QMap<QString, QVariant>::iterator itr2 = itr.value().begin(); itr2 != itr.value().end(); ++itr2)
+//            changedStories += itr2.key() + " = " + itr2.value().toString();
+//        changedStories += ")";
 
     }
 
@@ -299,8 +296,8 @@ void MainWindow::onActionSettings()
     dlg.setUrl(theLoader->url());
     dlg.setQueryString(theLoader->queryString());
     dlg.setLoadOnStart(loadOnStart);
-    for (int i=0; i<theStories.columnCount(); ++i)
-        dlg.setShowColumn(i, !ui->storyTable->isColumnHidden(i));
+    for (int i=0; i<theStoryTree.columnCount(); ++i)
+        dlg.setShowColumn(i, !ui->storyTreeView->isColumnHidden(i));
 
     QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
                      this, SLOT(onSetupAccepted(const QVariantMap &)));
@@ -313,51 +310,51 @@ void MainWindow::onSetupAccepted(const QVariantMap &map)
     theLoader->setQueryString(map["QueryString"].toString());
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
-        ui->storyTable->setColumnHidden(i, !list[i].toBool());
+        ui->storyTreeView->setColumnHidden(i, !list[i].toBool());
     loadOnStart = map["LoadOnStart"].toBool();
 }
 
 void MainWindow::onActionReport()
 {
-    StoryReport d;
-    d.beginInsertStory();
-    for (int i=0; i<theStories.rowCount(); ++i) {
-        d.insertStory(
-                    theStories.data(i,0).toInt(),
-                    theStories.data(i,1).toString(),
-                    theStories.data(i,2).toString(),
-                    theStories.data(i,3).toString(),
-                    theStories.data(i,4).toString(),
-                    theStories.data(i,5).toString(),
-                    theStories.data(i,6).toString(),
-                    theStories.data(i,8).toString());
+//    StoryReport d;
+//    d.beginInsertStory();
+//    for (int i=0; i<theStoryTree.rowCount(); ++i) {
+//        d.insertStory(
+//                    theStoryTree.data(i,0).toInt(),
+//                    theStoryTree.data(i,1).toString(),
+//                    theStoryTree.data(i,2).toString(),
+//                    theStoryTree.data(i,3).toString(),
+//                    theStoryTree.data(i,4).toString(),
+//                    theStoryTree.data(i,5).toString(),
+//                    theStoryTree.data(i,6).toString(),
+//                    theStoryTree.data(i,8).toString());
 
-    }
-    d.endInsertStory();
+//    }
+//    d.endInsertStory();
 
-    ReportDialog dlg;
-    dlg.setTextDocument(&d);
-    dlg.exec();
+//    ReportDialog dlg;
+//    dlg.setTextDocument(&d);
+//    dlg.exec();
 
 }
 
 void MainWindow::onActionPrint()
 {
 
-    QPrintDialog printDialog(&thePrinter);
-    StoryCardScene scene;
+//    QPrintDialog printDialog(&thePrinter);
+//    StoryCardScene scene;
 
-    if (printDialog.exec() == QDialog::Accepted) {
-        QPainter painter(&thePrinter);
-        painter.setRenderHint(QPainter::Antialiasing);
-        for (int i=0; i<theStories.rowCount(); ++i) {
-            if (theStories.printFlag(i)) {
-                fillCard(i, &theCardScene);
-                theCardScene.render(&painter);
-                thePrinter.newPage();
-            }
-        }
-    }
+//    if (printDialog.exec() == QDialog::Accepted) {
+//        QPainter painter(&thePrinter);
+//        painter.setRenderHint(QPainter::Antialiasing);
+//        for (int i=0; i<theStoryTree.rowCount(); ++i) {
+//            if (theStoryTree.printFlag(i)) {
+//                fillCard(i, &theCardScene);
+//                theCardScene.render(&painter);
+//                thePrinter.newPage();
+//            }
+//        }
+//    }
 }
 
 void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -369,7 +366,7 @@ void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , con
 
 void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 {
-    fillCard(index.row());
+    fillCard(index);
     theStoryChanges.append(index);
 }
 
@@ -377,51 +374,51 @@ QVariantList tmpList;
 void MainWindow::onStoryTableLayoutAboutToBeChanged()
 {
     // Store hidden rows
-    for( int i = 0; i < theStories.rowCount(); ++i ) {
-        if (ui->storyTable->isRowHidden(i))
-            tmpList.append(theStories.data(i, ST_ID, Qt::DisplayRole));
-    }
+//    for( int i = 0; i < theStoryTree.rowCount(); ++i ) {
+//        if (ui->storyTreeView->isRowHidden(i))
+//            tmpList.append(theStoryTree.data(i, ST_ID, Qt::DisplayRole));
+//    }
 }
 
 void MainWindow::onStoryTableLayoutChanged()
 {
     // Restore hidden rows
-    for( int i = 0; i < theStories.rowCount(); ++i ) {
-        if (tmpList.contains(theStories.data(i, ST_ID, Qt::DisplayRole)))
-            ui->storyTable->setRowHidden(i, true);
-        else
-            ui->storyTable->setRowHidden(i, false);
-    }
-    tmpList.clear();
+//    for( int i = 0; i < theStoryTree.rowCount(); ++i ) {
+//        if (tmpList.contains(theStoryTree.data(i, ST_ID, Qt::DisplayRole)))
+//            ui->storyTreeView->setRowHidden(i, true);
+//        else
+//            ui->storyTreeView->setRowHidden(i, false);
+//    }
+//    tmpList.clear();
 }
 
 void MainWindow::onFilterRow(QString arg)
 {
-    for( int i = 0; i < theStories.rowCount(); ++i )
-    {
-        QString str = theStories.data(i,ST_STATUS).toString();
-        if(arg == "all" || str.contains(arg) )
-            ui->storyTable->setRowHidden( i, false);
-        else
-            ui->storyTable->setRowHidden( i, true);
-    }
+//    for( int i = 0; i < theStoryTree.rowCount(); ++i )
+//    {
+//        QString str = theStoryTree.data(i,ST_STATUS).toString();
+//        if(arg == "all" || str.contains(arg) )
+//            ui->storyTreeView->setRowHidden( i, false);
+//        else
+//            ui->storyTreeView->setRowHidden( i, true);
+//    }
 }
 
 void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
 {
-    QModelIndexList indexList = ui->sprintTable->selectionModel()->selection().indexes();
-    QStringList stringList;
-    foreach (QModelIndex index, indexList)
-        stringList.append(theSprints.sprint(index.row()).name());
-    for( int i = 0; i < theStories.rowCount(); ++i )
-    {
-        if (checked) {
-            QString str = theStories.data(i,ST_SPRINT).toString();
-            ui->storyTable->setRowHidden( i, !stringList.contains(str));
-        }
-        else
-            ui->storyTable->setRowHidden( i, false);
-    }
+//    QModelIndexList indexList = ui->sprintTable->selectionModel()->selection().indexes();
+//    QStringList stringList;
+//    foreach (QModelIndex index, indexList)
+//        stringList.append(theSprints.sprint(index.row()).name());
+//    for( int i = 0; i < theStoryTree.rowCount(); ++i )
+//    {
+//        if (checked) {
+//            QString str = theStoryTree.data(i,ST_SPRINT).toString();
+//            ui->storyTreeView->setRowHidden( i, !stringList.contains(str));
+//        }
+//        else
+//            ui->storyTreeView->setRowHidden( i, false);
+//    }
 }
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -469,14 +466,14 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
 
 void MainWindow::setStories(const QVariantList &list)
 {
-    theStories.fromList(list);
-    theStoryTree.setupModelData(list);
+    theStoryTree.fromList(list);
+    theStoryTree.fromList(list);
 }
 void MainWindow::addNewlySavedStory(const QVariantMap &map)
 {
-    StoryData d(map);
-    int row = theStories.addStory(d);
-    ui->storyTable->selectRow(row);
+//    StoryData d(map);
+//    int row = theStoryTree.addStory(d);
+//    ui->storyTreeView->selectRow(row);
 }
 
 void MainWindow::setSprints(const QVariantList &list)

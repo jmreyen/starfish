@@ -1,6 +1,6 @@
 #include "newstorydialog.h"
 #include "ui_newstorydialog.h"
-#include "storydata.h"
+#include "storyitem.h"
 
 NewStoryDialog::NewStoryDialog(QAbstractItemModel *m1,
                                QAbstractItemModel *m2,
@@ -28,19 +28,19 @@ NewStoryDialog::~NewStoryDialog()
 
 void NewStoryDialog::on_buttonBox_accepted()
 {
-    QVariantMap newMap = StoryData::toMap(
-            "",
-            ui->summaryEdit->text(),
-            ui->descriptionEdit->document()->toPlainText(),
-            ui->htdEdit->document()->toPlainText(),
-            ui->impComboBox->currentText(),
-            ui->estComboBox->currentText(),
-            ui->reporterEdit->text(),
-            ui->typComboBox->currentText(),
-            ui->sprComboBox->currentText(),
-            ui->comComboBox->currentText(),
-            ui->verComboBox->currentText(),
-            "new");
+    QVariantMap newStory;
+    newStory[storyFieldNames[ST_ID]]      = "";
+    newStory[storyFieldNames[ST_DESC]]    = ui->summaryEdit->text();
+    newStory[storyFieldNames[ST_NOTES]]   = ui->descriptionEdit->document()->toPlainText();
+    newStory[storyFieldNames[ST_HTD]]     = ui->htdEdit->document()->toPlainText();
+    newStory[storyFieldNames[ST_IMP]]     = ui->impComboBox->currentText();
+    newStory[storyFieldNames[ST_EST]]     = ui->estComboBox->currentText();
+    newStory[storyFieldNames[ST_USER]]    = ui->reporterEdit->text();
+    newStory[storyFieldNames[ST_TYP]]     = ui->typComboBox->currentText();
+    newStory[storyFieldNames[ST_STATUS]]  = ui->sprComboBox->currentText();
+    newStory[storyFieldNames[ST_SPRINT]]  = ui->comComboBox->currentText();
+    newStory[storyFieldNames[ST_COMP]]    = ui->verComboBox->currentText();
+    newStory[storyFieldNames[ST_VERSION]] = "new";
 
-    emit (accepted(newMap));
+    emit (accepted(newStory));
 }

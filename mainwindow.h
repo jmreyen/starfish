@@ -3,7 +3,6 @@
 
 #include "burndownscene.h"
 #include "storycardscene.h"
-#include "storymodel.h"
 #include "storyitemmodel.h"
 #include "sprintmodel.h"
 #include "tracdataloader.h"
@@ -35,7 +34,7 @@ protected:
     // Load/Store
     void loadAll();
     //Display Index Card
-    void fillCard(int row, int col, StoryCardScene *scene=0);
+    void fillCard(const QModelIndex &index, StoryCardScene *scene=0);
     void fillCard(int row, StoryCardScene *scene=0);
 private slots:
     //Toolbar Actions
@@ -70,7 +69,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    StoryModel theStories;
+//    StoryModel theStories;
     StoryItemModel theStoryTree;
     SprintModel theSprints;
     QDataWidgetMapper theStoryDataMapper;

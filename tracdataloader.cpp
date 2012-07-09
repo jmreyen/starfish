@@ -1,7 +1,6 @@
 #include "tracdataloader.h"
-
-#include "storymodel.h"
 #include "sprintmodel.h"
+#include "storyitem.h"
 
 TracDataLoader::TracDataLoader(
         QObject *parent) :
@@ -131,19 +130,19 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
     for (int i = 0; i < ticketList.size(); ++i) {
         QVariantList fieldList = ticketList[i].toList().at(0).toList();
         QMap<QString,QVariant> map = fieldList[3].toMap();
-        QVariantMap newStory = StoryData::toMap(
-            fieldList[0].toString(),
-            map["summary"].toString(),
-            map["description"].toString(),
-            map["how_to_demo"].toString(),
-            map["priority"].toString(),
-            map["estimation"].toString(),
-            map["reporter"].toString(),
-            map["type"].toString(),
-            map["milestone"].toString(),
-            map["component"].toString(),
-            map["version"].toString(),
-            map["status"].toString());
+        QVariantMap newStory;
+        newStory[storyFieldNames[ST_ID]]      = fieldList[0].toString();
+        newStory[storyFieldNames[ST_DESC]]    = map["summary"].toString();
+        newStory[storyFieldNames[ST_NOTES]]   = map["description"].toString();
+        newStory[storyFieldNames[ST_HTD]]     = map["how_to_demo"].toString();
+        newStory[storyFieldNames[ST_IMP]]     = map["priority"].toString();
+        newStory[storyFieldNames[ST_EST]]     = map["estimation"].toString();
+        newStory[storyFieldNames[ST_USER]]    = map["reporter"].toString();
+        newStory[storyFieldNames[ST_TYP]]     = map["type"].toString();
+        newStory[storyFieldNames[ST_STATUS]]  = map["milestone"].toString();
+        newStory[storyFieldNames[ST_SPRINT]]  = map["component"].toString();
+        newStory[storyFieldNames[ST_COMP]]    = map["version"].toString();
+        newStory[storyFieldNames[ST_VERSION]] = map["status"].toString();
         storyList.append(newStory);
     }
     emit storiesLoaded(storyList);
@@ -259,10 +258,7 @@ void TracDataLoader::estimationQueryResponseMethod(QVariant &arg)
     emit estimationsLoaded(list);
 }
 
-void appendStoryArgs(const StoryData &d, QVariantList &args, int startPos)
-{
-    qDebug() << args;
-}
+
 
 void TracDataLoader::updateStoriesResponseMethod( QVariant &arg)
 {
@@ -285,21 +281,21 @@ void TracDataLoader::reloadNewStoryResponseMethod(QVariant & arg)
     QVariantList fieldList = arg.toList();
     QVariantMap map = fieldList[3].toMap();
 
-    QVariantMap newMap = StoryData::toMap(
-        fieldList[0].toString(),
-        map["summary"].toString(),
-        map["description"].toString(),
-        map["how_to_demo"].toString(),
-        map["priority"].toString(),
-        map["estimation"].toString(),
-        map["reporter"].toString(),
-        map["type"].toString(),
-        map["milestone"].toString(),
-        map["component"].toString(),
-        map["version"].toString(),
-        map["status"].toString());
+    QVariantMap newStory;
+    newStory[storyFieldNames[ST_ID]]      = fieldList[0].toString();
+    newStory[storyFieldNames[ST_DESC]]    = map["summary"].toString();
+    newStory[storyFieldNames[ST_NOTES]]   = map["description"].toString();
+    newStory[storyFieldNames[ST_HTD]]     = map["how_to_demo"].toString();
+    newStory[storyFieldNames[ST_IMP]]     = map["priority"].toString();
+    newStory[storyFieldNames[ST_EST]]     = map["estimation"].toString();
+    newStory[storyFieldNames[ST_USER]]    = map["reporter"].toString();
+    newStory[storyFieldNames[ST_TYP]]     = map["type"].toString();
+    newStory[storyFieldNames[ST_STATUS]]  = map["milestone"].toString();
+    newStory[storyFieldNames[ST_SPRINT]]  = map["component"].toString();
+    newStory[storyFieldNames[ST_COMP]]    = map["version"].toString();
+    newStory[storyFieldNames[ST_VERSION]] = map["status"].toString();
 
-    emit newStoryLoaded(newMap);
+    emit newStoryLoaded(newStory);
 }
 
 
