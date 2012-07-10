@@ -49,12 +49,42 @@
 
  }
 
+ bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value, int role )
+ {
+     if (!index.isValid())
+         return false;
+
+     StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
+
+     switch (role){
+     case Qt::CheckStateRole :
+         if (index.column()==ST_FLAG1) {
+             //Set status of the checkbox in the print column
+             item->setPrintFlag(value.toInt());
+             emit dataChanged(index, index);
+             return true;
+         }
+         break;
+     case Qt::EditRole:
+         if (index.column() < ST_LAST) {
+             item->setData(index.column(), value.toString());
+             emit dataChanged(index, index);
+         }
+         break;
+     }
+     return false;
+ }
+
  Qt::ItemFlags StoryItemModel::flags(const QModelIndex &index) const
  {
      if (!index.isValid())
          return 0;
 
-     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+     Qt::ItemFlags f =Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+     if (index.column()==ST_FLAG1)
+         f = f | Qt::ItemIsUserCheckable;
+
+     return f;
  }
 
  QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation,

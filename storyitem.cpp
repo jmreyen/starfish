@@ -81,6 +81,13 @@ QVariant StoryItem::data(int column) const
     return itemData.value(column);
 }
 
+bool StoryItem::setData(int column, const QVariant &value)
+{
+    itemData[column] = value;
+    return true;
+}
+
+
 StoryItem *StoryItem::parent()
 {
     return parentItem;
