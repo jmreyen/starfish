@@ -5,7 +5,7 @@
 #include "storycardscene.h"
 #include "storyitemmodel.h"
 #include "sprintmodel.h"
-#include "tracio.h"
+#include "io/tracio.h"
 
 #include <QMainWindow>
 #include <QSettings>

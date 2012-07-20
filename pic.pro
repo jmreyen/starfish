@@ -24,8 +24,8 @@ SOURCES += main.cpp\
     storyitemmodel.cpp \
     storyitemdelegate.cpp \
     fields.cpp \
-    iofactory.cpp \
-    tracio.cpp
+    io/iofactory.cpp \
+    io/tracio.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -40,9 +40,9 @@ HEADERS  += mainwindow.h \
     storyitemmodel.h \
     storyitemdelegate.h \
     fields.h \
-    iofactory.h \
-    abstractio.h \
-    tracio.h
+    io/abstractio.h \
+    io/iofactory.h \
+    io/tracio.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \
