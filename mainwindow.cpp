@@ -18,11 +18,16 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-//    theStories(this),
-    theStoryTree(this),
     ui(new Ui::MainWindow),
+    theStoryTree(this),
+    theSprints(this),
+    theStoryDataMapper(this),
+    theSprintDataMapper(this),
+    theBurnDownScene(this),
+    theCardScene(this),
     thePrinter(QPrinter::HighResolution),
-    theSettings("pic.ini", QSettings::IniFormat)
+    theSettings("pic.ini", QSettings::IniFormat),
+    loadOnStart(false)
 {
     ui->setupUi(this);
 
@@ -108,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theSettings.endArray();
 
     // *** Setup Loader ***
-    theLoader = new TracDataLoader(this);
+    theLoader = new TracIO(this);
     theLoader->setUrl(url);
     theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
     // connect slots for loading data

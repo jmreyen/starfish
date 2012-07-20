@@ -8,11 +8,13 @@ INPUT(
 ./release\burndownscene.o
 ./release\storyreport.o
 ./release\storyreportdialog.o
-./release\tracdataloader.o
 ./release\newstorydialog.o
 ./release\storyitem.o
 ./release\storyitemmodel.o
 ./release\storyitemdelegate.o
+./release\fields.o
+./release\iofactory.o
+./release\tracio.o
 ./release\moc_mainwindow.o
 ./release\moc_storycardscene.o
 ./release\moc_setupdialog.o
@@ -20,9 +22,9 @@ INPUT(
 ./release\moc_burndownscene.o
 ./release\moc_storyreport.o
 ./release\moc_storyreportdialog.o
-./release\moc_tracdataloader.o
-./release\moc_abstractdataloader.o
 ./release\moc_newstorydialog.o
 ./release\moc_storyitemmodel.o
+./release\moc_abstractio.o
+./release\moc_tracio.o
 ./release\qrc_images.o
 );

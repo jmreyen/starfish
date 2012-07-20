@@ -9,17 +9,6 @@
 
 
 
-const int SP_NAME = 0;
-const int SP_DUE  = 1;
-const int SP_COMP = 2;
-const int SP_DESC = 3;
-const int SP_CAP  = 4;
-const int SP_VEL  = 5;
-const int SP_DAYS = 6;
-const int SP_BURN = 7;
-const int SP_LAST = 8;
-
-extern const char *sprintFieldNames[SP_LAST];
 
 class SprintData
 {
@@ -37,8 +26,6 @@ public:
     QVariant data(int n) const;
     bool setData(int section, QVariant value);
     const SprintData &fromMap(const QVariantMap &map);
-    QVariantMap toMap() const;
-    static QVariantMap toMap(const QString &name, const QDate &date, bool completed, const QString &desc, int capacity, int theVelocity, int workdays, const QList<int> &burndown);
 protected:
 
 private:

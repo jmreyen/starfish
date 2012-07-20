@@ -1,6 +1,6 @@
 #include "newstorydialog.h"
 #include "ui_newstorydialog.h"
-#include "storyitem.h"
+#include "fields.h"
 
 NewStoryDialog::NewStoryDialog(QAbstractItemModel *m1,
                                QAbstractItemModel *m2,

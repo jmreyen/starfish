@@ -2,21 +2,7 @@
 #define STORYITEM_H
 
 
-const int ST_ID     = 0;
-const int ST_DESC   = 1;
-const int ST_NOTES  = 2;
-const int ST_HTD    = 3;
-const int ST_IMP    = 4;
-const int ST_EST    = 5;
-const int ST_USER   = 6;
-const int ST_TYP    = 7;
-const int ST_STATUS = 8;
-const int ST_SPRINT = 9;
-const int ST_COMP   = 10;
-const int ST_VERSION= 11;
-const int ST_LAST   = 12;
 
-extern const char *storyFieldNames[];
 extern const char *storyDisplayNames[];
 
 class StoryItem

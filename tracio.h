@@ -3,13 +3,13 @@
 
 
 #include "libmaia/maiaXmlRpcClient.h"
-#include "abstractdataloader.h"
+#include "abstractio.h"
 
-class TracDataLoader : public AbstractDataLoader
+class TracIO : public AbstractIO
 {
     Q_OBJECT
 public:
-    explicit TracDataLoader(QObject *parent);
+    explicit TracIO(QObject *parent);
     bool load();
     bool saveNewStory(const QVariantMap &map);
     bool updateStories(QMap<QString, QVariantMap> &map);

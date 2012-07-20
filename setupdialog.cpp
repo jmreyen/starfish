@@ -1,8 +1,8 @@
 #include <QUrl>
 
-#include "setupdialog.h"
 #include "ui_setupdialog.h"
-#include "storyitem.h"
+#include "setupdialog.h"
+#include "fields.h"
 
 
 SetupDialog::SetupDialog(QWidget *parent):

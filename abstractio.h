@@ -4,11 +4,11 @@
 #include <QObject>
 #include <QVariant>
 
-class AbstractDataLoader : public QObject
+class AbstractIO : public QObject
 {
     Q_OBJECT
 public:
-    explicit AbstractDataLoader(QObject *parent = 0) {}
+    explicit AbstractIO(QObject *parent = 0) {}
     virtual bool load() = 0;
     virtual bool saveNewStory(const QVariantMap &map) = 0;
     virtual bool updateStories(QMap<QString, QVariantMap> &map) = 0;

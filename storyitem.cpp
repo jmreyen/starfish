@@ -2,23 +2,11 @@
 #include <QList>
 #include <QVariant>
 
-
 #include "storyitem.h"
+#include "fields.h"
 
 
-const char *storyFieldNames[] = {
-    "id",
-    "summary",
-    "description",
-    "how_to_demo",
-    "priority",
-    "estimation",
-    "reporter",
-    "type",
-    "status",
-    "milestone",
-    "component",
-    "version"};
+
 
 const char *storyDisplayNames[ST_LAST] = {
     "ID",

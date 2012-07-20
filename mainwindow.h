@@ -5,7 +5,7 @@
 #include "storycardscene.h"
 #include "storyitemmodel.h"
 #include "sprintmodel.h"
-#include "tracdataloader.h"
+#include "tracio.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -13,9 +13,7 @@
 #include <QStandardItemModel>
 #include <QDataWidgetMapper>
 
-class QPrinter;
-class QGraphicsTextItem;
-class StoryCardScene;
+class TracIO;
 
 namespace Ui {
     class MainWindow;
@@ -69,7 +67,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-//    StoryModel theStories;
     StoryItemModel theStoryTree;
     SprintModel theSprints;
     QDataWidgetMapper theStoryDataMapper;
@@ -79,7 +76,7 @@ private:
     QPrinter thePrinter;
     QSettings theSettings;
     bool loadOnStart;
-    TracDataLoader *theLoader;
+    TracIO *theLoader;
     QList<QPersistentModelIndex> theStoryChanges;
 };
 

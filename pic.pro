@@ -19,11 +19,13 @@ SOURCES += main.cpp\
     burndownscene.cpp \
     storyreport.cpp \
     storyreportdialog.cpp \
-    tracdataloader.cpp \
     newstorydialog.cpp \
     storyitem.cpp \
     storyitemmodel.cpp \
-    storyitemdelegate.cpp
+    storyitemdelegate.cpp \
+    fields.cpp \
+    iofactory.cpp \
+    tracio.cpp
 
 HEADERS  += mainwindow.h \
     storycardscene.h \
@@ -33,12 +35,14 @@ HEADERS  += mainwindow.h \
     burndownscene.h \
     storyreport.h \
     storyreportdialog.h \
-    tracdataloader.h \
-    abstractdataloader.h \
     newstorydialog.h \
     storyitem.h \
     storyitemmodel.h \
-    storyitemdelegate.h
+    storyitemdelegate.h \
+    fields.h \
+    iofactory.h \
+    abstractio.h \
+    tracio.h
 
 FORMS    += mainwindow.ui \
     setupdialog.ui \

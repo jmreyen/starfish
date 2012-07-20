@@ -1,4 +1,6 @@
 #include "sprintmodel.h"
+#include "fields.h"
+
 #include <QListWidget>
 
 

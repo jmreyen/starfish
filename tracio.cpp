@@ -1,17 +1,16 @@
-#include "tracdataloader.h"
-#include "sprintmodel.h"
-#include "storyitem.h"
+#include "tracio.h"
+#include "fields.h"
 
-TracDataLoader::TracDataLoader(
+TracIO::TracIO(
         QObject *parent) :
-AbstractDataLoader(parent),
+AbstractIO(parent),
     rpc(this),
     theUrl()
 {
 }
 
 
-bool TracDataLoader::saveNewStory(const QVariantMap &map)
+bool TracIO::saveNewStory(const QVariantMap &map)
 {
     QVariantList args;
     QVariantMap attributes;
@@ -29,7 +28,7 @@ bool TracDataLoader::saveNewStory(const QVariantMap &map)
 
 
 
-bool TracDataLoader::updateStories(QMap<QString, QVariantMap> & map)
+bool TracIO::updateStories(QMap<QString, QVariantMap> & map)
 {
     QVariantList args, methodList;
 
@@ -54,7 +53,7 @@ bool TracDataLoader::updateStories(QMap<QString, QVariantMap> & map)
 
 
 
-bool TracDataLoader::load()
+bool TracIO::load()
 {
     QVariantList ticketArgs;
     QVariantList sprintArgs;
@@ -104,7 +103,7 @@ bool TracDataLoader::load()
     return true;
 }
 
-void TracDataLoader::ticketQueryResponseMethod(QVariant &arg) {
+void TracIO::ticketQueryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
 
@@ -123,7 +122,7 @@ void TracDataLoader::ticketQueryResponseMethod(QVariant &arg) {
              this, SLOT(myFaultResponse(int, const QString &)));
 }
 
-void TracDataLoader::getTicketResponseMethod(QVariant &arg)
+void TracIO::getTicketResponseMethod(QVariant &arg)
 {
     QVariantList ticketList = arg.toList();
     QVariantList storyList;
@@ -149,7 +148,7 @@ void TracDataLoader::getTicketResponseMethod(QVariant &arg)
 //    statusBar()->showMessage("");
 }
 
-void TracDataLoader::sprintQueryResponseMethod(QVariant &arg) {
+void TracIO::sprintQueryResponseMethod(QVariant &arg) {
 
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
@@ -168,18 +167,43 @@ void TracDataLoader::sprintQueryResponseMethod(QVariant &arg) {
              this, SLOT(myFaultResponse(int, const QString &)));
 }
 
+QVariantMap toSprintMap(
+        const QString &name,
+        const QDate &date,
+        bool completed,
+        const QString &desc,
+        int capacity,
+        int velocity,
+        int workdays,
+        const QList<int> &burndown)
+{
+    QVariantMap newMap;
+    QVariantList newBurnDownList;
+    foreach (int n, burndown)
+        newBurnDownList.append(n);
+    newMap[sprintFieldNames[SP_NAME]] = name;
+    newMap[sprintFieldNames[SP_DUE]]  = date;
+    newMap[sprintFieldNames[SP_COMP]] = completed;
+    newMap[sprintFieldNames[SP_DESC]] = desc;
+    newMap[sprintFieldNames[SP_CAP]]  = capacity;
+    newMap[sprintFieldNames[SP_VEL]]  = velocity;
+    newMap[sprintFieldNames[SP_DAYS]] = workdays;
+    newMap[sprintFieldNames[SP_BURN]] = newBurnDownList;
 
-void TracDataLoader::getSprintResponseMethod(QVariant &arg)
+    return newMap;
+}
+
+
+void TracIO::getSprintResponseMethod(QVariant &arg)
 {
     QVariantList sprintList = arg.toList();
     QVariantList newList;
     for (int i = 0; i < sprintList.size(); ++i) {
         QMap<QString, QVariant> map = sprintList[i].toList().at(0).toMap();
         int capacity = 0, velocity = 0, workdays = 0;
-        QString description;
         QList<int> burnDown;
         parseSprintDescription(map["description"].toString(), capacity, velocity, workdays, burnDown);
-        QVariantMap newMap = SprintData::toMap(
+        QVariantMap newMap = toSprintMap(
                     map["name"].toString(),
                     map["due"].toDateTime().date(),
                     map["completed"].toString()!= "0",
@@ -193,7 +217,7 @@ void TracDataLoader::getSprintResponseMethod(QVariant &arg)
     emit sprintsLoaded(newList);
 }
 
-void TracDataLoader::parseSprintDescription(const QString &description, int &capacity, int &velocity, int &workDays, QList<int> &burnDown) const
+void TracIO::parseSprintDescription(const QString &description, int &capacity, int &velocity, int &workDays, QList<int> &burnDown) const
 {
     capacity = 0;
     velocity = 0;
@@ -222,37 +246,37 @@ void TracDataLoader::parseSprintDescription(const QString &description, int &cap
         workDays = rx.cap().split("=").at(1).toInt();
 }
 
-void TracDataLoader::componentQueryResponseMethod(QVariant &arg)
+void TracIO::componentQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit componentsLoaded(list);
 }
 
-void TracDataLoader::priorityQueryResponseMethod(QVariant &arg)
+void TracIO::priorityQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit prioritiesLoaded(list);
 }
 
-void TracDataLoader::typeQueryResponseMethod(QVariant &arg)
+void TracIO::typeQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit typesLoaded(list);
 }
 
-void TracDataLoader::versionQueryResponseMethod(QVariant &arg)
+void TracIO::versionQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit versionsLoaded(list);
 }
 
-void TracDataLoader::statusQueryResponseMethod(QVariant &arg)
+void TracIO::statusQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit statusLoaded(list);
 }
 
-void TracDataLoader::estimationQueryResponseMethod(QVariant &arg)
+void TracIO::estimationQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
     emit estimationsLoaded(list);
@@ -260,13 +284,13 @@ void TracDataLoader::estimationQueryResponseMethod(QVariant &arg)
 
 
 
-void TracDataLoader::updateStoriesResponseMethod( QVariant &arg)
+void TracIO::updateStoriesResponseMethod( QVariant &arg)
 {
     qDebug() << arg;
 }
 
 
-void TracDataLoader::saveNewStoryResponseMethod( QVariant &arg)
+void TracIO::saveNewStoryResponseMethod( QVariant &arg)
 {
     QVariantList args;
     args << arg;
@@ -276,7 +300,7 @@ void TracDataLoader::saveNewStoryResponseMethod( QVariant &arg)
 
 }
 
-void TracDataLoader::reloadNewStoryResponseMethod(QVariant & arg)
+void TracIO::reloadNewStoryResponseMethod(QVariant & arg)
 {
     QVariantList fieldList = arg.toList();
     QVariantMap map = fieldList[3].toMap();
@@ -300,7 +324,7 @@ void TracDataLoader::reloadNewStoryResponseMethod(QVariant & arg)
 
 
 
-void TracDataLoader::myFaultResponse(int error, const QString &message) {
+void TracIO::myFaultResponse(int error, const QString &message) {
     QString msg = QString().sprintf("An Error occured: %i. Message: ", error) + message;
     qDebug() << msg;
 //    ui->statusBar->showMessage(msg, 5000);

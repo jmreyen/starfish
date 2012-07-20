@@ -6,6 +6,7 @@
 #include <QVariant>
 
 #include "storyitem.h"
+#include "fields.h"
 
 class StoryItem;
 
