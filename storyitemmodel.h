@@ -20,6 +20,9 @@ public:
     StoryItemModel(QObject *parent);
     ~StoryItemModel();
 
+
+    StoryItem *getItem(const QModelIndex &index) const;
+
     QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
     bool setData ( const QModelIndex &index, const QVariant &value, int role);
     Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -31,6 +34,8 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
+    QModelIndex addStory(const QModelIndex &parent, StoryItem *newStoryItem);
+    QModelIndex addStory(const QModelIndex &parent, const QVariantMap &map);
     void fromList(const QVariantList &list);
     void clear();
 

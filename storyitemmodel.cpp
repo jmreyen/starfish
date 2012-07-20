@@ -18,12 +18,19 @@
      delete rootItem;
  }
 
+ StoryItem *StoryItemModel::getItem(const QModelIndex &index) const
+ {
+     if (index.isValid()) {
+         StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
+         if (item)
+             return item;
+     }
+     return rootItem;
+ }
+
  int StoryItemModel::columnCount(const QModelIndex &parent) const
  {
-     if (parent.isValid())
-         return static_cast<StoryItem*>(parent.internalPointer())->columnCount();
-     else
-         return rootItem->columnCount();
+    return getItem(parent)->columnCount();
  }
 
  QVariant StoryItemModel::data(const QModelIndex &index, int role) const
@@ -31,7 +38,7 @@
      if (!index.isValid())
          return QVariant();
 
-     StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
+     StoryItem *item = getItem(index);
 
      switch (role) {
      case Qt::EditRole:
@@ -54,7 +61,7 @@
      if (!index.isValid())
          return false;
 
-     StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
+     StoryItem *item = getItem(index);
 
      switch (role){
      case Qt::CheckStateRole :
@@ -102,14 +109,9 @@
      if (!hasIndex(row, column, parent))
          return QModelIndex();
 
-     StoryItem *parentItem;
-
-     if (!parent.isValid())
-         parentItem = rootItem;
-     else
-         parentItem = static_cast<StoryItem*>(parent.internalPointer());
-
+     StoryItem *parentItem = getItem(parent);
      StoryItem *childItem = parentItem->child(row);
+
      if (childItem)
          return createIndex(row, column, childItem);
      else
@@ -121,10 +123,10 @@
      if (!index.isValid())
          return QModelIndex();
 
-     StoryItem *childItem = static_cast<StoryItem*>(index.internalPointer());
+     StoryItem *childItem = getItem(index);
      StoryItem *parentItem = childItem->parent();
 
-     if (parentItem == rootItem)
+     if (parentItem == rootItem || parentItem == 0)
          return QModelIndex();
 
      return createIndex(parentItem->row(), 0, parentItem);
@@ -132,26 +134,46 @@
 
  int StoryItemModel::rowCount(const QModelIndex &parent) const
  {
-     StoryItem *parentItem;
      if (parent.column() > 0)
          return 0;
 
-     if (!parent.isValid())
-         parentItem = rootItem;
-     else
-         parentItem = static_cast<StoryItem*>(parent.internalPointer());
-
-     return parentItem->childCount();
+     return getItem(parent)->childCount();
  }
+
+ QModelIndex StoryItemModel::addStory(const QModelIndex &parent, StoryItem *newStoryItem)
+ {
+     StoryItem *parentItem = getItem(parent);
+     newStoryItem->setParent(parentItem);
+     int position = parentItem->childCount();
+     beginInsertRows(parent, position, position);
+     parentItem->appendChild(newStoryItem);
+     endInsertRows();
+     return index(position, 0, parent);
+ }
+
+ QModelIndex StoryItemModel::addStory(const QModelIndex &parent, const QVariantMap &map)
+ {
+     StoryItem *parentItem = getItem(parent);
+     StoryItem *newStoryItem = new StoryItem(map, parentItem);
+     int position = parentItem->childCount();
+     beginInsertRows(parent, position, position);
+     parentItem->appendChild(newStoryItem);
+     endInsertRows();
+     return index(position, 0, parent);
+
+ }
+
 
 
  void StoryItemModel::fromList(const QVariantList &list)
  {
+     emit layoutAboutToBeChanged();
      for (int i=0; i<list.count(); ++i) {
          QVariantMap map = list[i].toMap();
          StoryItem *story = new StoryItem(map, rootItem);
          rootItem->appendChild(story);
      }
+     emit layoutChanged();
  }
 
  void StoryItemModel::clear()

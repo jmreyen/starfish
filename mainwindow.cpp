@@ -467,13 +467,13 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
 void MainWindow::setStories(const QVariantList &list)
 {
     theStoryTree.fromList(list);
-    theStoryTree.fromList(list);
 }
+
 void MainWindow::addNewlySavedStory(const QVariantMap &map)
 {
-//    StoryData d(map);
-//    int row = theStoryTree.addStory(d);
-//    ui->storyTreeView->selectRow(row);
+    QModelIndex index = ui->storyTreeView->currentIndex();
+    QModelIndex newIndex = theStoryTree.addStory(index, map);
+//    ui->storyTreeView->setCurrentIndex(newIndex);
 }
 
 void MainWindow::setSprints(const QVariantList &list)

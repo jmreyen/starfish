@@ -35,6 +35,7 @@ public:
      bool setData(int column, const QVariant &value);
      int row() const;
      StoryItem *parent();
+     void setParent(StoryItem *parent);
 
      const StoryItem &fromMap(const QVariantMap &map);
      void clear();

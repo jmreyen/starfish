@@ -93,6 +93,11 @@ StoryItem *StoryItem::parent()
     return parentItem;
 }
 
+void StoryItem::setParent(StoryItem *parent)
+{
+    parentItem = parent;
+}
+
 int StoryItem::row() const
 {
     if (parentItem)
