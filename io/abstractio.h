@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QSettings>
+#include <QFrame>
 
 class AbstractIO : public QObject
 {
@@ -15,6 +16,7 @@ public:
     virtual bool updateStories(QMap<QString, QVariantMap> &map) = 0;
     virtual bool loadSettings(const QSettings &settings) = 0;
     virtual bool saveSettings(QSettings &settings) const = 0;
+    virtual QFrame *getSettingsFrame()  = 0;
 
 signals:
     void storiesLoaded(const QVariantList &l);
@@ -29,8 +31,10 @@ signals:
 
 public slots:
     void onSaveNewStory(const QVariantMap &map){saveNewStory(map);}
+    void onSetupAccepted(){acceptSetup();}
 
 protected:
+    virtual void acceptSetup() = 0;
 
 private:
 

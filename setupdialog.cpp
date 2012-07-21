@@ -5,11 +5,12 @@
 #include "fields.h"
 
 
-SetupDialog::SetupDialog(QWidget *parent):
+SetupDialog::SetupDialog(QFrame *extraSettings, QWidget *parent):
     QDialog(parent),
     ui(new Ui::SetupDialog)
 {
     ui->setupUi(this);
+    ui->tabWidget->addTab(extraSettings, extraSettings->objectName());
 }
 
 SetupDialog::~SetupDialog()
@@ -17,18 +18,6 @@ SetupDialog::~SetupDialog()
     delete ui;
 }
 
-void SetupDialog::setUrl(const QUrl& url)
-{
-    ui->serverEdit->setText(url.toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-    ui->portSpinBox->setValue(url.port());
-    ui->userEdit->setText(url.userName());
-    ui->passwordEdit->setText(url.password());
-}
-
-void SetupDialog::setQueryString(const QString &str)
-{
-    ui->queryGeneralEdit->setText(str);
-}
 
 
 void SetupDialog::setShowColumn(int col, bool b)
@@ -61,14 +50,6 @@ void SetupDialog::on_buttonBox_accepted()
     QVariantMap returnMap;
     QVariantList columnlist;
     QUrl url;
-
-    url.setUrl(ui->serverEdit->text());
-    url.setPort(ui->portSpinBox->value());
-    url.setUserName(ui->userEdit->text());
-    url.setPassword(ui->passwordEdit->text());
-    returnMap["Url"] = url;
-
-    returnMap["QueryString"] = ui->queryGeneralEdit->text();
 
     columnlist << ui->checkBox_0->isChecked() << ui->checkBox_1->isChecked()<<
             ui->checkBox_2->isChecked() << ui->checkBox_3->isChecked() <<

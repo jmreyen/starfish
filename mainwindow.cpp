@@ -287,22 +287,22 @@ void MainWindow::onActionLoad()
 
 void MainWindow::onActionSettings()
 {
-    SetupDialog dlg;
-//    dlg.setUrl(theLoader->url());
-//    dlg.setQueryString(theLoader->queryString());
+    SetupDialog dlg(theLoader->getSettingsFrame());
     dlg.setLoadOnStart(loadOnStart);
     for (int i=0; i<theStoryTree.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTreeView->isColumnHidden(i));
 
     QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
                      this, SLOT(onSetupAccepted(const QVariantMap &)));
+
+    QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
+                     theLoader, SLOT(onSetupAccepted()));
+
     dlg.exec();
 }
 
 void MainWindow::onSetupAccepted(const QVariantMap &map)
 {
-//    theLoader->setUrl(map["Url"].toUrl());
-//    theLoader->setQueryString(map["QueryString"].toString());
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTreeView->setColumnHidden(i, !list[i].toBool());

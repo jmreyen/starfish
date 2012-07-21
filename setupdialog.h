@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QVariant>
+#include <QFrame>
 
 namespace Ui {
 class SetupDialog;
@@ -13,11 +14,9 @@ class SetupDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit SetupDialog(QWidget *parent = 0);
+    explicit SetupDialog(QFrame *extraSettings, QWidget *parent = 0);
     ~SetupDialog();
-    void setUrl(const QUrl& url);
     void setShowColumn(int col, bool b);
-    void setQueryString(const QString &str);
     void setLoadOnStart(bool b);
 signals:
     void accepted(const QVariantMap &map);

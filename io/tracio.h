@@ -4,6 +4,7 @@
 
 #include "libmaia/maiaXmlRpcClient.h"
 #include "abstractio.h"
+#include "ui_tracsettingsframe.h"
 
 class TracIO : public AbstractIO
 {
@@ -15,8 +16,11 @@ public:
     bool updateStories(QMap<QString, QVariantMap> &map);
     bool loadSettings(const QSettings &settings);
     bool saveSettings(QSettings &settings) const;
+    QFrame *getSettingsFrame();
 
 protected:
+    void acceptSetup();
+
     void setUrl(const QUrl &url){theUrl = url; rpc.setUrl(url);}
     void setQueryString(const QString &s) {theQueryString=s;}
     const QString &queryString()const{return theQueryString;}
@@ -28,6 +32,9 @@ private:
     MaiaXmlRpcClient rpc;
     QUrl theUrl;
     QString theQueryString;
+    Ui::Trac ui;
+
+
 
 signals:
     

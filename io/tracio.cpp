@@ -337,7 +337,7 @@ void TracIO::reloadNewStoryResponseMethod(QVariant & arg)
 void TracIO::myFaultResponse(int error, const QString &message) {
     QString msg = QString().sprintf("An Error occured: %i. Message: ", error) + message;
     qDebug() << msg;
-//    ui->statusBar->showMessage(msg, 5000);
+//    ui.statusBar->showMessage(msg, 5000);
 }
 
 bool TracIO::loadSettings(const QSettings &settings)
@@ -361,3 +361,32 @@ bool TracIO::saveSettings(QSettings &settings) const
     settings.setValue("TRAC/QueryString", queryString());
     return true;
 }
+
+QFrame *TracIO::getSettingsFrame()
+{
+    QFrame *theWidget;
+
+    theWidget = new QFrame();
+    ui.setupUi(theWidget);
+
+    ui.editTracServer->setText(url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+    ui.spinBoxTracPort->setValue(url().port());
+    ui.editTracUser->setText(url().userName());
+    ui.editTracPassword->setText(url().password());
+    ui.editTracQueryFilter->setText(theQueryString);
+
+    return theWidget;
+}
+
+void TracIO::acceptSetup()
+{
+    QUrl url;
+    url.setUrl(ui.editTracServer->text());
+    url.setPort(ui.spinBoxTracPort->value());
+    url.setUserName(ui.editTracUser->text());
+    url.setPassword(ui.editTracPassword->text());
+    setUrl(url);
+    setQueryString(ui.editTracQueryFilter->text());
+}
+
+

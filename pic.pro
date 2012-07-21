@@ -47,7 +47,8 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     setupdialog.ui \
     reportdialog.ui \
-    newstorydialog.ui
+    newstorydialog.ui \
+    tracsettingsframe.ui
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a
