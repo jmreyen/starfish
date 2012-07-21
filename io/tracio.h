@@ -9,17 +9,18 @@ class TracIO : public AbstractIO
 {
     Q_OBJECT
 public:
-    explicit TracIO(QObject *parent);
+    explicit TracIO(QObject *parent = 0);
     bool load();
     bool saveNewStory(const QVariantMap &map);
     bool updateStories(QMap<QString, QVariantMap> &map);
+    bool loadSettings(const QSettings &settings);
+    bool saveSettings(QSettings &settings) const;
 
+protected:
     void setUrl(const QUrl &url){theUrl = url; rpc.setUrl(url);}
     void setQueryString(const QString &s) {theQueryString=s;}
     const QString &queryString()const{return theQueryString;}
     const QUrl &url() const {return theUrl;}
-
-protected:
     QString getStatus( QMap<QString,QVariant> &map) const;
     void parseSprintDescription(const QString &description, int &capacity, int &velocity, int &workDays, QList<int> &burnDown) const;
 
@@ -30,7 +31,7 @@ private:
 
 signals:
     
-public slots:
+private slots:
     void ticketQueryResponseMethod(QVariant &arg);
     void sprintQueryResponseMethod(QVariant &arg);
     void componentQueryResponseMethod(QVariant &arg);

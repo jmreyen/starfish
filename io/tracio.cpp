@@ -1,9 +1,19 @@
 #include "tracio.h"
+#include "iofactory.h"
 #include "fields.h"
 
-TracIO::TracIO(
-        QObject *parent) :
-AbstractIO(parent),
+namespace
+{
+    AbstractIO *CreateTracIO()
+    {
+        return new TracIO;
+    }
+    const QString Trac = "TRAC";
+    const bool registered = IOFactory::Instance()->RegisterIO(Trac, CreateTracIO);
+}
+
+TracIO::TracIO(QObject *parent) :
+    AbstractIO(parent),
     rpc(this),
     theUrl()
 {
@@ -330,3 +340,24 @@ void TracIO::myFaultResponse(int error, const QString &message) {
 //    ui->statusBar->showMessage(msg, 5000);
 }
 
+bool TracIO::loadSettings(const QSettings &settings)
+{
+    QUrl url;
+    url.setUrl(settings.value("TRAC/Server").toString());
+    url.setPort(settings.value("TRAC/Port").toInt());
+    url.setUserName(settings.value("TRAC/UserName").toString());
+    url.setPassword(settings.value("TRAC/Password").toString());
+    setUrl(url);
+    setQueryString(settings.value("TRAC/QueryString").toString());
+    return true;
+}
+
+bool TracIO::saveSettings(QSettings &settings) const
+{
+    settings.setValue("TRAC/Server",url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
+    settings.setValue("TRAC/Port", url().port());
+    settings.setValue("TRAC/UserName", url().userName());
+    settings.setValue("TRAC/Password", url().password());
+    settings.setValue("TRAC/QueryString", queryString());
+    return true;
+}

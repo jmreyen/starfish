@@ -93,14 +93,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cardView->setScene(&theCardScene);
     theCardScene.setSceneRect(ui->cardView->rect());
 
+    // *** Setup Loader ***
+    theLoader = IOFactory::Instance()->getIO("TRAC");
+
     // *** Load Settings ***
-    //TRAC settings
-    QUrl url;
-    url.setUrl(theSettings.value("TRAC/Server").toString());
-    url.setPort(theSettings.value("TRAC/Port").toInt());
-    url.setUserName(theSettings.value("TRAC/UserName").toString());
-    url.setPassword(theSettings.value("TRAC/Password").toString());
-    loadOnStart = theSettings.value("TRAC/LoadOnStart").toBool();
+    //I/O settings
+    loadOnStart = theSettings.value("IO/LoadOnStart").toBool();
+    theLoader->loadSettings(theSettings);
     //Layout settings
     int size = theSettings.beginReadArray("columns");
     for (int i = 0; i < size; ++i) {
@@ -112,10 +111,6 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     theSettings.endArray();
 
-    // *** Setup Loader ***
-    theLoader = new TracIO(this);
-    theLoader->setUrl(url);
-    theLoader->setQueryString(theSettings.value("TRAC/QueryString").toString());
     // connect slots for loading data
     connect(theLoader, SIGNAL(storiesLoaded(const QVariantList &)),
             SLOT(setStories(const QVariantList &)));
@@ -145,14 +140,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     // Save Settings
-    //TRAC
-    theSettings.setValue("TRAC/Server", theLoader->url().toString(QUrl::RemoveUserInfo|QUrl::RemovePort));
-    theSettings.setValue("TRAC/Port", theLoader->url().port());
-    theSettings.setValue("TRAC/UserName", theLoader->url().userName());
-    theSettings.setValue("TRAC/Password", theLoader->url().password());
-    theSettings.setValue("TRAC/QueryString", theLoader->queryString());
-    theSettings.setValue("TRAC/LoadOnStart", loadOnStart);
-
+    //I/O
+    theSettings.setValue("IO/LoadOnStart", loadOnStart);
+    theLoader->saveSettings(theSettings);
     // Columns
     theSettings.beginWriteArray("columns");
     for (int i=0; i<theStoryTree.columnCount(); ++i){
@@ -298,8 +288,8 @@ void MainWindow::onActionLoad()
 void MainWindow::onActionSettings()
 {
     SetupDialog dlg;
-    dlg.setUrl(theLoader->url());
-    dlg.setQueryString(theLoader->queryString());
+//    dlg.setUrl(theLoader->url());
+//    dlg.setQueryString(theLoader->queryString());
     dlg.setLoadOnStart(loadOnStart);
     for (int i=0; i<theStoryTree.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTreeView->isColumnHidden(i));
@@ -311,8 +301,8 @@ void MainWindow::onActionSettings()
 
 void MainWindow::onSetupAccepted(const QVariantMap &map)
 {
-    theLoader->setUrl(map["Url"].toUrl());
-    theLoader->setQueryString(map["QueryString"].toString());
+//    theLoader->setUrl(map["Url"].toUrl());
+//    theLoader->setQueryString(map["QueryString"].toString());
     QVariantList list = map["Columns"].toList();
     for (int i=0; i<list.size(); ++i)
         ui->storyTreeView->setColumnHidden(i, !list[i].toBool());

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QSettings>
 
 class AbstractIO : public QObject
 {
@@ -12,6 +13,8 @@ public:
     virtual bool load() = 0;
     virtual bool saveNewStory(const QVariantMap &map) = 0;
     virtual bool updateStories(QMap<QString, QVariantMap> &map) = 0;
+    virtual bool loadSettings(const QSettings &settings) = 0;
+    virtual bool saveSettings(QSettings &settings) const = 0;
 
 signals:
     void storiesLoaded(const QVariantList &l);

@@ -5,15 +5,13 @@
 #include "storycardscene.h"
 #include "storyitemmodel.h"
 #include "sprintmodel.h"
-#include "io/tracio.h"
+#include "io/iofactory.h"
 
 #include <QMainWindow>
 #include <QSettings>
 #include <QPrinter>
 #include <QStandardItemModel>
 #include <QDataWidgetMapper>
-
-class TracIO;
 
 namespace Ui {
     class MainWindow;
@@ -76,7 +74,7 @@ private:
     QPrinter thePrinter;
     QSettings theSettings;
     bool loadOnStart;
-    TracIO *theLoader;
+    AbstractIO *theLoader;
     QList<QPersistentModelIndex> theStoryChanges;
 };
 
