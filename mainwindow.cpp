@@ -354,8 +354,8 @@ void MainWindow::onActionPrint()
 
 void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
-    if (current.row()!= previous.row()) {
-        fillCard(current.row());
+    if (current!= previous) {
+        fillCard(current);
     }
 }
 

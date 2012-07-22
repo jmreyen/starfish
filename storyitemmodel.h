@@ -1,6 +1,7 @@
 #ifndef STORYITEMMODEL_H
 #define STORYITEMMODEL_H
 
+
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>

@@ -20,23 +20,25 @@ const char *storyDisplayNames[ST_LAST] = {
     "Status",
     "Sprint",
     "Component",
-    "Version"};
+    "Version",
+    "Parent",
+    "Children"};
 
 StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
     thePrintFlag(false),
     sortPosition(-1)
 
 {
-    parentItem = parent;
     itemData = list;
+    setParent(parent);
 }
 
 StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent) :
     thePrintFlag(false),
     sortPosition(-1)
 {
-    parentItem = parent;
     fromMap(map);
+    setParent(parent);
 }
 
 StoryItem::~StoryItem()
@@ -47,6 +49,10 @@ StoryItem::~StoryItem()
 void StoryItem::appendChild(StoryItem *item)
 {
     childItems.append(item);
+    if (parentItem) {
+        QString currentChildren = data(ST_CHILDREN).toString();
+        setData(ST_CHILDREN, currentChildren+" "+item->data(ST_ID).toString());
+    }
 }
 
 StoryItem *StoryItem::child(int row)
@@ -84,6 +90,10 @@ StoryItem *StoryItem::parent()
 void StoryItem::setParent(StoryItem *parent)
 {
     parentItem = parent;
+    if (parent && parent->parent()) {
+        QString parentID = parent->data(ST_ID).toString();
+        setData(ST_PARENT, parentID);
+    }
 }
 
 int StoryItem::row() const

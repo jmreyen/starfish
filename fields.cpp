@@ -1,6 +1,6 @@
 #include "fields.h"
 
-const char *storyFieldNames[] = {
+const char *storyFieldNames[ST_LAST] = {
     "id",
     "summary",
     "description",
@@ -12,7 +12,9 @@ const char *storyFieldNames[] = {
     "status",
     "milestone",
     "component",
-    "version"};
+    "version",
+    "parent",
+    "children"};
 
 const char *sprintFieldNames[SP_LAST] = {
     "name",
