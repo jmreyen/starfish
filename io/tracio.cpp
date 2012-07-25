@@ -46,15 +46,20 @@ bool TracIO::updateStories(QMap<QString, QVariantMap> & map)
 
         QVariantMap newMethod;
         QVariantList newParams;
+        QVariantMap newAttributes = itr.value();
+        newAttributes.insert("action", "leave");
         newParams.append(itr.key().toInt());
         newParams.append("Stored by PIC");
-        newParams.append(itr.value());
+        newParams.append(newAttributes);
         newMethod.insert("methodName", "ticket.update");
         newMethod.insert("params", newParams);
         methodList.append(newMethod);
     }
 
-    args.insert(0, methodList);;
+    args.insert(0, methodList);
+
+    qDebug() << "*** RPC Input Map ***\n" << args <<"\n";
+
     rpc.call("system.multicall", args,
              this, SLOT(updateStoriesResponseMethod(QVariant&)),
              this, SLOT(myFaultResponse(int, const QString &)));
@@ -138,20 +143,21 @@ void TracIO::getTicketResponseMethod(QVariant &arg)
     QVariantList storyList;
     for (int i = 0; i < ticketList.size(); ++i) {
         QVariantList fieldList = ticketList[i].toList().at(0).toList();
-        QMap<QString,QVariant> map = fieldList[3].toMap();
+        QMap<QString,QVariant> fieldMap = fieldList[3].toMap();
         QVariantMap newStory;
         newStory[storyFieldNames[ST_ID]]      = fieldList[0].toString();
-        newStory[storyFieldNames[ST_DESC]]    = map["summary"].toString();
-        newStory[storyFieldNames[ST_NOTES]]   = map["description"].toString();
-        newStory[storyFieldNames[ST_HTD]]     = map["how_to_demo"].toString();
-        newStory[storyFieldNames[ST_IMP]]     = map["priority"].toString();
-        newStory[storyFieldNames[ST_EST]]     = map["estimation"].toString();
-        newStory[storyFieldNames[ST_USER]]    = map["reporter"].toString();
-        newStory[storyFieldNames[ST_TYP]]     = map["type"].toString();
-        newStory[storyFieldNames[ST_STATUS]]  = map["milestone"].toString();
-        newStory[storyFieldNames[ST_SPRINT]]  = map["component"].toString();
-        newStory[storyFieldNames[ST_COMP]]    = map["version"].toString();
-        newStory[storyFieldNames[ST_VERSION]] = map["status"].toString();
+        newStory[storyFieldNames[ST_DESC]]    = fieldMap["summary"].toString();
+        newStory[storyFieldNames[ST_NOTES]]   = fieldMap["description"].toString();
+        newStory[storyFieldNames[ST_HTD]]     = fieldMap["how_to_demo"].toString();
+        newStory[storyFieldNames[ST_IMP]]     = fieldMap["priority"].toString();
+        newStory[storyFieldNames[ST_EST]]     = fieldMap["estimation"].toString();
+        newStory[storyFieldNames[ST_USER]]    = fieldMap["reporter"].toString();
+        newStory[storyFieldNames[ST_TYP]]     = fieldMap["type"].toString();
+        newStory[storyFieldNames[ST_STATUS]]  = fieldMap["status"].toString();
+        newStory[storyFieldNames[ST_SPRINT]]  = fieldMap["milestone"].toString();
+        newStory[storyFieldNames[ST_COMP]]    = fieldMap["component"].toString();
+        newStory[storyFieldNames[ST_VERSION]] = fieldMap["version"].toString();
+        newStory[storyFieldNames[ST_PARENT]]  = fieldMap["parent"].toString();;
         storyList.append(newStory);
     }
     emit storiesLoaded(storyList);
@@ -296,7 +302,7 @@ void TracIO::estimationQueryResponseMethod(QVariant &arg)
 
 void TracIO::updateStoriesResponseMethod( QVariant &arg)
 {
-    qDebug() << arg;
+    qDebug() << "*** Story Updated *** \n" << arg << "\n";
 }
 
 
@@ -313,21 +319,22 @@ void TracIO::saveNewStoryResponseMethod( QVariant &arg)
 void TracIO::reloadNewStoryResponseMethod(QVariant & arg)
 {
     QVariantList fieldList = arg.toList();
-    QVariantMap map = fieldList[3].toMap();
+    QVariantMap fieldMap = fieldList[3].toMap();
 
     QVariantMap newStory;
     newStory[storyFieldNames[ST_ID]]      = fieldList[0].toString();
-    newStory[storyFieldNames[ST_DESC]]    = map["summary"].toString();
-    newStory[storyFieldNames[ST_NOTES]]   = map["description"].toString();
-    newStory[storyFieldNames[ST_HTD]]     = map["how_to_demo"].toString();
-    newStory[storyFieldNames[ST_IMP]]     = map["priority"].toString();
-    newStory[storyFieldNames[ST_EST]]     = map["estimation"].toString();
-    newStory[storyFieldNames[ST_USER]]    = map["reporter"].toString();
-    newStory[storyFieldNames[ST_TYP]]     = map["type"].toString();
-    newStory[storyFieldNames[ST_STATUS]]  = map["milestone"].toString();
-    newStory[storyFieldNames[ST_SPRINT]]  = map["component"].toString();
-    newStory[storyFieldNames[ST_COMP]]    = map["version"].toString();
-    newStory[storyFieldNames[ST_VERSION]] = map["status"].toString();
+    newStory[storyFieldNames[ST_DESC]]    = fieldMap["summary"].toString();
+    newStory[storyFieldNames[ST_NOTES]]   = fieldMap["description"].toString();
+    newStory[storyFieldNames[ST_HTD]]     = fieldMap["how_to_demo"].toString();
+    newStory[storyFieldNames[ST_IMP]]     = fieldMap["priority"].toString();
+    newStory[storyFieldNames[ST_EST]]     = fieldMap["estimation"].toString();
+    newStory[storyFieldNames[ST_USER]]    = fieldMap["reporter"].toString();
+    newStory[storyFieldNames[ST_TYP]]     = fieldMap["type"].toString();
+    newStory[storyFieldNames[ST_STATUS]]  = fieldMap["status"].toString();
+    newStory[storyFieldNames[ST_SPRINT]]  = fieldMap["milestone"].toString();
+    newStory[storyFieldNames[ST_COMP]]    = fieldMap["component"].toString();
+    newStory[storyFieldNames[ST_VERSION]] = fieldMap["version"].toString();
+    newStory[storyFieldNames[ST_PARENT]]  = fieldMap["parent"].toString();;
 
     emit newStoryLoaded(newStory);
 }

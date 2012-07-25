@@ -41,7 +41,6 @@ public:
     void fromList(const QVariantList &list);
     void clear();
 
-
 private:
     StoryItem *rootItem;
 };

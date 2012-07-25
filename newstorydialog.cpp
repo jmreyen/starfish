@@ -1,6 +1,7 @@
 #include "newstorydialog.h"
 #include "ui_newstorydialog.h"
 #include "fields.h"
+#include <QDebug>
 
 NewStoryDialog::NewStoryDialog(QAbstractItemModel *m1,
                                QAbstractItemModel *m2,
@@ -37,10 +38,13 @@ void NewStoryDialog::on_buttonBox_accepted()
     newStory[storyFieldNames[ST_EST]]     = ui->estComboBox->currentText();
     newStory[storyFieldNames[ST_USER]]    = ui->reporterEdit->text();
     newStory[storyFieldNames[ST_TYP]]     = ui->typComboBox->currentText();
-    newStory[storyFieldNames[ST_STATUS]]  = ui->sprComboBox->currentText();
-    newStory[storyFieldNames[ST_SPRINT]]  = ui->comComboBox->currentText();
-    newStory[storyFieldNames[ST_COMP]]    = ui->verComboBox->currentText();
-    newStory[storyFieldNames[ST_VERSION]] = "new";
+    newStory[storyFieldNames[ST_SPRINT]]  = ui->sprComboBox->currentText();
+    newStory[storyFieldNames[ST_COMP]]    = ui->comComboBox->currentText();
+    newStory[storyFieldNames[ST_VERSION]] = ui->verComboBox->currentText();
+    newStory[storyFieldNames[ST_STATUS]]  = "new";
+    newStory[storyFieldNames[ST_PARENT]]  = "";
+
+    qDebug() << newStory << "\n";
 
     emit (accepted(newStory));
 }

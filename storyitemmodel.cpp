@@ -160,19 +160,35 @@
      parentItem->appendChild(newStoryItem);
      endInsertRows();
      return index(position, 0, parent);
-
  }
-
 
 
  void StoryItemModel::fromList(const QVariantList &list)
  {
      emit layoutAboutToBeChanged();
+
+     //create lookup map with id and StoryItem
+     QMap <QString, StoryItem*> lookupMap;
      for (int i=0; i<list.count(); ++i) {
          QVariantMap map = list[i].toMap();
-         StoryItem *story = new StoryItem(map, rootItem);
-         rootItem->appendChild(story);
+         StoryItem *story = new StoryItem(map);
+         lookupMap.insert(story->data(ST_ID).toString(), story);
      }
+     //build tree
+     for (QMap <QString, StoryItem*>::iterator itr = lookupMap.begin(); itr != lookupMap.end(); ++itr) {
+         StoryItem *item = itr.value();
+         QString parentId = itr.value()->data(ST_PARENT).toString();
+         StoryItem *parentItem;
+
+         if (parentId.isEmpty())
+             parentItem = rootItem;
+         else
+             parentItem = lookupMap[parentId];
+
+             item->setParent(parentItem);
+             parentItem->appendChild(item);
+     }
+
      emit layoutChanged();
  }
 

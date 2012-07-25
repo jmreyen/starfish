@@ -36,7 +36,8 @@ void SetupDialog::setShowColumn(int col, bool b)
     case ST_SPRINT:  ui->checkBox_9->setChecked(b); break;
     case ST_COMP:    ui->checkBox_10->setChecked(b); break;
     case ST_VERSION: ui->checkBox_11->setChecked(b); break;
-    case ST_LAST:    ui->checkBox_12->setChecked(b); break;
+    case ST_PARENT:  ui->checkBox_12->setChecked(b); break;
+    case ST_LAST:    ui->checkBox_13->setChecked(b); break;
     }
 }
 
@@ -57,7 +58,7 @@ void SetupDialog::on_buttonBox_accepted()
             ui->checkBox_6->isChecked() << ui->checkBox_7->isChecked()<<
             ui->checkBox_8->isChecked() << ui->checkBox_9->isChecked()<<
             ui->checkBox_10->isChecked()<< ui->checkBox_11->isChecked()<<
-            ui->checkBox_12->isChecked();
+            ui->checkBox_12->isChecked()<< ui->checkBox_13->isChecked();
     returnMap["Columns"] = columnlist;
     returnMap["LoadOnStart"] = ui->loadOnStartCheckBox->isChecked();
 

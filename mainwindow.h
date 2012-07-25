@@ -31,7 +31,6 @@ protected:
     void loadAll();
     //Display Index Card
     void fillCard(const QModelIndex &index, StoryCardScene *scene=0);
-    void fillCard(int row, StoryCardScene *scene=0);
 private slots:
     //Toolbar Actions
     void onActionAddStory();

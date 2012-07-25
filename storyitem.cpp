@@ -21,8 +21,7 @@ const char *storyDisplayNames[ST_LAST] = {
     "Sprint",
     "Component",
     "Version",
-    "Parent",
-    "Children"};
+    "Parent"};
 
 StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
     thePrintFlag(false),
@@ -49,10 +48,6 @@ StoryItem::~StoryItem()
 void StoryItem::appendChild(StoryItem *item)
 {
     childItems.append(item);
-    if (parentItem) {
-        QString currentChildren = data(ST_CHILDREN).toString();
-        setData(ST_CHILDREN, currentChildren+" "+item->data(ST_ID).toString());
-    }
 }
 
 StoryItem *StoryItem::child(int row)

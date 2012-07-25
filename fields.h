@@ -14,8 +14,7 @@ const int ST_SPRINT = 9;
 const int ST_COMP   = 10;
 const int ST_VERSION= 11;
 const int ST_PARENT = 12;
-const int ST_CHILDREN= 13;
-const int ST_LAST   = 14;
+const int ST_LAST   = 13;
 
 extern const char *storyFieldNames[ST_LAST];
 
