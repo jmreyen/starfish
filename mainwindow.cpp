@@ -62,8 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect slots for story table events
     connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged (const QModelIndex & , const QModelIndex & )),
             SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
-    connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
-            &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+//    connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
+//            &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
     connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
     connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
@@ -221,12 +221,23 @@ void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
 
 void MainWindow::onActionAddStory()
 {
+    // determine parent ...
+    QModelIndex currentIndex = ui->storyTreeView->currentIndex();
+    QString parentId = theStoryTree.data(
+        theStoryTree.index(
+            currentIndex.row(),
+            ST_ID,
+            currentIndex.parent()
+        )
+    ).toString();
+
     NewStoryDialog dlg(ui->estComboBox->model(),
                        ui->impComboBox->model(),
                        ui->sprComboBox->model(),
                        ui->typComboBox->model(),
                        ui->comComboBox->model(),
-                       ui->verComboBox->model());
+                       ui->verComboBox->model(),
+                       parentId);
 
     QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
                      theLoader, SLOT(onSaveNewStory(const QVariantMap &)));
@@ -330,20 +341,22 @@ void MainWindow::onActionReport()
 void MainWindow::onActionPrint()
 {
 
-//    QPrintDialog printDialog(&thePrinter);
-//    StoryCardScene scene;
+    QPrintDialog printDialog(&thePrinter);
+    StoryCardScene scene;
 
 //    if (printDialog.exec() == QDialog::Accepted) {
 //        QPainter painter(&thePrinter);
 //        painter.setRenderHint(QPainter::Antialiasing);
-//        for (int i=0; i<theStoryTree.rowCount(); ++i) {
-//            if (theStoryTree.printFlag(i)) {
-//                fillCard(i, &theCardScene);
-//                theCardScene.render(&painter);
-//                thePrinter.newPage();
-//            }
-//        }
-//    }
+
+        for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+            if (itr->data(ST_PRINT).toBool()) {
+                qDebug() << itr->data(ST_ID).toString();
+                //fillCard(i, &theCardScene);
+                //theCardScene.render(&painter);
+                //thePrinter.newPage();
+            }
+        }
+    //}
 }
 
 
@@ -352,7 +365,9 @@ void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , con
 {
     if (current!= previous) {
         fillCard(current);
-        theStoryDataMapper.setCurrentIndex(current.row());
+        // if the root index is not set, the mapper won't findy the sub items
+        theStoryDataMapper.setRootIndex(current.parent());
+        theStoryDataMapper.setCurrentModelIndex(current);
     }
 }
 
@@ -466,25 +481,6 @@ void MainWindow::addNewlySavedStory(const QVariantMap &map)
     // find parent and add child to model
     QModelIndex parentIndex = ui->storyTreeView->currentIndex();
     QModelIndex newIndex = theStoryTree.addStory(parentIndex, map);
-
-    // determine parent ...
-    QString newId = map[storyFieldNames[ST_ID]].toString();
-    QString parentId = theStoryTree.data(
-        theStoryTree.index(
-            newIndex.row(),
-            ST_PARENT,
-            newIndex.parent()
-        )
-    ).toString();
-    // ... and update new item with parent id
-    if (!parentId.isEmpty()){
-        //store parents reference to children and childs reference to parent
-        QMap<QString, QVariantMap> updateMap;
-        updateMap[newId][storyFieldNames[ST_PARENT]] = parentId;
-        qDebug() << " *** Input Map ***\n " << updateMap << "\n";
-        theLoader->updateStories(updateMap);
-    }
-
 //    ui->storyTreeView->setCurrentIndex(newIndex);
 }
 

@@ -11,8 +11,23 @@
 
 class StoryItem;
 
-const int ST_FLAG1     = ST_LAST;
-const int ST_MODELLAST = ST_LAST + 1;
+class StoryIterator
+{
+    friend class StoryItemModel;
+
+public:
+    StoryIterator() {current = -1;}
+    StoryIterator &operator = (StoryIterator &iterator);
+    StoryIterator &operator ++();
+    const StoryItem *operator ->();
+    bool operator !=(const StoryIterator &iterator) const;
+protected:
+    StoryIterator(StoryItem *item);
+    void makeFlatList(StoryItem *item);
+private:
+    QList<StoryItem*> theFlatList;
+    int current;
+};
 
 class StoryItemModel : public QAbstractItemModel
 {
@@ -40,6 +55,10 @@ public:
     QModelIndex addStory(const QModelIndex &parent, const QVariantMap &map);
     void fromList(const QVariantList &list);
     void clear();
+
+    typedef StoryIterator iterator;
+    iterator begin() const {StoryIterator itr(rootItem); return itr;}
+    iterator end() const {return StoryIterator();}
 
 private:
     StoryItem *rootItem;

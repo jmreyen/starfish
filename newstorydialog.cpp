@@ -9,9 +9,11 @@ NewStoryDialog::NewStoryDialog(QAbstractItemModel *m1,
                                QAbstractItemModel *m4,
                                QAbstractItemModel *m5,
                                QAbstractItemModel *m6,
+                               const QString & parentId,
                                QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::NewStoryDialog)
+    ui(new Ui::NewStoryDialog),
+    theParentId(parentId)
 {
     ui->setupUi(this);
     ui->estComboBox->setModel(m1);
@@ -42,7 +44,7 @@ void NewStoryDialog::on_buttonBox_accepted()
     newStory[storyFieldNames[ST_COMP]]    = ui->comComboBox->currentText();
     newStory[storyFieldNames[ST_VERSION]] = ui->verComboBox->currentText();
     newStory[storyFieldNames[ST_STATUS]]  = "new";
-    newStory[storyFieldNames[ST_PARENT]]  = "";
+    newStory[storyFieldNames[ST_PARENT]]  = theParentId;
 
     qDebug() << newStory << "\n";
 

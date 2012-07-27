@@ -26,7 +26,7 @@ bool TracIO::saveNewStory(const QVariantMap &map)
     QVariantMap attributes;
     args.append(map[storyFieldNames[ST_DESC]]);
     args.append(map[storyFieldNames[ST_NOTES]]);
-    for (int i=ST_HTD; i < ST_LAST; ++i) {
+    for (int i=ST_HTD; i < ST_IO_LAST; ++i) {
         attributes.insert(storyFieldNames[i], map[storyFieldNames[i]]);
     }
     args.append(attributes);

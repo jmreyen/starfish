@@ -21,7 +21,7 @@ public:
                             QAbstractItemModel *m4,
                             QAbstractItemModel *m5,
                             QAbstractItemModel *m6,
-                            QWidget *parent = 0);
+                            const QString &parentId, QWidget *parent = 0);
 
     ~NewStoryDialog();
 
@@ -33,6 +33,7 @@ private slots:
 
 private:
     Ui::NewStoryDialog *ui;
+    QString theParentId;
 };
 
 #endif // NEWSTORYDIALOG_H

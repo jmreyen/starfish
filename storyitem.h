@@ -25,9 +25,6 @@ public:
 
      const StoryItem &fromMap(const QVariantMap &map);
      void clear();
-     bool printFlag() const {return thePrintFlag;}
-     void setPrintFlag(bool b) {thePrintFlag = b;}
-
 
  private:
      QList<StoryItem*> childItems;

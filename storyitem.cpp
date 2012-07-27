@@ -21,7 +21,8 @@ const char *storyDisplayNames[ST_LAST] = {
     "Sprint",
     "Component",
     "Version",
-    "Parent"};
+    "Parent",
+    "Print"};
 
 StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
     thePrintFlag(false),

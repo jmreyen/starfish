@@ -14,7 +14,9 @@ const int ST_SPRINT = 9;
 const int ST_COMP   = 10;
 const int ST_VERSION= 11;
 const int ST_PARENT = 12;
-const int ST_LAST   = 13;
+const int ST_PRINT  = 13;
+const int ST_IO_LAST= 13; // last item to load/store
+const int ST_LAST   = 14; // last item to display
 
 extern const char *storyFieldNames[ST_LAST];
 

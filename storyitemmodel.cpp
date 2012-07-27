@@ -3,14 +3,53 @@
 #include "storyitem.h"
 #include "storyitemmodel.h"
 
- StoryItemModel::StoryItemModel(/*const QString &data, */QObject *parent)
+StoryIterator::StoryIterator(StoryItem *item)
+{
+    current = 0;
+    makeFlatList(item);
+}
+
+void StoryIterator::makeFlatList(StoryItem *item)
+{
+    for (int i = 0; i<item->childCount(); ++i) {
+        theFlatList.append(item->child(i));
+        makeFlatList(item->child(i));
+    }
+}
+
+StoryIterator &StoryIterator::operator = (StoryIterator &iterator)
+{
+    theFlatList = iterator.theFlatList;
+    current=iterator.current;
+    return *this;
+}
+
+
+StoryIterator &StoryIterator::operator ++()
+{
+    ++current;
+    if (current == theFlatList.count())
+        current = -1;
+    return *this;
+}
+
+const StoryItem *StoryIterator::operator ->()
+{
+    return theFlatList[current];
+}
+
+bool StoryIterator::operator !=(const StoryIterator &iterator) const
+{
+    return current!=iterator.current;
+}
+
+ StoryItemModel::StoryItemModel(QObject *parent)
      : QAbstractItemModel(parent)
  {
      QList<QVariant> rootData;
      for (int i=ST_ID; i<ST_LAST; ++i)
          rootData << storyDisplayNames[i];
      rootItem = new StoryItem(rootData);
-     //setupModelData(data.split(QString("\n")), rootItem);
  }
 
  StoryItemModel::~StoryItemModel()
@@ -24,6 +63,8 @@
          StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
          if (item)
              return item;
+         else
+             qDebug() << "";
      }
      return rootItem;
  }
@@ -43,17 +84,16 @@
      switch (role) {
      case Qt::EditRole:
      case Qt::DisplayRole:
-         if (index.column()<ST_LAST)
+         if (index.column()<ST_PRINT)
              return item->data(index.column());
          break;
      case Qt::CheckStateRole:
          //Get status of the checkbox in the print column
-         if (index.column()==ST_FLAG1)
-             return item->printFlag();
+         if (index.column()== ST_PRINT)
+            return item->data(index.column()).toBool();
          break;
      }
      return QVariant();
-
  }
 
  bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value, int role )
@@ -64,18 +104,19 @@
      StoryItem *item = getItem(index);
 
      switch (role){
-     case Qt::CheckStateRole :
-         if (index.column()==ST_FLAG1) {
-             //Set status of the checkbox in the print column
-             item->setPrintFlag(value.toInt());
+     case Qt::EditRole:
+         if (index.column() < ST_PRINT) {
+             item->setData(index.column(), value.toString());
              emit dataChanged(index, index);
              return true;
          }
          break;
-     case Qt::EditRole:
-         if (index.column() < ST_LAST) {
-             item->setData(index.column(), value.toString());
+     case Qt::CheckStateRole :
+         if (index.column()==ST_PRINT) {
+             //Set status of the checkbox in the print column
+             item->setData(index.column(), !item->data(index.column()).toBool());
              emit dataChanged(index, index);
+             return true;
          }
          break;
      }
@@ -88,23 +129,27 @@
          return 0;
 
      Qt::ItemFlags f =Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-     if (index.column()==ST_FLAG1)
+     if (index.column()==ST_PRINT)
          f = f | Qt::ItemIsUserCheckable;
-
      return f;
  }
 
- QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation,
-                                int role) const
+ QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation, int role) const
  {
-     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-         return rootItem->data(section);
-
+     switch (role) {
+     case Qt::DisplayRole:
+         if (orientation == Qt::Horizontal && section != ST_PRINT)
+                 return rootItem->data(section);
+         break;
+     case Qt::DecorationRole:
+         if (orientation == Qt::Horizontal && section == ST_PRINT)
+                 return QIcon(":images/printer.png");
+         break;
+     }
      return QVariant();
  }
 
- QModelIndex StoryItemModel::index(int row, int column, const QModelIndex &parent)
-             const
+ QModelIndex StoryItemModel::index(int row, int column, const QModelIndex &parent) const
  {
      if (!hasIndex(row, column, parent))
          return QModelIndex();
@@ -126,7 +171,7 @@
      StoryItem *childItem = getItem(index);
      StoryItem *parentItem = childItem->parent();
 
-     if (parentItem == rootItem || parentItem == 0)
+     if (parentItem == rootItem)
          return QModelIndex();
 
      return createIndex(parentItem->row(), 0, parentItem);

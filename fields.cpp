@@ -13,7 +13,8 @@ const char *storyFieldNames[ST_LAST] = {
     "milestone",
     "component",
     "version",
-    "parent"};
+    "parent",
+    "print"};
 
 const char *sprintFieldNames[SP_LAST] = {
     "name",
