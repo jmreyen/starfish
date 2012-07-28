@@ -344,19 +344,26 @@ void MainWindow::onActionPrint()
     QPrintDialog printDialog(&thePrinter);
     StoryCardScene scene;
 
-//    if (printDialog.exec() == QDialog::Accepted) {
-//        QPainter painter(&thePrinter);
-//        painter.setRenderHint(QPainter::Antialiasing);
+    if (printDialog.exec() == QDialog::Accepted) {
+        QPainter painter(&thePrinter);
+        painter.setRenderHint(QPainter::Antialiasing);
 
+        StoryCardScene scene;
         for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
             if (itr->data(ST_PRINT).toBool()) {
-                qDebug() << itr->data(ST_ID).toString();
-                //fillCard(i, &theCardScene);
-                //theCardScene.render(&painter);
-                //thePrinter.newPage();
+                scene.setID(QString ("Backlog Item #" + itr->data(ST_ID).toString()));
+                scene.setDesc(itr->data(ST_DESC).toString());
+                scene.setNotes(itr->data(ST_NOTES).toString());
+                scene.setHTD(itr->data(ST_HTD).toString());
+                scene.setImp(itr->data(ST_IMP).toString());
+                scene.setEst(itr->data(ST_EST).toString());
+                scene.setUser(itr->data(ST_USER).toString());
+
+                scene.render(&painter);
+                thePrinter.newPage();
             }
         }
-    //}
+    }
 }
 
 
