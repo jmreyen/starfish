@@ -43,7 +43,7 @@ private slots:
     //Story Table
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
-    void onStoryTableLayoutAboutToBeChanged();
+    void onStoryTableLayoutAboutToBeChanged() const;
     void onStoryTableLayoutChanged();
     // Story Table Filters
     void onFilterRow(QString arg);

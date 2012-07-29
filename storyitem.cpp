@@ -78,7 +78,7 @@ bool StoryItem::setData(int column, const QVariant &value)
 }
 
 
-StoryItem *StoryItem::parent()
+StoryItem *StoryItem::parent() const
 {
     return parentItem;
 }

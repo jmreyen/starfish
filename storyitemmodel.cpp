@@ -3,16 +3,23 @@
 #include "storyitem.h"
 #include "storyitemmodel.h"
 
-StoryIterator::StoryIterator(StoryItem *item)
+
+
+StoryIterator::StoryIterator(const StoryItemModel *model):
+    theModel(model)
+
 {
-    current = 0;
-    makeFlatList(item);
+    makeFlatList(theModel->rootItem);
+    if (theFlatList.count() == 0)
+        current = -1;
+    else
+        current = 0;
 }
 
 void StoryIterator::makeFlatList(StoryItem *item)
 {
     for (int i = 0; i<item->childCount(); ++i) {
-        theFlatList.append(item->child(i));
+        theFlatList.append(QPair<StoryItem *, int>(item->child(i), i));
         makeFlatList(item->child(i));
     }
 }
@@ -35,13 +42,23 @@ StoryIterator &StoryIterator::operator ++()
 
 const StoryItem *StoryIterator::operator ->()
 {
-    return theFlatList[current];
+    return theFlatList[current].first;
 }
 
 bool StoryIterator::operator !=(const StoryIterator &iterator) const
 {
     return current!=iterator.current;
 }
+
+QModelIndex StoryIterator::currentIndex() const
+{
+    if (current == -1)
+        return QModelIndex();
+
+    const StoryItem *item = theFlatList[current].first;
+    return theModel->createIndex(theFlatList[current].second, 0, item->parent());
+}
+
 
  StoryItemModel::StoryItemModel(QObject *parent)
      : QAbstractItemModel(parent)
@@ -171,7 +188,7 @@ bool StoryIterator::operator !=(const StoryIterator &iterator) const
      StoryItem *childItem = getItem(index);
      StoryItem *parentItem = childItem->parent();
 
-     if (parentItem == rootItem)
+     if (parentItem == rootItem || parentItem == 0)
          return QModelIndex();
 
      return createIndex(parentItem->row(), 0, parentItem);

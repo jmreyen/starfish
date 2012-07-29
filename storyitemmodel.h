@@ -10,6 +10,7 @@
 #include "fields.h"
 
 class StoryItem;
+class StoryItemModel;
 
 class StoryIterator
 {
@@ -21,17 +22,20 @@ public:
     StoryIterator &operator ++();
     const StoryItem *operator ->();
     bool operator !=(const StoryIterator &iterator) const;
+    QModelIndex currentIndex() const;
 protected:
-    StoryIterator(StoryItem *item);
+    StoryIterator(const StoryItemModel *model);
     void makeFlatList(StoryItem *item);
 private:
-    QList<StoryItem*> theFlatList;
+    const StoryItemModel *theModel;
+    QList<QPair<StoryItem*, int> > theFlatList;
     int current;
 };
 
 class StoryItemModel : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class StoryIterator;
 
 public:
     StoryItemModel(QObject *parent);
@@ -57,7 +61,7 @@ public:
     void clear();
 
     typedef StoryIterator iterator;
-    iterator begin() const {StoryIterator itr(rootItem); return itr;}
+    iterator begin() const {StoryIterator itr(this); return itr;}
     iterator end() const {return StoryIterator();}
 
 private:

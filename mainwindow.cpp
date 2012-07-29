@@ -385,25 +385,31 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 }
 
 QVariantList tmpList;
-void MainWindow::onStoryTableLayoutAboutToBeChanged()
+void MainWindow::onStoryTableLayoutAboutToBeChanged() const
 {
     // Store hidden rows
-//    for( int i = 0; i < theStoryTree.rowCount(); ++i ) {
-//        if (ui->storyTreeView->isRowHidden(i))
-//            tmpList.append(theStoryTree.data(i, ST_ID, Qt::DisplayRole));
-//    }
+    for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+        QModelIndex index = itr.currentIndex();
+        if (ui->storyTreeView->isRowHidden(index.row(), theStoryTree.parent(index))) {
+            QModelIndex idIndex = theStoryTree.index(index.row(), ST_ID, index.parent());
+            QString id = theStoryTree.data(idIndex, Qt::DisplayRole).toString();
+            tmpList.append(id);
+        }
+    }
 }
 
 void MainWindow::onStoryTableLayoutChanged()
 {
     // Restore hidden rows
-//    for( int i = 0; i < theStoryTree.rowCount(); ++i ) {
-//        if (tmpList.contains(theStoryTree.data(i, ST_ID, Qt::DisplayRole)))
-//            ui->storyTreeView->setRowHidden(i, true);
-//        else
-//            ui->storyTreeView->setRowHidden(i, false);
-//    }
-//    tmpList.clear();
+    for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+        QModelIndex index = itr.currentIndex();
+        QModelIndex idIndex = theStoryTree.index(index.row(), ST_ID, index.parent());
+        if (tmpList.contains(theStoryTree.data(idIndex, Qt::DisplayRole)))
+            ui->storyTreeView->setRowHidden(index.row(),theStoryTree.parent(index), true);
+        else
+            ui->storyTreeView->setRowHidden(index.row(),theStoryTree.parent(index), false);
+    }
+    tmpList.clear();
 }
 
 void MainWindow::onFilterRow(QString arg)
