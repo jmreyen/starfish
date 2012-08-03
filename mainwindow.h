@@ -13,6 +13,7 @@
 #include <QStandardItemModel>
 #include <QDataWidgetMapper>
 
+
 namespace Ui {
     class MainWindow;
 }
@@ -43,8 +44,6 @@ private slots:
     //Story Table
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
-    void onStoryTableLayoutAboutToBeChanged() const;
-    void onStoryTableLayoutChanged();
     // Story Table Filters
     void onFilterRow(QString arg);
     void on_filterBySprintCheckBox_clicked(bool checked);
@@ -59,13 +58,21 @@ private slots:
     void setEstimations(const QStringList &list);
     void setVersions(const QStringList &list);
     void setComponents(const QStringList &list);
+    void setStatus(const QStringList &list);
     void setTypes(const QStringList &list);
+
 
 
 private:
     Ui::MainWindow *ui;
     StoryItemModel theStoryTree;
     SprintModel theSprints;
+    QStringList thePriorities;
+    QStringList theEstimations;
+    QStringList theVersions;
+    QStringList theComponents;
+    QStringList theStatus;
+    QStringList theTypes;
     QDataWidgetMapper theStoryDataMapper;
     QDataWidgetMapper theSprintDataMapper;
     BurnDownScene theBurnDownScene;

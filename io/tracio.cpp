@@ -12,6 +12,29 @@ namespace
     const bool registered = IOFactory::Instance()->RegisterIO(Trac, CreateTracIO);
 }
 
+QStringList picStatusList = QString("new,postponed,prioritised,selected,selected,waiting,done").split(",");
+QStringList tracStatusList = QString("new,postponed,accepted,assigned,reopened,waiting,closed").split(",");
+
+void toTrac(QVariantMap &map)
+{
+    QString picStatus = map[storyFieldNames[ST_STATUS]].toString();
+    int n = picStatusList.indexOf(picStatus);
+    if (n != -1) {
+        QString tracStatus = tracStatusList[n];
+        map[storyFieldNames[ST_STATUS]] = tracStatus;
+    }
+}
+
+void toPic(QVariantMap &map)
+{
+    QString tracStatus = map[storyFieldNames[ST_STATUS]].toString();
+    int n = tracStatusList.indexOf(tracStatus);
+    if (n != -1) {
+        QString picStatus = picStatusList[n];
+        map[storyFieldNames[ST_STATUS]] = picStatus;
+    }
+}
+
 TracIO::TracIO(QObject *parent) :
     AbstractIO(parent),
     rpc(this),
@@ -29,6 +52,7 @@ bool TracIO::saveNewStory(const QVariantMap &map)
     for (int i=ST_HTD; i < ST_IO_LAST; ++i) {
         attributes.insert(storyFieldNames[i], map[storyFieldNames[i]]);
     }
+    toTrac(attributes);
     args.append(attributes);
     rpc.call("ticket.create", args,
                 this, SLOT(saveNewStoryResponseMethod(QVariant &)),
@@ -47,6 +71,7 @@ bool TracIO::updateStories(QMap<QString, QVariantMap> & map)
         QVariantMap newMethod;
         QVariantList newParams;
         QVariantMap newAttributes = itr.value();
+        toTrac(newAttributes);
         newAttributes.insert("action", "leave");
         newParams.append(itr.key().toInt());
         newParams.append("Stored by PIC");
@@ -157,7 +182,8 @@ void TracIO::getTicketResponseMethod(QVariant &arg)
         newStory[storyFieldNames[ST_SPRINT]]  = fieldMap["milestone"].toString();
         newStory[storyFieldNames[ST_COMP]]    = fieldMap["component"].toString();
         newStory[storyFieldNames[ST_VERSION]] = fieldMap["version"].toString();
-        newStory[storyFieldNames[ST_PARENT]]  = fieldMap["parent"].toString();;
+        newStory[storyFieldNames[ST_PARENT]]  = fieldMap["parent"].toString();
+        toPic(newStory);
         storyList.append(newStory);
     }
     emit storiesLoaded(storyList);
@@ -289,7 +315,9 @@ void TracIO::versionQueryResponseMethod(QVariant &arg)
 void TracIO::statusQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
-    emit statusLoaded(list);
+    //TODO: check if Trac workflow is set up properly
+
+    emit statusLoaded(picStatusList);
 }
 
 void TracIO::estimationQueryResponseMethod(QVariant &arg)
@@ -335,7 +363,7 @@ void TracIO::reloadNewStoryResponseMethod(QVariant & arg)
     newStory[storyFieldNames[ST_COMP]]    = fieldMap["component"].toString();
     newStory[storyFieldNames[ST_VERSION]] = fieldMap["version"].toString();
     newStory[storyFieldNames[ST_PARENT]]  = fieldMap["parent"].toString();;
-
+    toPic(newStory);
     emit newStoryLoaded(newStory);
 }
 

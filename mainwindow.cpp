@@ -68,10 +68,6 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
     connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
-    connect(&theStoryTree, SIGNAL(layoutChanged()),
-            SLOT(onStoryTableLayoutChanged()));
-    connect(&theStoryTree, SIGNAL(layoutAboutToBeChanged()),
-            SLOT(onStoryTableLayoutAboutToBeChanged()));
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
     //setup burndown view
@@ -130,6 +126,8 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(setTypes(const QStringList &)));
     connect(theLoader, SIGNAL(componentsLoaded(const QStringList &)),
             SLOT(setComponents(const QStringList &)));
+    connect(theLoader, SIGNAL(statusLoaded(const QStringList &)),
+            SLOT(setStatus(const QStringList &)));
     connect(theLoader, SIGNAL(newStoryLoaded(const QVariantMap &)),
             SLOT(addNewlySavedStory(const QVariantMap &)));
 
@@ -147,6 +145,8 @@ MainWindow::~MainWindow()
     //I/O
     theSettings.setValue("IO/LoadOnStart", loadOnStart);
     theLoader->saveSettings(theSettings);
+    //Filter
+
     // Columns
     theSettings.beginWriteArray("columns");
     for (int i=0; i<theStoryTree.columnCount(); ++i){
@@ -171,11 +171,9 @@ void MainWindow::loadAll()
     ui->comComboBox->clear();
     ui->verComboBox->clear();
     ui->typComboBox->clear();
-    ui->filterByStatusComboBox->clear();
-    ui->filterByStatusComboBox->addItem("all");
+    ui->filterValueComboBox->clear();
     statusBar()->showMessage("Querying ...");
     theLoader->load();
-    ui->filterByStatusComboBox->setCurrentIndex(0);
     theSprints.sortByDate();
 
 }
@@ -384,33 +382,7 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
     theStoryChanges.append(index);
 }
 
-QVariantList tmpList;
-void MainWindow::onStoryTableLayoutAboutToBeChanged() const
-{
-    // Store hidden rows
-    for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
-        QModelIndex index = itr.currentIndex();
-        if (ui->storyTreeView->isRowHidden(index.row(), theStoryTree.parent(index))) {
-            QModelIndex idIndex = theStoryTree.index(index.row(), ST_ID, index.parent());
-            QString id = theStoryTree.data(idIndex, Qt::DisplayRole).toString();
-            tmpList.append(id);
-        }
-    }
-}
 
-void MainWindow::onStoryTableLayoutChanged()
-{
-    // Restore hidden rows
-    for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
-        QModelIndex index = itr.currentIndex();
-        QModelIndex idIndex = theStoryTree.index(index.row(), ST_ID, index.parent());
-        if (tmpList.contains(theStoryTree.data(idIndex, Qt::DisplayRole)))
-            ui->storyTreeView->setRowHidden(index.row(),theStoryTree.parent(index), true);
-        else
-            ui->storyTreeView->setRowHidden(index.row(),theStoryTree.parent(index), false);
-    }
-    tmpList.clear();
-}
 
 void MainWindow::onFilterRow(QString arg)
 {
@@ -516,23 +488,34 @@ void setStandardItemModel(const QStringList &list, QAbstractItemModel *model)
 
 void MainWindow::setPriorities(const QStringList &list)
 {
-    setStandardItemModel(list, ui->impComboBox->model());
+    thePriorities = list;
+    setStandardItemModel(thePriorities, ui->impComboBox->model());
 }
 
 void MainWindow::setEstimations(const QStringList &list)
 {
-    setStandardItemModel(list, ui->estComboBox->model());
+    theEstimations = list;
+    setStandardItemModel(theEstimations, ui->estComboBox->model());
 }
 void MainWindow::setVersions(const QStringList &list)
 {
-    setStandardItemModel(list, ui->verComboBox->model());
+    theVersions = list;
+    setStandardItemModel(theVersions, ui->verComboBox->model());
 }
 void MainWindow::setComponents(const QStringList &list)
 {
-    setStandardItemModel(list, ui->comComboBox->model());
+    theComponents = list;
+    setStandardItemModel(theComponents, ui->comComboBox->model());
+}
+
+void MainWindow::setStatus(const QStringList &list)
+{
+    theStatus = list;
+    setStandardItemModel(theStatus, ui->filterValueComboBox->model());
 }
 void MainWindow::setTypes(const QStringList &list)
 {
-    setStandardItemModel(list, ui->typComboBox->model());
+    theTypes = list;
+    setStandardItemModel(theTypes, ui->typComboBox->model());
 }
 
