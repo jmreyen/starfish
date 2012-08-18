@@ -1,10 +1,9 @@
-
-#include <QList>
-#include <QVariant>
-
 #include "storyitem.h"
 #include "fields.h"
 
+#include <QList>
+#include <QVariant>
+#include <QXmlStreamWriter>
 
 
 
@@ -24,6 +23,16 @@ const char *storyDisplayNames[ST_LAST] = {
     "Parent",
     "Print"};
 
+StoryItem::StoryItem(const QString &desc, StoryItem *parent)
+{
+    for (int i=0; i< ST_LAST; ++i) {
+        itemData.append("");
+    }
+    itemData[ST_DESC] = desc;
+    setParent(parent);
+}
+
+
 StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
     thePrintFlag(false),
     sortPosition(-1)
@@ -41,17 +50,25 @@ StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent) :
     setParent(parent);
 }
 
+StoryItem::StoryItem(QXmlStreamReader *reader, StoryItem *parent) :
+    thePrintFlag(false),
+    sortPosition(-1)
+{
+    readStory(reader);
+    setParent(parent);
+}
+
 StoryItem::~StoryItem()
 {
     qDeleteAll(childItems);
 }
 
-void StoryItem::appendChild(StoryItem *item)
+void StoryItem::addChild(StoryItem *item)
 {
     childItems.append(item);
 }
 
-StoryItem *StoryItem::child(int row)
+StoryItem *StoryItem::childAt(int row)
 {
     return childItems.value(row);
 }
@@ -77,6 +94,20 @@ bool StoryItem::setData(int column, const QVariant &value)
     return true;
 }
 
+bool StoryItem::insertChild(int row, StoryItem *item)
+{
+    childItems.insert(row, item);
+    return true;
+}
+
+StoryItem *StoryItem::takeChild(int row)
+{
+    StoryItem *item = childItems.takeAt(row);
+    Q_ASSERT(item);
+    item->setParent(0);
+    return item;
+}
+
 
 StoryItem *StoryItem::parent() const
 {
@@ -86,9 +117,10 @@ StoryItem *StoryItem::parent() const
 void StoryItem::setParent(StoryItem *parent)
 {
     parentItem = parent;
-    if (parent && parent->parent()) {
+    if (parent/* && parent->parent()*/) {
         QString parentID = parent->data(ST_ID).toString();
         setData(ST_PARENT, parentID);
+        parent->addChild(this);
     }
 }
 
@@ -102,10 +134,24 @@ int StoryItem::row() const
 
 const StoryItem &StoryItem::fromMap(const QVariantMap &map)
 {
-    for (int i=ST_ID; i<ST_LAST;++i) {
+    for (int i=ST_FIRST; i<ST_LAST;++i) {
         itemData.append(map[storyFieldNames[i]]);
     }
     return *this;
+}
+
+void StoryItem::writeStory(QXmlStreamWriter *writer) const
+{
+    for (int i=ST_FIRST; i<ST_LAST;++i) {
+        writer->writeAttribute(storyFieldNames[i], itemData.at(i).toString());
+    }
+}
+
+void StoryItem::readStory(QXmlStreamReader *reader)
+{
+    for (int i=ST_FIRST; i<ST_LAST;++i) {
+        itemData.append(reader->attributes().value(storyFieldNames[i]).toString());
+    }
 }
 
 void StoryItem::clear()

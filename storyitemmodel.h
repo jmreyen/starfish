@@ -1,13 +1,14 @@
 #ifndef STORYITEMMODEL_H
 #define STORYITEMMODEL_H
 
+#include "storyitem.h"
+#include "fields.h"
 
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
 
-#include "storyitem.h"
-#include "fields.h"
+class QXmlStreamWriter;
 
 class StoryItem;
 class StoryItemModel;
@@ -22,12 +23,11 @@ public:
     StoryIterator &operator ++();
     const StoryItem *operator ->();
     bool operator !=(const StoryIterator &iterator) const;
-    QModelIndex currentIndex() const;
 protected:
-    StoryIterator(const StoryItemModel *model);
+    StoryIterator(StoryItem *item);
     void makeFlatList(StoryItem *item);
 private:
-    const StoryItemModel *theModel;
+    StoryItem *theRootItem;
     QList<QPair<StoryItem*, int> > theFlatList;
     int current;
 };
@@ -41,28 +41,49 @@ public:
     StoryItemModel(QObject *parent);
     ~StoryItemModel();
 
-
-    StoryItem *getItem(const QModelIndex &index) const;
-
+    // inherited from QAbstractItemModel
+    // All models
     QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
-    bool setData ( const QModelIndex &index, const QVariant &value, int role);
     Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant headerData(int section, Qt::Orientation orientation,
-                        int role = Qt::DisplayRole) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    // Table and tree models
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    // Editable models
+    bool setData ( const QModelIndex &index, const QVariant &value, int role);
+    // All resizable models
+    bool insertRows(int position, int count, const QModelIndex &parent = QModelIndex());
+    bool removeRows(int position, int count, const QModelIndex &parent);
+    // Tree models
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+
+    // drag and drop
+    Qt::DropActions supportedDropActions() const;
+    Qt::DropActions supportedDragActions() const;
+    QStringList mimeTypes() const;
+    QMimeData *mimeData(const QModelIndexList &indexes) const;
+    bool dropMimeData(const QMimeData *mimeData, Qt::DropAction action,
+                      int row,int column, const QModelIndex &parent);
+
 
     QModelIndex addStory(const QModelIndex &parent, StoryItem *newStoryItem);
     QModelIndex addStory(const QModelIndex &parent, const QVariantMap &map);
+
+    void writeStoryAndChildren(QXmlStreamWriter *writer, StoryItem *story) const;
+    void readStories(QXmlStreamReader *reader, StoryItem *story);
+
     void fromList(const QVariantList &list);
     void clear();
 
+
+
     typedef StoryIterator iterator;
-    iterator begin() const {StoryIterator itr(this); return itr;}
+    iterator begin() const {StoryIterator itr(rootItem); return itr;}
     iterator end() const {return StoryIterator();}
+protected:
+    StoryItem *getItem(const QModelIndex &index) const;
 
 private:
     StoryItem *rootItem;

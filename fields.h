@@ -1,6 +1,6 @@
 #ifndef FIELDS_H
 #define FIELDS_H
-
+const int ST_FIRST  = 0;
 const int ST_ID     = 0;
 const int ST_DESC   = 1;
 const int ST_NOTES  = 2;
@@ -20,6 +20,7 @@ const int ST_LAST   = 14; // last item to display
 
 extern const char *storyFieldNames[ST_LAST];
 
+const int SP_FIRST= 0;
 const int SP_NAME = 0;
 const int SP_DUE  = 1;
 const int SP_COMP = 2;

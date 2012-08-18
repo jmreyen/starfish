@@ -42,9 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
     //setup story tree
     ui->storyTreeView->setModel(&theStoryTree);
+    ui->storyTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->storyTreeView->setDragEnabled (true );
-    ui->storyTreeView->setAcceptDrops (true );
+    ui->storyTreeView->viewport()->setAcceptDrops (true );
     ui->storyTreeView->setDropIndicatorShown (true );
+    ui->storyTreeView->setDragDropMode(QAbstractItemView::InternalMove);
+
 
     //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStoryTree);

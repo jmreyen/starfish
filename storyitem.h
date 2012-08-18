@@ -1,37 +1,48 @@
 #ifndef STORYITEM_H
 #define STORYITEM_H
 
+#include <QVariant>
 
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 extern const char *storyDisplayNames[];
 
 class StoryItem
 {
 public:
+    StoryItem(const QString &desc, StoryItem *parent = 0);
     StoryItem(const QVariantList &list, StoryItem *parent = 0);
     StoryItem(const QVariantMap &map, StoryItem *parent = 0);
-     ~StoryItem();
+    StoryItem(QXmlStreamReader *reader, StoryItem *parent);
 
-     void appendChild(StoryItem *child);
+    ~StoryItem();
 
-     StoryItem *child(int row);
-     int childCount() const;
-     int columnCount() const;
-     QVariant data(int column) const;
-     bool setData(int column, const QVariant &value);
-     int row() const;
-     StoryItem *parent() const;
-     void setParent(StoryItem *parent);
+    StoryItem *childAt(int row);
+    int childCount() const;
+    int columnCount() const;
+    QVariant data(int column) const;
+    bool setData(int column, const QVariant &value);
+    bool insertChild(int row, StoryItem *item);
+    void addChild(StoryItem *childAt);
+    StoryItem* takeChild(int row);
+    int row() const;
+    StoryItem *parent() const;
+    void setParent(StoryItem *parent);
 
-     const StoryItem &fromMap(const QVariantMap &map);
-     void clear();
+    void clear();
+    void writeStory(QXmlStreamWriter *writer) const;
 
- private:
-     QList<StoryItem*> childItems;
-     QList<QVariant> itemData;
-     StoryItem *parentItem;
-     bool thePrintFlag;
-     int sortPosition;
+protected:
+    const StoryItem &fromMap(const QVariantMap &map);
+    void readStory(QXmlStreamReader *reader);
+
+private:
+    QList<StoryItem*> childItems;
+    QList<QVariant> itemData;
+    StoryItem *parentItem;
+    bool thePrintFlag;
+    int sortPosition;
 
 };
 
