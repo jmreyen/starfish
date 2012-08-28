@@ -95,13 +95,13 @@ QVariant StoryItemModel::data(const QModelIndex &index, int role) const
 Qt::ItemFlags StoryItemModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
 
     Qt::ItemFlags f =
             Qt::ItemIsEnabled |
             Qt::ItemIsSelectable;
 
-    if (index.column() == ST_ID)
+   if (index.column() == ST_ID)
             f = f | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
 
     if (index.column()==ST_PRINT)
@@ -278,7 +278,7 @@ bool StoryItemModel::dropMimeData(const QMimeData *mimeData,
         QByteArray xmlData = qUncompress(mimeData->data(MimeType));
         QXmlStreamReader reader(xmlData);
         if (row == -1)
-            row = parent.isValid() ? parent.row() : rootItem->childCount();
+            row = parent.isValid() ? parentItem->childCount() : rootItem->childCount();
         beginInsertRows(parent, row, row);
         readStories(&reader, parentItem);
         endInsertRows();

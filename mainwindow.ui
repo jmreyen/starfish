@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>PIC</string>
+   <string>Starfish</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -724,7 +724,7 @@
      <x>0</x>
      <y>0</y>
      <width>643</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

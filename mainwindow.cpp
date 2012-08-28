@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theBurnDownScene(this),
     theCardScene(this),
     thePrinter(QPrinter::HighResolution),
-    theSettings("pic.ini", QSettings::IniFormat),
+    theSettings("starfish.ini", QSettings::IniFormat),
     loadOnStart(false)
 {
     ui->setupUi(this);

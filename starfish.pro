@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-TARGET = pic
+TARGET = starfish
 TEMPLATE = app
 
 
