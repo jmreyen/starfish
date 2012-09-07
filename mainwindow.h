@@ -46,7 +46,6 @@ private slots:
     void onStoryModelDataChanged(const QModelIndex &index);
     // Story Table Filters
     void onFilterRow(QString arg);
-    void on_filterBySprintCheckBox_clicked(bool checked);
     //Sprint Table
     void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onSprintModelDataChanged(const QModelIndex &index);
@@ -60,6 +59,8 @@ private slots:
     void setComponents(const QStringList &list);
     void setStatus(const QStringList &list);
     void setTypes(const QStringList &list);
+    void loadError(const QString &);
+    void ioMessage(const QString &);
 
 
 

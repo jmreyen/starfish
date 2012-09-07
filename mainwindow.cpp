@@ -47,8 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->storyTreeView->viewport()->setAcceptDrops (true );
     ui->storyTreeView->setDropIndicatorShown (true );
     ui->storyTreeView->setDragDropMode(QAbstractItemView::InternalMove);
-
-
     //map story table entries to editor widgets
     theStoryDataMapper.setModel(&theStoryTree);
     theStoryDataMapper.setItemDelegate(new StoryItemDelegate());
@@ -98,22 +96,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // *** Setup Loader ***
     theLoader = IOFactory::Instance()->getIO("TRAC");
-
-    // *** Load Settings ***
-    //I/O settings
-    loadOnStart = theSettings.value("IO/LoadOnStart").toBool();
-    theLoader->loadSettings(theSettings);
-    //Layout settings
-    int size = theSettings.beginReadArray("columns");
-    for (int i = 0; i < size; ++i) {
-        theSettings.setArrayIndex(i);
-        bool show = theSettings.value(QString("show"), false).toBool();
-        int width = theSettings.value(QString("width"), 100).toInt();
-        ui->storyTreeView->setColumnHidden(i, !show);
-        ui->storyTreeView->setColumnWidth(i, width==0?100:width);
-    }
-    theSettings.endArray();
-
     // connect slots for loading data
     connect(theLoader, SIGNAL(storiesLoaded(const QVariantList &)),
             SLOT(setStories(const QVariantList &)));
@@ -133,7 +115,25 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(setStatus(const QStringList &)));
     connect(theLoader, SIGNAL(newStoryLoaded(const QVariantMap &)),
             SLOT(addNewlySavedStory(const QVariantMap &)));
+    connect(theLoader, SIGNAL(loadError(const QString &)),
+            SLOT(loadError(const QString &)));
+    connect(theLoader, SIGNAL(message(const QString &)),
+            SLOT(ioMessage(const QString &)));
 
+    // *** Load Settings ***
+    //I/O settings
+    loadOnStart = theSettings.value("IO/LoadOnStart").toBool();
+    theLoader->loadSettings(theSettings);
+    //Layout settings
+    int size = theSettings.beginReadArray("columns");
+    for (int i = 0; i < size; ++i) {
+        theSettings.setArrayIndex(i);
+        bool show = theSettings.value(QString("show"), false).toBool();
+        int width = theSettings.value(QString("width"), 100).toInt();
+        ui->storyTreeView->setColumnHidden(i, !show);
+        ui->storyTreeView->setColumnWidth(i, width==0?100:width);
+    }
+    theSettings.endArray();
     // setup Printer
     thePrinter.setOrientation(QPrinter::Landscape);
     thePrinter.setPageSize(QPrinter::A5);
@@ -178,7 +178,7 @@ void MainWindow::loadAll()
     statusBar()->showMessage("Querying ...");
     theLoader->load();
     theSprints.sortByDate();
-
+    statusBar()->showMessage("");
 }
 
 void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
@@ -399,22 +399,7 @@ void MainWindow::onFilterRow(QString arg)
 //    }
 }
 
-void MainWindow::on_filterBySprintCheckBox_clicked(bool checked)
-{
-//    QModelIndexList indexList = ui->sprintTable->selectionModel()->selection().indexes();
-//    QStringList stringList;
-//    foreach (QModelIndex index, indexList)
-//        stringList.append(theSprints.sprint(index.row()).name());
-//    for( int i = 0; i < theStoryTree.rowCount(); ++i )
-//    {
-//        if (checked) {
-//            QString str = theStoryTree.data(i,ST_SPRINT).toString();
-//            ui->storyTreeView->setRowHidden( i, !stringList.contains(str));
-//        }
-//        else
-//            ui->storyTreeView->setRowHidden( i, false);
-//    }
-}
+
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
@@ -522,3 +507,15 @@ void MainWindow::setTypes(const QStringList &list)
     setStandardItemModel(theTypes, ui->typComboBox->model());
 }
 
+void MainWindow::loadError(const QString &s)
+{
+    QMessageBox msgBox;
+    msgBox.setText(QString(s));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
+void MainWindow::ioMessage(const QString &s)
+{
+    statusBar()->showMessage(s);
+}

@@ -28,6 +28,8 @@ signals:
     void componentsLoaded(const QStringList &list);
     void statusLoaded(const QStringList &list);
     void typesLoaded(const QStringList &list);
+    void loadError(const QString &s);
+    void message(const QString &s);
 
 public slots:
     void onSaveNewStory(const QVariantMap &map){saveNewStory(map);}

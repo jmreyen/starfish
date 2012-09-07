@@ -12,8 +12,8 @@ namespace
     const bool registered = IOFactory::Instance()->RegisterIO(Trac, CreateTracIO);
 }
 
-QStringList picStatusList = QString("new,postponed,prioritised,selected,selected,waiting,done").split(",");
-QStringList tracStatusList = QString("new,postponed,accepted,assigned,reopened,waiting,closed").split(",");
+QStringList picStatusList = QString("new,postponed,prioritised,selected,waiting,done").split(",");
+QStringList tracStatusList = QString("new,postponed,accepted,assigned,waiting,closed").split(",");
 
 void toTrac(QVariantMap &map)
 {
@@ -147,7 +147,7 @@ void TracIO::ticketQueryResponseMethod(QVariant &arg) {
     QStringList list = arg.toStringList();
     QVariantList args, methodList;
 
-//    statusBar()->showMessage("Retrieving ...");
+    emit message("Retrieving ...");
     for (int i=0; i<list.size(); ++i)    {
         QVariantMap newMethod;
         QVariantList newParams;
@@ -187,7 +187,7 @@ void TracIO::getTicketResponseMethod(QVariant &arg)
         storyList.append(newStory);
     }
     emit storiesLoaded(storyList);
-//    statusBar()->showMessage("");
+    emit message("");
 }
 
 void TracIO::sprintQueryResponseMethod(QVariant &arg) {
@@ -315,7 +315,15 @@ void TracIO::versionQueryResponseMethod(QVariant &arg)
 void TracIO::statusQueryResponseMethod(QVariant &arg)
 {
     QStringList list = arg.toStringList();
-    //TODO: check if Trac workflow is set up properly
+    foreach(const QString &s, tracStatusList) {
+        if (!list.contains(s))
+            emit loadError("Trac workflow not set up properly. Status " +s+" is missing.");
+    }
+
+    foreach(const QString &s, list) {
+        if (!tracStatusList.contains(s))
+            emit loadError("Additional status " +s+" found in Trac setup. It will be ignored.");
+    }
 
     emit statusLoaded(picStatusList);
 }
@@ -372,7 +380,7 @@ void TracIO::reloadNewStoryResponseMethod(QVariant & arg)
 void TracIO::myFaultResponse(int error, const QString &message) {
     QString msg = QString().sprintf("An Error occured: %i. Message: ", error) + message;
     qDebug() << msg;
-//    ui.statusBar->showMessage(msg, 5000);
+    //emit message(msg);
 }
 
 bool TracIO::loadSettings(const QSettings &settings)

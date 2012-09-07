@@ -649,24 +649,14 @@
        <string>Story Filter</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="1">
-        <widget class="QComboBox" name="filterColumnComboBox"/>
-       </item>
        <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Filter Column</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
         <widget class="QLabel" name="label_15">
          <property name="text">
-          <string>Filter Value</string>
+          <string>Status</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
+       <item row="0" column="1">
         <widget class="QComboBox" name="filterValueComboBox"/>
        </item>
       </layout>

@@ -314,19 +314,19 @@ void StoryItemModel::fromList(const QVariantList &list)
     emit layoutAboutToBeChanged();
 
     //create lookup map with id and StoryItem
-    QMap <QString, StoryItem*> lookupMap;
+    QMap <int, StoryItem*> lookupMap;
     for (int i=0; i<list.count(); ++i) {
         QVariantMap map = list[i].toMap();
         StoryItem *story = new StoryItem(map);
-        lookupMap.insert(story->data(ST_ID).toString(), story);
+        lookupMap.insert(story->data(ST_ID).toInt(), story);
     }
     //build tree
-    for (QMap <QString, StoryItem*>::iterator itr = lookupMap.begin(); itr != lookupMap.end(); ++itr) {
+    for (QMap <int, StoryItem*>::iterator itr = lookupMap.begin(); itr != lookupMap.end(); ++itr) {
         StoryItem *item = itr.value();
-        QString parentId = itr.value()->data(ST_PARENT).toString();
+        int parentId = itr.value()->data(ST_PARENT).toInt();
         StoryItem *parentItem;
 
-        if (parentId.isEmpty())
+        if (parentId == 0)
             parentItem = rootItem;
         else
             parentItem = lookupMap[parentId];
