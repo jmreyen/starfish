@@ -22,6 +22,7 @@ public:
     StoryIterator &operator = (StoryIterator &iterator);
     StoryIterator &operator ++();
     const StoryItem *operator ->();
+    const StoryItem *operator *();
     bool operator !=(const StoryIterator &iterator) const;
 protected:
     StoryIterator(StoryItem *item);
@@ -58,6 +59,7 @@ public:
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const;
     QModelIndex parent(const QModelIndex &index) const;
+    QModelIndex parent(const StoryItem *childItem) const;
 
     // drag and drop
     Qt::DropActions supportedDropActions() const;

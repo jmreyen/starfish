@@ -45,6 +45,12 @@ const StoryItem *StoryIterator::operator ->()
     return theFlatList[current].first;
 }
 
+const StoryItem *StoryIterator::operator *()
+{
+    return theFlatList[current].first;
+}
+
+
 bool StoryIterator::operator !=(const StoryIterator &iterator) const
 {
     return current!=iterator.current;
@@ -217,6 +223,11 @@ QModelIndex StoryItemModel::parent(const QModelIndex &index) const
         return QModelIndex();
 
     StoryItem *childItem = getItem(index);
+    return parent(childItem);
+}
+
+QModelIndex StoryItemModel::parent(const StoryItem *childItem) const
+{
     StoryItem *parentItem = childItem->parent();
 
     if (childItem == rootItem || parentItem == rootItem || parentItem == 0)
@@ -224,6 +235,7 @@ QModelIndex StoryItemModel::parent(const QModelIndex &index) const
 
     return createIndex(parentItem->row(), 0, parentItem);
 }
+
 
 // end model/view methods <<<
 const QString MimeType = "application/pic";

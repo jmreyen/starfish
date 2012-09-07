@@ -64,6 +64,8 @@ private slots:
 
 
 
+    void on_filterValueComboBox_currentIndexChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     StoryItemModel theStoryTree;

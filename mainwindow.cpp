@@ -519,3 +519,27 @@ void MainWindow::ioMessage(const QString &s)
 {
     statusBar()->showMessage(s);
 }
+
+bool itemOrChildrenHaveStatus(const StoryItem *item, QString arg1)
+{
+    if (item->data(ST_STATUS).toString() == arg1)
+        return true;
+    else {
+        for (int i=0; i<item->childCount(); ++i){
+            if (itemOrChildrenHaveStatus((const_cast<StoryItem*>(item))->childAt(i), arg1))
+                return true;
+        }
+    }
+    return false;
+}
+
+void MainWindow::on_filterValueComboBox_currentIndexChanged(const QString &arg1)
+{
+    for (StoryItemModel::iterator itr = theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+        QModelIndex parent = theStoryTree.parent(*itr);
+        if (itemOrChildrenHaveStatus(*itr, arg1))
+            ui->storyTreeView->setRowHidden(itr->row(),parent, false);
+        else
+            ui->storyTreeView->setRowHidden(itr->row(), parent, true);
+    }
+}
