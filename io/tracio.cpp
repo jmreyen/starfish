@@ -320,10 +320,10 @@ void TracIO::statusQueryResponseMethod(QVariant &arg)
             emit loadError("Trac workflow not set up properly. Status " +s+" is missing.");
     }
 
-    foreach(const QString &s, list) {
-        if (!tracStatusList.contains(s))
-            emit loadError("Additional status " +s+" found in Trac setup. It will be ignored.");
-    }
+//    foreach(const QString &s, list) {
+//        if (!tracStatusList.contains(s))
+//            emit loadError("Additional status " +s+" found in Trac setup. It will be ignored.");
+//    }
 
     emit statusLoaded(picStatusList);
 }

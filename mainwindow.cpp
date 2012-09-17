@@ -161,6 +161,15 @@ MainWindow::~MainWindow()
         theSettings.setValue(QString("width"), width);
     }
     theSettings.endArray();
+
+    // Story Filter
+    foreach (QString s, theStatus) {
+        QCheckBox *cb = ui->showStatusGroupBox->findChild<QCheckBox*>(s);
+        if (cb) {
+            theSettings.setValue(QString("StoryFilter/") + s, cb->checkState() == Qt::Checked);
+        }
+    }
+
     delete ui;
 }
 
@@ -174,7 +183,6 @@ void MainWindow::loadAll()
     ui->comComboBox->clear();
     ui->verComboBox->clear();
     ui->typComboBox->clear();
-    ui->filterValueComboBox->clear();
     statusBar()->showMessage("Querying ...");
     theLoader->load();
     theSprints.sortByDate();
@@ -191,7 +199,13 @@ void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
 
     QString txt;
     QModelIndex currentIndex = theStoryTree.index(index.row(), 0, index.parent());
-    txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
+    if (index.parent().isValid()) {
+        QModelIndex parentIndex = theStoryTree.index(index.parent().row(), 1, index.parent().parent());
+        txt =  theStoryTree.data(parentIndex).toString() + ": #" + theStoryTree.data(currentIndex).toString();
+    }
+    else {
+        txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
+    }
     scene->setID(txt);
 
     currentIndex = theStoryTree.index(index.row(), 1, index.parent());
@@ -387,18 +401,6 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 
 
 
-void MainWindow::onFilterRow(QString arg)
-{
-//    for( int i = 0; i < theStoryTree.rowCount(); ++i )
-//    {
-//        QString str = theStoryTree.data(i,ST_STATUS).toString();
-//        if(arg == "all" || str.contains(arg) )
-//            ui->storyTreeView->setRowHidden( i, false);
-//        else
-//            ui->storyTreeView->setRowHidden( i, true);
-//    }
-}
-
 
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
@@ -435,7 +437,6 @@ void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , co
     }
 }
 
-
 void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
 {
     //set Data to BurnDownView
@@ -443,10 +444,11 @@ void MainWindow::onSprintModelDataChanged(const QModelIndex &index)
     theBurnDownScene.show(d.capacity(), d.workDays(), d.burnDown());
 }
 
-
 void MainWindow::setStories(const QVariantList &list)
 {
     theStoryTree.fromList(list);
+    if (theStatus.count() > 0)
+        applyStoryFilter();
 }
 
 void MainWindow::addNewlySavedStory(const QVariantMap &map)
@@ -499,7 +501,23 @@ void MainWindow::setComponents(const QStringList &list)
 void MainWindow::setStatus(const QStringList &list)
 {
     theStatus = list;
-    setStandardItemModel(theStatus, ui->filterValueComboBox->model());
+    //setup checkboxes for story filter
+    //Create grid layout
+    QGridLayout *gridLayout = new QGridLayout(ui->showStatusGroupBox);
+    gridLayout->setSpacing(6);
+    // create checkboxes
+    int col= 0;
+    foreach (QString s, theStatus) {
+        QCheckBox *cb = new QCheckBox(s, ui->showStatusGroupBox);
+        //load previous checkstate from settings
+        bool isChecked = theSettings.value(QString("StoryFilter/") + s).toBool();
+        cb->setCheckState(isChecked?Qt::Checked:Qt::Unchecked);
+        cb->setObjectName(s);
+        gridLayout->addWidget(cb, 0, ++col);
+        connect(cb, SIGNAL(clicked() ),
+                this, SLOT(applyStoryFilter()));
+    }
+
 }
 void MainWindow::setTypes(const QStringList &list)
 {
@@ -520,26 +538,34 @@ void MainWindow::ioMessage(const QString &s)
     statusBar()->showMessage(s);
 }
 
-bool itemOrChildrenHaveStatus(const StoryItem *item, QString arg1)
+
+void MainWindow::applyStoryFilter()
 {
-    if (item->data(ST_STATUS).toString() == arg1)
-        return true;
-    else {
-        for (int i=0; i<item->childCount(); ++i){
-            if (itemOrChildrenHaveStatus((const_cast<StoryItem*>(item))->childAt(i), arg1))
-                return true;
+    // get list with checkboxes
+    QList<QCheckBox*> list = ui->showStatusGroupBox->findChildren<QCheckBox*>();
+    // Map to store display status
+    QMap<const StoryItem *, bool> displayMap;
+    //for each status ...
+    foreach (QCheckBox *cb, list) {
+        QString statusName = cb->objectName();
+        bool isChecked = cb->checkState() == Qt::Checked;
+        //... check if the item ...
+        for (StoryItemModel::iterator itr = theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+            if (itr->data(ST_STATUS).toString() == statusName) {
+                // ... and its parents have to be displayed ...
+                for (const StoryItem *item = *itr; item != 0; item = item->parent()) {
+                    // ... and mark this in the display map
+                    displayMap[item] = displayMap[item] || isChecked;
+                }
+            }
         }
     }
-    return false;
+    // show or hide rows
+    foreach (const StoryItem *item, displayMap.keys()){
+        QModelIndex parent = theStoryTree.parent(item);
+        ui->storyTreeView->setRowHidden(item->row(),parent, !displayMap.value(item));
+    }
+
+
 }
 
-void MainWindow::on_filterValueComboBox_currentIndexChanged(const QString &arg1)
-{
-    for (StoryItemModel::iterator itr = theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
-        QModelIndex parent = theStoryTree.parent(*itr);
-        if (itemOrChildrenHaveStatus(*itr, arg1))
-            ui->storyTreeView->setRowHidden(itr->row(),parent, false);
-        else
-            ui->storyTreeView->setRowHidden(itr->row(), parent, true);
-    }
-}

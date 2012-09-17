@@ -90,7 +90,7 @@ void StoryCardScene::setDesc(const QString & txt)
 
 void StoryCardScene::setNotes(const QString & txt)
 {
-    theStoryNotes->setPlainText(txt.left(300));
+    theStoryNotes->setPlainText(txt.left(200));
     adjustFontSize(theStoryNotes, theNotesRect.width(), theNotesRect.height(), 10.);
 }
 

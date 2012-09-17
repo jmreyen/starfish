@@ -12,6 +12,7 @@
 #include <QPrinter>
 #include <QStandardItemModel>
 #include <QDataWidgetMapper>
+#include <QCheckBox>
 
 
 namespace Ui {
@@ -45,7 +46,7 @@ private slots:
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onStoryModelDataChanged(const QModelIndex &index);
     // Story Table Filters
-    void onFilterRow(QString arg);
+    void applyStoryFilter();
     //Sprint Table
     void onSprintTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
     void onSprintModelDataChanged(const QModelIndex &index);
@@ -62,9 +63,10 @@ private slots:
     void loadError(const QString &);
     void ioMessage(const QString &);
 
+private:
+    //Helpers for story filter
+    bool itemOrChildrenHaveDifferentStatus(const StoryItem *item, QString arg1);
 
-
-    void on_filterValueComboBox_currentIndexChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -86,6 +88,8 @@ private:
     AbstractIO *theLoader;
     QList<QPersistentModelIndex> theStoryChanges;
 };
+
+
 
 
 #endif // MAINWINDOW_H
