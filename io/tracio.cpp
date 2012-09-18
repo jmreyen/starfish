@@ -17,11 +17,13 @@ QStringList tracStatusList = QString("new,postponed,accepted,assigned,waiting,cl
 
 void toTrac(QVariantMap &map)
 {
-    QString picStatus = map[storyFieldNames[ST_STATUS]].toString();
-    int n = picStatusList.indexOf(picStatus);
-    if (n != -1) {
-        QString tracStatus = tracStatusList[n];
-        map[storyFieldNames[ST_STATUS]] = tracStatus;
+    // Status
+    if (map.contains(storyFieldNames[ST_STATUS])) {
+        int n = picStatusList.indexOf(map[storyFieldNames[ST_STATUS]].toString());
+        if (n != -1) {
+            QString tracStatus = tracStatusList[n];
+            map[storyFieldNames[ST_STATUS]] = tracStatus;
+        }
     }
 }
 

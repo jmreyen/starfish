@@ -152,7 +152,7 @@ bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value
     StoryItem *item = getItem(index);
 
     switch (role){
-    case Qt::DisplayRole:
+    case Qt::DisplayRole: //Hmm, warum habe ich das denn gebraucht?!?
     case Qt::EditRole:
         if (index.column() < ST_PRINT) {
             item->setData(index.column(), value);
