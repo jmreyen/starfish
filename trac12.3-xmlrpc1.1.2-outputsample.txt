@@ -1,7 +1,0 @@
->>> print map(str, multicall())
-
-
-["
-	[1, <DateTime '20120602T08:46:00' at 241c508>, <DateTime '20120606T21:07:30' at 241c378>, {'status': 'new', 'changetime': <DateTime '20120606T21:07:30' at 241c3c8>, 'description': '', 'reporter': 'admin', 'cc': '', 'type': 'defect', 'milestone': '', '_ts': '2012-06-06 21:07:30.711000+00:00', 'component': 'DekaGrid','summary': 'Dies ist das erste Testticket', 'priority': 'major', 'owner': 'somebody', 'version': '', 'time': <DateTime '20120602T08:46:00' at 241c648>, 'keywords': '', 'resolution': ''}]", "
-	[2, <DateTime '20120602T16:36:56' at 241c5d0>, <DateTime '20120606T21:07:45' at 241c350>, {'status': 'new', 'changetime': <DateTime '20120606T21:07:45' at 241c580>, 'description': '', 'reporter': 'admin', 'cc': '', 'type': 'defect', 'milestone': '', '_ts': '2012-06-06 21:07:45.848000+00:00', 'component': 'DekaGrid', 'summary': 'Dies ist ein weiterer Test', 'priority': 'major', 'owner': 'somebody', 'version': '', 'time': <DateTime '20120602T16:36:56' at 241c5f8>, 'keywords': '', 'resolution': ''}]
-"]
