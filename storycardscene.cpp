@@ -109,7 +109,7 @@ void StoryCardScene::setImp(const QString & txt)
 
 void StoryCardScene::setEst(const QString & txt)
 {
-    theStoryEst->setPlainText(txt);
+    theStoryEst->setPlainText(txt=="?"?"":txt);
     adjustFontSize(theStoryEst, theEstRect.width(), theEstRect.height(), 10.);
     center(theStoryEst);
 }

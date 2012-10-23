@@ -52,7 +52,6 @@ FORMS    += mainwindow.ui \
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a
-QT   += xml network
+QT   += xml network ssl
 
-RESOURCES += \
-    images.qrc
+#RESOURCES += images.qrc

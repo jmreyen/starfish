@@ -41,9 +41,7 @@ private:
     QList<StoryItem*> childItems;
     QList<QVariant> itemData;
     StoryItem *parentItem;
-    bool thePrintFlag;
     int sortPosition;
-
 };
 
 #endif // STORYITEM_H

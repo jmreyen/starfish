@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
     theStoryDataMapper.addMapping(ui->reporterEdit, ST_USER);
     theStoryDataMapper.addMapping(ui->descriptionEdit, ST_NOTES);
+    theStoryDataMapper.addMapping(ui->htdEdit, ST_HTD);
     theStoryDataMapper.addMapping(ui->estComboBox, ST_EST);
     theStoryDataMapper.addMapping(ui->impComboBox, ST_IMP);
     theStoryDataMapper.addMapping(ui->sprComboBox, ST_SPRINT);
@@ -69,6 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
     connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
+
     //setup SprintTable
     ui->sprintTable->setModel(&theSprints);
     //setup burndown view
@@ -290,7 +292,17 @@ void MainWindow::onActionStoreStories()
     int ret = msgBox.exec();
     switch (ret) {
     case QMessageBox::Save:
+        //save changes
         theLoader->updateStories(updateMap);
+        //mark stories as unmodified
+        foreach (QPersistentModelIndex i, theStoryChanges) {
+            theStoryTree.setData(
+                theStoryTree.index(i.row(), ST_MODIFIED, i.parent()),
+                false,
+                Qt::EditRole
+            );
+        }
+        //clear change list
         theStoryChanges.clear();
         break;
     case QMessageBox::Discard:
@@ -381,13 +393,12 @@ void MainWindow::onActionPrint()
     }
 }
 
-
-
 void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
     if (current!= previous) {
         fillCard(current);
-        // if the root index is not set, the mapper won't findy the sub items
+        updateStatisticsLabel(current);
+        // if the root index is not set, the mapper won't find the sub items
         theStoryDataMapper.setRootIndex(current.parent());
         theStoryDataMapper.setCurrentModelIndex(current);
     }
@@ -395,13 +406,25 @@ void MainWindow::onStoryTableCurrentCellChanged(const QModelIndex &current , con
 
 void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
 {
-    fillCard(index);
+    if (index.column() == ST_MODIFIED)
+        return;
+
+    //remember changed item
     theStoryChanges.append(index);
+    //update card preview
+    fillCard(index);
+    //mark row as modified
+    theStoryTree.setData(
+        theStoryTree.index(index.row(), ST_MODIFIED, index.parent()),
+        true,
+        Qt::EditRole
+    );
+    // update TreeView to show that the row has been modified
+    // Not sure why this works and just calling update() doesn't
+    ui->storyTreeView->setUpdatesEnabled(false);
+    ui->storyTreeView->setUpdatesEnabled(true);
+    //ui->storyTreeView->update();
 }
-
-
-
-
 
 void MainWindow::onSprintTableCurrentCellChanged(const QModelIndex &current , const QModelIndex &previous )
 {
@@ -569,3 +592,44 @@ void MainWindow::applyStoryFilter()
 
 }
 
+struct s_statistics
+{
+    s_statistics() : estimation(0), estimated(0),notEstimated(0){}
+    s_statistics & operator = (s_statistics &s)
+    {
+        estimation = s.estimation;
+        estimated  = s.estimated;
+        notEstimated= s.notEstimated;
+        return *this;
+    }
+    int estimation;
+    int estimated;
+    int notEstimated;
+} ;
+
+void MainWindow::updateStatisticsLabel(const QModelIndex &current)
+{
+    QMap<QString, s_statistics> storyPoints;
+    if (current.isValid()) {
+        for (StoryItemModel::iterator itr = theStoryTree.begin(current); itr != theStoryTree.end(); ++ itr){
+            QString status = itr->data(ST_STATUS).toString();
+            QString estimation = itr->data(ST_EST).toString();
+            if (estimation == "?") {
+                storyPoints[status].notEstimated++;
+            } else {
+                storyPoints[status].estimated++;
+                storyPoints[status].estimation+=estimation.toInt();
+            }
+        }
+    }
+    QString statistics = "<html><table cellpadding=2 cellspacing=2><tr><td><strong>status</strong></td><td><strong>SP</strong></td><td><strong>est.</strong></td><td><strong>not est.</strong></td></tr>";
+    foreach (const QString &str, storyPoints.keys())
+        statistics += "<tr><td>" + str.leftJustified(8, ' ')
+                 + "<td align=right>" + QString::number(storyPoints.value(str).estimation) + "</td>"
+                 + "<td align=right>" + QString::number(storyPoints.value(str).estimated) + "</td>"
+                 + "<td align=right>" + QString::number(storyPoints.value(str).notEstimated) + "</td></tr>";
+    statistics += "</table></html>";
+    ui->statisticsLabel->setText(statistics);
+    ui->storyStatisticsGroupBox->adjustSize();
+
+}

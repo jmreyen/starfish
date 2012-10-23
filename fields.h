@@ -1,22 +1,23 @@
 #ifndef FIELDS_H
 #define FIELDS_H
-const int ST_FIRST  = 0;
-const int ST_ID     = 0;
-const int ST_DESC   = 1;
-const int ST_NOTES  = 2;
-const int ST_HTD    = 3;
-const int ST_IMP    = 4;
-const int ST_EST    = 5;
-const int ST_USER   = 6;
-const int ST_TYP    = 7;
-const int ST_STATUS = 8;
-const int ST_SPRINT = 9;
-const int ST_COMP   = 10;
-const int ST_VERSION= 11;
-const int ST_PARENT = 12;
-const int ST_PRINT  = 13;
-const int ST_IO_LAST= 13; // last item to load/store
-const int ST_LAST   = 14; // last item to display
+const int ST_FIRST         = 0;
+const int ST_ID            = 0;
+const int ST_DESC          = 1;
+const int ST_NOTES         = 2;
+const int ST_HTD           = 3;
+const int ST_IMP           = 4;
+const int ST_EST           = 5;
+const int ST_USER          = 6;
+const int ST_TYP           = 7;
+const int ST_STATUS        = 8;
+const int ST_SPRINT        = 9;
+const int ST_COMP          = 10;
+const int ST_VERSION       = 11;
+const int ST_PARENT        = 12;
+const int ST_IO_LAST       = 13; // last item to load/store
+const int ST_PRINT         = 13;
+const int ST_MODIFIED      = 14;
+const int ST_LAST          = 15; // last item to display
 
 extern const char *storyFieldNames[ST_LAST];
 

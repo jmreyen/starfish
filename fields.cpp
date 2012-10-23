@@ -14,7 +14,8 @@ const char *storyFieldNames[ST_LAST] = {
     "component",
     "version",
     "parent",
-    "print"};
+    "print",
+    "modified"};
 
 const char *sprintFieldNames[SP_LAST] = {
     "name",

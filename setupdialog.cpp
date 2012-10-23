@@ -37,7 +37,7 @@ void SetupDialog::setShowColumn(int col, bool b)
     case ST_COMP:    ui->checkBox_10->setChecked(b); break;
     case ST_VERSION: ui->checkBox_11->setChecked(b); break;
     case ST_PARENT:  ui->checkBox_12->setChecked(b); break;
-    case ST_LAST:    ui->checkBox_13->setChecked(b); break;
+    case ST_PRINT:   ui->checkBox_13->setChecked(b); break;
     }
 }
 

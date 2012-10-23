@@ -34,7 +34,6 @@ StoryItem::StoryItem(const QString &desc, StoryItem *parent)
 
 
 StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
-    thePrintFlag(false),
     sortPosition(-1)
 
 {
@@ -43,7 +42,6 @@ StoryItem::StoryItem(const QList<QVariant> &list, StoryItem *parent) :
 }
 
 StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent) :
-    thePrintFlag(false),
     sortPosition(-1)
 {
     fromMap(map);
@@ -51,7 +49,6 @@ StoryItem::StoryItem(const QVariantMap &map, StoryItem *parent) :
 }
 
 StoryItem::StoryItem(QXmlStreamReader *reader, StoryItem *parent) :
-    thePrintFlag(false),
     sortPosition(-1)
 {
     readStory(reader);
@@ -134,6 +131,7 @@ int StoryItem::row() const
 
 const StoryItem &StoryItem::fromMap(const QVariantMap &map)
 {
+    itemData.clear();
     for (int i=ST_FIRST; i<ST_LAST;++i) {
         itemData.append(map[storyFieldNames[i]]);
     }
@@ -149,6 +147,7 @@ void StoryItem::writeStory(QXmlStreamWriter *writer) const
 
 void StoryItem::readStory(QXmlStreamReader *reader)
 {
+    itemData.clear();
     for (int i=ST_FIRST; i<ST_LAST;++i) {
         itemData.append(reader->attributes().value(storyFieldNames[i]).toString());
     }

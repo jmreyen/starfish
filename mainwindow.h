@@ -63,6 +63,8 @@ private slots:
     void loadError(const QString &);
     void ioMessage(const QString &);
 
+    void updateStatisticsLabel(const QModelIndex &current);
+
 private:
     //Helpers for story filter
     bool itemOrChildrenHaveDifferentStatus(const StoryItem *item, QString arg1);

@@ -86,13 +86,21 @@ QVariant StoryItemModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::EditRole:
     case Qt::DisplayRole:
-        if (index.column()<ST_PRINT)
+        if (index.column() < ST_LAST)
             return item->data(index.column());
         break;
     case Qt::CheckStateRole:
         //Get status of the checkbox in the print column
         if (index.column()== ST_PRINT)
             return item->data(index.column()).toBool();
+        break;
+    case Qt::FontRole: {
+            if (item->data(ST_MODIFIED).toBool()) {
+                QFont font;
+                font.setItalic(true);
+                return font;
+            }
+        }
         break;
     }
     return QVariant();
@@ -120,7 +128,7 @@ QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation, in
 {
     switch (role) {
     case Qt::DisplayRole:
-        if (orientation == Qt::Horizontal && section != ST_PRINT)
+        if (orientation == Qt::Horizontal/* && section != ST_PRINT*/)
             return rootItem->data(section);
         break;
     case Qt::DecorationRole:
@@ -154,10 +162,12 @@ bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value
     switch (role){
     case Qt::DisplayRole: //Hmm, warum habe ich das denn gebraucht?!?
     case Qt::EditRole:
-        if (index.column() < ST_PRINT) {
-            item->setData(index.column(), value);
-            emit dataChanged(index, index);
-            return true;
+        if (index.column() < ST_LAST) {
+            if (item->data(index.column()) != value) {
+                item->setData(index.column(), value);
+                emit dataChanged(index, index);
+                return true;
+            }
         }
         break;
     case Qt::CheckStateRole :
@@ -268,7 +278,6 @@ QMimeData *StoryItemModel::mimeData(const QModelIndexList &indexes) const
         QByteArray encodedData;
         QXmlStreamWriter writer(&encodedData);
         writeStoryAndChildren(&writer, item);
-
         mimeData->setData(MimeType, qCompress(encodedData));
         return mimeData;
     }
@@ -277,13 +286,12 @@ QMimeData *StoryItemModel::mimeData(const QModelIndexList &indexes) const
 }
 
 bool StoryItemModel::dropMimeData(const QMimeData *mimeData,
-                                  Qt::DropAction action, int row, int column,
+                                  Qt::DropAction action, int row, int /*column */,
                                   const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
-    if (action != Qt::MoveAction || column > 0 ||
-            !mimeData || !mimeData->hasFormat(MimeType))
+    if (action != Qt::MoveAction || !mimeData || !mimeData->hasFormat(MimeType))
         return false;
     StoryItem *parentItem = getItem(parent);
     if (parentItem) {
@@ -387,6 +395,7 @@ void StoryItemModel::readStories(QXmlStreamReader *reader, StoryItem *story)
         if (reader->isStartElement()) {
             if (reader->name() == StoryTag) {
                 story = new StoryItem(reader, story);
+                story->setData(ST_MODIFIED, true);
             }
         }
         else if (reader->isEndElement()) {

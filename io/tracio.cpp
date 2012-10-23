@@ -76,7 +76,7 @@ bool TracIO::updateStories(QMap<QString, QVariantMap> & map)
         toTrac(newAttributes);
         newAttributes.insert("action", "leave");
         newParams.append(itr.key().toInt());
-        newParams.append("Stored by PIC");
+        newParams.append("Stored by STARFISH");
         newParams.append(newAttributes);
         newMethod.insert("methodName", "ticket.update");
         newMethod.insert("params", newParams);

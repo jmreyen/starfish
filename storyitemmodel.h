@@ -68,11 +68,8 @@ public:
     QMimeData *mimeData(const QModelIndexList &indexes) const;
     bool dropMimeData(const QMimeData *mimeData, Qt::DropAction action,
                       int row,int column, const QModelIndex &parent);
-
-
     QModelIndex addStory(const QModelIndex &parent, StoryItem *newStoryItem);
     QModelIndex addStory(const QModelIndex &parent, const QVariantMap &map);
-
     void writeStoryAndChildren(QXmlStreamWriter *writer, StoryItem *story) const;
     void readStories(QXmlStreamReader *reader, StoryItem *story);
 
@@ -80,9 +77,10 @@ public:
     void clear();
 
 
-
+    //iterator
     typedef StoryIterator iterator;
-    iterator begin() const {StoryIterator itr(rootItem); return itr;}
+    iterator begin(StoryItem *root = 0) const {StoryIterator itr(root?root:rootItem); return itr;}
+    iterator begin(const QModelIndex &index) const {StoryItem * item = getItem(index); return begin(item);}
     iterator end() const {return StoryIterator();}
 protected:
     StoryItem *getItem(const QModelIndex &index) const;
