@@ -3,5 +3,11 @@
         <file>images/b019500.jpg</file>
         <file>images/dekagrid_large.png</file>
         <file>images/printer.png</file>
+        <file>images/done.jpg</file>
+        <file>images/postponed.jpg</file>
+        <file>images/prioritised.jpg</file>
+        <file>images/selected.jpg</file>
+        <file>images/waiting.jpg</file>
+        <file>images/new.jpg</file>
     </qresource>
 </RCC>

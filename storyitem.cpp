@@ -65,7 +65,7 @@ void StoryItem::addChild(StoryItem *item)
     childItems.append(item);
 }
 
-StoryItem *StoryItem::childAt(int row)
+StoryItem *StoryItem::childAt(int row) const
 {
     return childItems.value(row);
 }

@@ -45,9 +45,9 @@ const StoryItem *StoryIterator::operator ->()
     return theFlatList[current].first;
 }
 
-const StoryItem *StoryIterator::operator *()
+const StoryItem &StoryIterator::operator *()
 {
-    return theFlatList[current].first;
+    return *theFlatList[current].first;
 }
 
 
@@ -75,13 +75,14 @@ StoryItemModel::~StoryItemModel()
 }
 
 // >>> model/view methods (from QAbstractItemModel
-
 QVariant StoryItemModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
     StoryItem *item = getItem(index);
+    if (item == rootItem)
+        return QVariant();
 
     switch (role) {
     case Qt::EditRole:
@@ -128,7 +129,7 @@ QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation, in
 {
     switch (role) {
     case Qt::DisplayRole:
-        if (orientation == Qt::Horizontal/* && section != ST_PRINT*/)
+        if (orientation == Qt::Horizontal && section != ST_PRINT)
             return rootItem->data(section);
         break;
     case Qt::DecorationRole:
@@ -174,7 +175,7 @@ bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value
         if (index.column()==ST_PRINT) {
             //Set status of the checkbox in the print column
             item->setData(index.column(), !item->data(index.column()).toBool());
-            emit dataChanged(index, index);
+            //emit dataChanged(index, index);
             return true;
         }
         break;
@@ -219,13 +220,17 @@ QModelIndex StoryItemModel::index(int row, int column, const QModelIndex &parent
     else
         parentItem = getItem(parent);
 
+    return index(row, column, parentItem);
+}
+
+QModelIndex StoryItemModel::index(int row, int column, const StoryItem *parentItem) const
+{
     StoryItem *childItem = parentItem->childAt(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
-
 
 QModelIndex StoryItemModel::parent(const QModelIndex &index) const
 {
@@ -245,9 +250,9 @@ QModelIndex StoryItemModel::parent(const StoryItem *childItem) const
 
     return createIndex(parentItem->row(), 0, parentItem);
 }
-
-
 // end model/view methods <<<
+
+// >>> drag and drop
 const QString MimeType = "application/pic";
 QStringList StoryItemModel::mimeTypes() const
 {
@@ -308,16 +313,6 @@ bool StoryItemModel::dropMimeData(const QMimeData *mimeData,
 }
 
 
-QModelIndex StoryItemModel::addStory(const QModelIndex &parent, StoryItem *newStoryItem)
-{
-    StoryItem *parentItem = getItem(parent);
-    newStoryItem->setParent(parentItem);
-    int position = parentItem->childCount();
-    beginInsertRows(parent, position, position);
-    endInsertRows();
-    return index(position, 0, parent);
-}
-
 QModelIndex StoryItemModel::addStory(const QModelIndex &parent, const QVariantMap &map)
 {
     StoryItem *parentItem = getItem(parent);
@@ -341,9 +336,16 @@ void StoryItemModel::fromList(const QVariantList &list)
         lookupMap.insert(story->data(ST_ID).toInt(), story);
     }
     //build tree
+    int parentId = 0;
     for (QMap <int, StoryItem*>::iterator itr = lookupMap.begin(); itr != lookupMap.end(); ++itr) {
         StoryItem *item = itr.value();
-        int parentId = itr.value()->data(ST_PARENT).toInt();
+        if (item) {
+            parentId = itr.value()->data(ST_PARENT).toInt();
+        } else {
+            qDebug() << "Inconsitent Tree!";
+            //            clear();
+            return;
+        }
         StoryItem *parentItem;
 
         if (parentId == 0)
@@ -396,6 +398,8 @@ void StoryItemModel::readStories(QXmlStreamReader *reader, StoryItem *story)
             if (reader->name() == StoryTag) {
                 story = new StoryItem(reader, story);
                 story->setData(ST_MODIFIED, true);
+                QModelIndex index = createIndex(story->parent()->childCount()-1, ST_PARENT, story);
+                emit dataChanged(index, index);
             }
         }
         else if (reader->isEndElement()) {

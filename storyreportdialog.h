@@ -15,7 +15,7 @@ class ReportDialog : public QDialog
 public:
     explicit ReportDialog(QWidget *parent = 0);
     ~ReportDialog();
-    void setTextDocument(QTextDocument *d);
+    void setHtml(const QString &s);
     
 private slots:
     void on_printButton_clicked();

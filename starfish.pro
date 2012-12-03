@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui webkit
 
 TARGET = starfish
 TEMPLATE = app
@@ -52,6 +52,9 @@ FORMS    += mainwindow.ui \
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a
-QT   += xml network ssl
+QT   += xml network 
 
 #RESOURCES += images.qrc
+
+RESOURCES += \
+    images.qrc

@@ -38,7 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionLoad, SIGNAL(triggered()), SLOT(onActionLoad()));
     connect(ui->actionStore, SIGNAL(triggered()), SLOT(onActionStoreStories()));
     connect(ui->actionSettings, SIGNAL(triggered()), SLOT(onActionSettings()));
-    connect(ui->actionShow_Report, SIGNAL(triggered()), SLOT(onActionReport()));
+    connect(ui->actionShowComprehensiveReport, SIGNAL(triggered()), SLOT(onActionComprehensiveReport()));
+    connect(ui->actionMeetingHandout, SIGNAL(triggered()), SLOT(onActionMeetingHandout()));
     connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
     //setup story tree
     ui->storyTreeView->setModel(&theStoryTree);
@@ -201,13 +202,14 @@ void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
 
     QString txt;
     QModelIndex currentIndex = theStoryTree.index(index.row(), 0, index.parent());
-    if (index.parent().isValid()) {
-        QModelIndex parentIndex = theStoryTree.index(index.parent().row(), 1, index.parent().parent());
-        txt =  theStoryTree.data(parentIndex).toString() + ": #" + theStoryTree.data(currentIndex).toString();
-    }
-    else {
-        txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
-    }
+//    if (index.parent().isValid()) {
+//        QModelIndex parentIndex = theStoryTree.index(index.parent().row(), 1, index.parent().parent());
+//        txt =  theStoryTree.data(parentIndex).toString() + ": #" + theStoryTree.data(currentIndex).toString();
+//    }
+//    else {
+//        txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
+//    }
+    txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
     scene->setID(txt);
 
     currentIndex = theStoryTree.index(index.row(), 1, index.parent());
@@ -233,6 +235,14 @@ void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
     currentIndex = theStoryTree.index(index.row(), 6, index.parent());
     txt = theStoryTree.data(currentIndex).toString();
     scene->setUser(txt);
+
+    if (index.parent().isValid() ) {
+        currentIndex = theStoryTree.index(index.parent().row(), ST_DESC, index.parent().parent());
+        txt = theStoryTree.data(currentIndex).toString();
+    } else {
+        txt = "";
+    }
+    scene->setParent(txt);
 }
 
 
@@ -267,23 +277,11 @@ void MainWindow::onActionStoreStories()
     if (theStoryChanges.isEmpty())
         return;
 
-    QMap<QString, QVariantMap> updateMap;
-    foreach (QPersistentModelIndex i, theStoryChanges) {
-        QString id = theStoryTree.data(theStoryTree.index(i.row(), ST_ID, i.parent()), Qt::DisplayRole).toString();
-        QString attribute = storyFieldNames[i.column()];
-        updateMap[id][attribute] = theStoryTree.data(i);
-    }
-
+    // Really dave changes?
     QString changedStories;
-    for (QMap<QString, QVariantMap>::iterator itr = updateMap.begin(); itr != updateMap.end(); ++itr) {
+    for (QMap<QString, QVariantMap>::iterator itr = theStoryChanges.begin(); itr != theStoryChanges.end(); ++itr) {
         changedStories += (changedStories.isEmpty()?"":", ") + itr.key();
-//        changedStories += "(";
-//        for (QMap<QString, QVariant>::iterator itr2 = itr.value().begin(); itr2 != itr.value().end(); ++itr2)
-//            changedStories += itr2.key() + " = " + itr2.value().toString();
-//        changedStories += ")";
-
     }
-
     QMessageBox msgBox;
     msgBox.setText(QString("The following stories have been modified: ")+changedStories);
     msgBox.setInformativeText("Do you want to save your changes?");
@@ -293,14 +291,10 @@ void MainWindow::onActionStoreStories()
     switch (ret) {
     case QMessageBox::Save:
         //save changes
-        theLoader->updateStories(updateMap);
+        theLoader->updateStories(theStoryChanges);
         //mark stories as unmodified
-        foreach (QPersistentModelIndex i, theStoryChanges) {
-            theStoryTree.setData(
-                theStoryTree.index(i.row(), ST_MODIFIED, i.parent()),
-                false,
-                Qt::EditRole
-            );
+        for (StoryItemModel::iterator itr=theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
+            (const_cast<StoryItem*>(&*itr))->setData(ST_MODIFIED, "false");
         }
         //clear change list
         theStoryChanges.clear();
@@ -341,28 +335,51 @@ void MainWindow::onSetupAccepted(const QVariantMap &map)
     loadOnStart = map["LoadOnStart"].toBool();
 }
 
-void MainWindow::onActionReport()
+
+void MainWindow::onActionReport(AbstractStoryReport &report, const QString &header)
 {
-//    StoryReport d;
-//    d.beginInsertStory();
-//    for (int i=0; i<theStoryTree.rowCount(); ++i) {
-//        d.insertStory(
-//                    theStoryTree.data(i,0).toInt(),
-//                    theStoryTree.data(i,1).toString(),
-//                    theStoryTree.data(i,2).toString(),
-//                    theStoryTree.data(i,3).toString(),
-//                    theStoryTree.data(i,4).toString(),
-//                    theStoryTree.data(i,5).toString(),
-//                    theStoryTree.data(i,6).toString(),
-//                    theStoryTree.data(i,8).toString());
+    // get a list with the checked status
+    QList<QCheckBox*> list = ui->showStatusGroupBox->findChildren<QCheckBox*>();
+    QStringList checkedStatus;
+    foreach (QCheckBox *cb, list) {
+        if (cb->checkState() == Qt::Checked)
+            checkedStatus.append(cb->text());
+    }
 
-//    }
-//    d.endInsertStory();
+    //insert stories into report
+    report.beginInsertStory(header);
+    for (StoryItemModel::iterator i = theStoryTree.begin(); i!=theStoryTree.end(); ++i) {
+        if (checkedStatus.contains(i->data(ST_STATUS).toString()) && i->childCount() == 0) {
+            report.insertStory(*i);
+        }
+    }
+    report.endInsertStory();
 
-//    ReportDialog dlg;
-//    dlg.setTextDocument(&d);
-//    dlg.exec();
+    qDebug() << report;
 
+    ReportDialog dlg;
+    dlg.setHtml(report);
+    dlg.exec();
+
+}
+
+void MainWindow::onActionComprehensiveReport()
+{
+    StoryReport report;
+    onActionReport(report, "DekaGrid Story Overview");
+}
+
+void MainWindow::on_actionShortReport_triggered()
+{
+    QuickReport report;
+    onActionReport(report, "DekaGrid Short Story Overview");
+
+}
+
+void MainWindow::onActionMeetingHandout()
+{
+    MeetingHandout handout;
+    onActionReport(handout, "DekaGrid Prio Meeting Agenda");
 }
 
 void MainWindow::onActionPrint()
@@ -385,7 +402,11 @@ void MainWindow::onActionPrint()
                 scene.setImp(itr->data(ST_IMP).toString());
                 scene.setEst(itr->data(ST_EST).toString());
                 scene.setUser(itr->data(ST_USER).toString());
-
+                if (itr->parent() && itr->parent()->parent()) {
+                    scene.setParent(itr->parent()->data(ST_DESC).toString());
+                } else {
+                    scene.setParent("");
+                }
                 scene.render(&painter);
                 thePrinter.newPage();
             }
@@ -410,7 +431,9 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
         return;
 
     //remember changed item
-    theStoryChanges.append(index);
+    QString id = theStoryTree.data(theStoryTree.index(index.row(), ST_ID, index.parent()), Qt::DisplayRole).toString();
+    QString attribute = storyFieldNames[index.column()];
+    theStoryChanges[id][attribute] = theStoryTree.data(index);
     //update card preview
     fillCard(index);
     //mark row as modified
@@ -576,7 +599,7 @@ void MainWindow::applyStoryFilter()
         for (StoryItemModel::iterator itr = theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
             if (itr->data(ST_STATUS).toString() == statusName) {
                 // ... and its parents have to be displayed ...
-                for (const StoryItem *item = *itr; item != 0; item = item->parent()) {
+                for (const StoryItem *item = &*itr; item != 0; item = item->parent()) {
                     // ... and mark this in the display map
                     displayMap[item] = displayMap[item] || isChecked;
                 }
@@ -586,7 +609,8 @@ void MainWindow::applyStoryFilter()
     // show or hide rows
     foreach (const StoryItem *item, displayMap.keys()){
         QModelIndex parent = theStoryTree.parent(item);
-        ui->storyTreeView->setRowHidden(item->row(),parent, !displayMap.value(item));
+        bool hide = !displayMap.value(item);
+        ui->storyTreeView->setRowHidden(item->row(),parent, hide);
     }
 
 

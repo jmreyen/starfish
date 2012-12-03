@@ -34,34 +34,31 @@ StoryCardScene::~StoryCardScene()
 
 
 //formatting helper functions
-void adjustFontSize(QGraphicsTextItem *item, double width, double height, double fontSize, int fontWeight=QFont::Normal, double deltaSize = 0)
+void adjustFontSize(QGraphicsTextItem *item, double itemWidth, double itemHeight, double fontSize, int fontWeight=QFont::Normal, double deltaSize = 0)
 {
     QFont font;
     font.setWeight(fontWeight);
-    int docHeight;
-
-    if (fontSize<=2)
-    {
-        item->setPlainText("See TRAC Ticket for details.");
-        fontSize = 10;
-    }
-
     // Determine height of text item with given width and font size
-    item->setTextWidth(width);
+    item->setTextWidth(itemWidth);
     font = item->font();
     font.setPointSize(fontSize);
     item->setFont(font);
-    docHeight=item->document()->size().height();
+    int docHeight=item->document()->size().height();
     // if item is not high enough, increase font size
-    if (docHeight < height)
+    if (docHeight < itemHeight) {
         // except when it was already made smaller in the previus recursion
         if (deltaSize<0)
             return;
         else
-            adjustFontSize(item, width, height, fontSize+1, fontWeight, 1);
+            adjustFontSize(item, itemWidth, itemHeight, fontSize+1, fontWeight, 1);
+    }
     //if item is too high decrease font size
-    else if (docHeight > height)
-        adjustFontSize(item, width, height, fontSize-1, fontWeight, -1);
+    else if (docHeight > itemHeight) {
+        if (fontSize < 5)
+            return;
+        else
+            adjustFontSize(item, itemWidth, itemHeight, fontSize-1, fontWeight, -1);
+    }
 
     return;
 }
@@ -92,6 +89,11 @@ void StoryCardScene::setNotes(const QString & txt)
 {
     theStoryNotes->setPlainText(txt.left(200));
     adjustFontSize(theStoryNotes, theNotesRect.width(), theNotesRect.height(), 10.);
+    if (theStoryNotes->font().pointSize() < 6)
+    {
+        theStoryNotes->setPlainText("See TRAC Ticket for details.");
+        adjustFontSize(theStoryNotes, theNotesRect.width(), theNotesRect.height(), 10.);
+    }
 }
 
 void StoryCardScene::setHTD(const QString & txt)
@@ -102,7 +104,7 @@ void StoryCardScene::setHTD(const QString & txt)
 
 void StoryCardScene::setImp(const QString & txt)
 {
-    theStoryImp->setPlainText(txt);
+    theStoryImp->setPlainText(txt=="none"?"":txt);
     adjustFontSize(theStoryImp, theImpRect.width(), theImpRect.height(), 10.);
     center(theStoryImp);
 }
@@ -119,6 +121,11 @@ void StoryCardScene::setUser(const QString & txt)
     adjustFontSize(theStoryUser, theUserRect.width(), theUserRect.height(), 10.);
     center(theStoryUser);
 }
+void StoryCardScene::setParent(const QString & txt)
+{
+    theParentStory->setPlainText(txt);
+    adjustFontSize(theParentStory, theParentRect.width(), theParentRect.height(), 10.);
+}
 
 void StoryCardScene::clearCard()
 {
@@ -129,6 +136,7 @@ void StoryCardScene::clearCard()
     theStoryImp->setPlainText("");
     theStoryEst->setPlainText("");
     theStoryUser->setPlainText("");
+    theParentStory->setPlainText("");
 }
 
 void StoryCardScene::initCard(qreal x, qreal y, qreal width, qreal height)
@@ -173,15 +181,19 @@ void StoryCardScene::initCard(qreal x, qreal y, qreal width, qreal height)
     theStoryUser = addText("");
     theStoryUser->setPos(theUserRect.x(),theUserRect.y());
     theStoryUser->setTextWidth(theUserRect.width());
+    theParentStory = addText("");
+    theParentStory->setPos(theParentRect.x(),theParentRect.y());
+    theParentStory->setTextWidth(theParentRect.width());
 }
 
 void StoryCardScene::initDefaultLayout(qreal x, qreal y, qreal width, qreal height)
 {
     theIDRect.setRect(0,0,160,30);
-    theDescRect.setRect(5,30, 288,65);
-    theNotesRect.setRect(5,110,233,50);
+    theDescRect.setRect(5,40, 288,65);
+    theNotesRect.setRect(5,120,233,40);
     theHTDRect.setRect(5,175,233,30);
-    theImpRect.setRect(243,110,50,40);
-    theEstRect.setRect(243,165,50,40);
-    theUserRect.setRect(160,0,148,25);
+    theImpRect.setRect(243,120,50,30);
+    theEstRect.setRect(243,175,50,30);
+    theUserRect.setRect(160,0,128,25);
+    theParentRect.setRect(0,20,293,20);
 }

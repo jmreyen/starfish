@@ -1,26 +1,59 @@
 #ifndef STORYREPORT_H
 #define STORYREPORT_H
 
-#include <QTextDocument>
-#include <QTextCursor>
+#include <QString>
+#include <QMap>
 
+class StoryItem;
 
-class StoryReport : public QTextDocument
+class AbstractStoryReport  : public QString
 {
-    Q_OBJECT
 public:
-    explicit StoryReport(QObject *parent = 0);
-    void insertheader(const QString &arg);
-    void insertStory(int id, const QString &sum, const QString &desc, const QString &htd, const QString &prio, const QString &est, const QString &usr, const QString &stat);
-    void beginInsertStory();
-    void endInsertStory();
-signals:
-    
-public slots:
+    explicit AbstractStoryReport();
+    virtual void beginInsertStory(const QString &header) = 0;
+    virtual void insertStory(const StoryItem &story) = 0;
+    virtual void endInsertStory() = 0;
 
-private:
-    QTextCursor theCursor;
+protected:
+    QString &wiki2html(QString & str);
+
+};
+
+
+class StoryReport : public AbstractStoryReport
+{
+public:
+    explicit StoryReport();
+    void beginInsertStory(const QString &header);
+    void insertStory(const StoryItem &story);
+    void endInsertStory();
+protected:
     QMap <QString, QString> theMap;
 };
+
+class QuickReport : public AbstractStoryReport
+{
+public:
+    explicit QuickReport();
+    void beginInsertStory(const QString &header);
+    void insertStory(const StoryItem &story);
+    void endInsertStory();
+protected:
+    QMap <QString, QString> theMap;
+};
+
+class MeetingHandout : public AbstractStoryReport
+{
+public:
+    explicit MeetingHandout();
+    void beginInsertStory(const QString &header);
+    void insertStory(const StoryItem &story);
+    void endInsertStory();
+protected:
+    QMap <QString, QString > theMap;
+    QString theSprintReview;
+    QString theNewStories;
+};
+
 
 #endif // STORYREPORT_H

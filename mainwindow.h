@@ -19,6 +19,8 @@ namespace Ui {
     class MainWindow;
 }
 
+class AbstractStoryReport;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -40,7 +42,10 @@ private slots:
     void onActionLoad();
     void onActionSettings();
     void onSetupAccepted(const QVariantMap &map);
-    void onActionReport();
+    void onActionReport(AbstractStoryReport &report, const QString &header);
+    void on_actionShortReport_triggered();
+    void onActionComprehensiveReport();
+    void onActionMeetingHandout();
     void onActionPrint();
     //Story Table
     void onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & );
@@ -88,7 +93,7 @@ private:
     QSettings theSettings;
     bool loadOnStart;
     AbstractIO *theLoader;
-    QList<QPersistentModelIndex> theStoryChanges;
+    QMap<QString, QVariantMap> theStoryChanges;
 };
 
 

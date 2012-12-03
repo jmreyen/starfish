@@ -18,7 +18,7 @@ public:
 
     ~StoryItem();
 
-    StoryItem *childAt(int row);
+    StoryItem *childAt(int row) const;
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;

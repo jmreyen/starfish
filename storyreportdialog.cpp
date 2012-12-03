@@ -16,15 +16,17 @@ ReportDialog::~ReportDialog()
     delete ui;
 }
 
-void ReportDialog::setTextDocument(QTextDocument *d)
+void ReportDialog::setHtml(const QString &s)
 {
-    ui->reportEdit->setDocument(d);
+    ui->webView->setHtml(s);
 }
 
 void ReportDialog::on_printButton_clicked()
 {
     QPrinter printer;
+    printer.setOrientation(QPrinter::Portrait);
+    printer.setPageSize(QPrinter::A4);
     QPrintDialog dlg(&printer);
     dlg.exec();
-    ui->reportEdit->print(&printer);
+    ui->webView->print(&printer);
 }

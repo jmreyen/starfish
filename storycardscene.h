@@ -22,6 +22,7 @@ public slots:
     void setImp(const QString & text);
     void setEst(const QString & text);
     void setUser(const QString & text);
+    void setParent(const QString & text);
     void clearCard();
 
 private slots:
@@ -38,6 +39,7 @@ private:
     QGraphicsTextItem *theStoryImp;
     QGraphicsTextItem *theStoryEst;
     QGraphicsTextItem *theStoryUser;
+    QGraphicsTextItem *theParentStory;
 
     QRectF theIDRect;
     QRectF theDescRect;
@@ -46,6 +48,7 @@ private:
     QRectF theImpRect;
     QRectF theEstRect;
     QRectF theUserRect;
+    QRectF theParentRect;
 
 };
 
