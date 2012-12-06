@@ -1,8 +1,8 @@
 #ifndef STORYITEMMODEL_H
 #define STORYITEMMODEL_H
 
-#include "storyitem.h"
-#include "fields.h"
+#include "models/storyitem.h"
+#include "base/fields.h"
 
 #include <QAbstractItemModel>
 #include <QModelIndex>

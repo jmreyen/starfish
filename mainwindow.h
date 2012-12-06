@@ -11,7 +11,6 @@
 #include <QSettings>
 #include <QPrinter>
 #include <QStandardItemModel>
-#include <QSortFilterProxyModel>
 #include <QDataWidgetMapper>
 #include <QCheckBox>
 
@@ -79,7 +78,6 @@ private:
 private:
     Ui::MainWindow *ui;
     StoryModel theStoryTree;
-    QSortFilterProxyModel theProxyStoryTree;
     SprintModel theSprints;
     QStringList thePriorities;
     QStringList theEstimations;
