@@ -26,7 +26,8 @@ SOURCES += \
     views/storyitemdelegate.cpp \
     views/storycardscene.cpp \
     views/burndownscene.cpp \
-    base/fields.cpp
+    base/fields.cpp \
+    models/storyproxymodel.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     views/storyitemdelegate.h \
     views/storycardscene.h \
     views/burndownscene.h \
-    base/fields.h
+    base/fields.h \
+    models/storyproxymodel.h
 
 FORMS    += \
     mainwindow.ui \

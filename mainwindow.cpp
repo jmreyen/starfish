@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     theStoryTree(this),
+    theStoryProxyTree(this),
     theSprints(this),
     theStoryDataMapper(this),
     theSprintDataMapper(this),
@@ -42,14 +43,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionMeetingHandout, SIGNAL(triggered()), SLOT(onActionMeetingHandout()));
     connect(ui->actionPrint, SIGNAL(triggered()), SLOT(onActionPrint()));
     //setup story tree
-    ui->storyTreeView->setModel(&theStoryTree);
+    theStoryProxyTree.setSourceModel(&theStoryTree);
+    theStoryProxyTree.setDynamicSortFilter(true);
+    theStoryProxyTree.setFilterKeyColumn(ST_STATUS);
+    ui->storyTreeView->setModel(&theStoryProxyTree);
     ui->storyTreeView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->storyTreeView->setDragEnabled (true );
     ui->storyTreeView->viewport()->setAcceptDrops (true );
     ui->storyTreeView->setDropIndicatorShown (true );
     ui->storyTreeView->setDragDropMode(QAbstractItemView::InternalMove);
     //map story table entries to editor widgets
-    theStoryDataMapper.setModel(&theStoryTree);
+    theStoryDataMapper.setModel(&theStoryProxyTree);
     theStoryDataMapper.setItemDelegate(new StoryItemDelegate());
     theStoryDataMapper.addMapping(ui->summaryEdit, ST_DESC);
     theStoryDataMapper.addMapping(ui->reporterEdit, ST_USER);
@@ -67,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(onStoryTableCurrentCellChanged(const QModelIndex & , const QModelIndex & )));
 //    connect(ui->storyTreeView->selectionModel(), SIGNAL(currentChanged ( const QModelIndex & , const QModelIndex &)),
 //            &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
-    connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+    connect(&theStoryProxyTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             SLOT(onStoryModelDataChanged ( const QModelIndex & )));
-    connect(&theStoryTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
+    connect(&theStoryProxyTree, SIGNAL(dataChanged( const QModelIndex &, const QModelIndex &)),
             &theStoryDataMapper, SLOT(setCurrentModelIndex ( const QModelIndex & )));
 
     //setup SprintTable
@@ -166,7 +170,7 @@ MainWindow::~MainWindow()
 
     // Columns
     theSettings.beginWriteArray("columns");
-    for (int i=0; i<theStoryTree.columnCount(); ++i){
+    for (int i=0; i<theStoryProxyTree.columnCount(); ++i){
         theSettings.setArrayIndex(i);
         bool show = !ui->storyTreeView->isColumnHidden(i);
         ui->storyTreeView->setColumnHidden(i, false); // show column, otherwise width=0
@@ -191,7 +195,7 @@ MainWindow::~MainWindow()
 void MainWindow::loadAll()
 {
     theSprints.clear();
-    theStoryTree.clear();
+    theStoryProxyTree.clear();
     ui->impComboBox->clear();
     ui->estComboBox->clear();
     ui->comComboBox->clear();
@@ -205,51 +209,51 @@ void MainWindow::loadAll()
 
 void MainWindow::fillCard(const QModelIndex &index, StoryCardScene *scene)
 {
-    if (theStoryTree.rowCount()==0 || !index.isValid())
+    if (theStoryProxyTree.rowCount()==0 || !index.isValid())
         return;
 
     if (scene==0x0)
         scene = &theCardScene;
 
     QString txt;
-    QModelIndex currentIndex = theStoryTree.index(index.row(), 0, index.parent());
+    QModelIndex currentIndex = theStoryProxyTree.index(index.row(), 0, index.parent());
 //    if (index.parent().isValid()) {
-//        QModelIndex parentIndex = theStoryTree.index(index.parent().row(), 1, index.parent().parent());
-//        txt =  theStoryTree.data(parentIndex).toString() + ": #" + theStoryTree.data(currentIndex).toString();
+//        QModelIndex parentIndex = theStoryProxyTree.index(index.parent().row(), 1, index.parent().parent());
+//        txt =  theStoryProxyTree.data(parentIndex).toString() + ": #" + theStoryProxyTree.data(currentIndex).toString();
 //    }
 //    else {
-//        txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
+//        txt = "Backlog Item #" + theStoryProxyTree.data(currentIndex).toString();
 //    }
-    txt = "Backlog Item #" + theStoryTree.data(currentIndex).toString();
+    txt = "Backlog Item #" + theStoryProxyTree.data(currentIndex).toString();
     scene->setID(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 1, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 1, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setDesc(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 2, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 2, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setNotes(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 3, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 3, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setHTD(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 4, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 4, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setImp(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 5, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 5, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setEst(txt);
 
-    currentIndex = theStoryTree.index(index.row(), 6, index.parent());
-    txt = theStoryTree.data(currentIndex).toString();
+    currentIndex = theStoryProxyTree.index(index.row(), 6, index.parent());
+    txt = theStoryProxyTree.data(currentIndex).toString();
     scene->setUser(txt);
 
     if (index.parent().isValid() ) {
-        currentIndex = theStoryTree.index(index.parent().row(), ST_DESC, index.parent().parent());
-        txt = theStoryTree.data(currentIndex).toString();
+        currentIndex = theStoryProxyTree.index(index.parent().row(), ST_DESC, index.parent().parent());
+        txt = theStoryProxyTree.data(currentIndex).toString();
     } else {
         txt = "";
     }
@@ -261,8 +265,8 @@ void MainWindow::onActionAddStory()
 {
     // determine parent ...
     QModelIndex currentIndex = ui->storyTreeView->currentIndex();
-    QString parentId = theStoryTree.data(
-        theStoryTree.index(
+    QString parentId = theStoryProxyTree.data(
+        theStoryProxyTree.index(
             currentIndex.row(),
             ST_ID,
             currentIndex.parent()
@@ -326,7 +330,7 @@ void MainWindow::onActionSettings()
 {
     SetupDialog dlg(theLoader->getSettingsFrame());
     dlg.setLoadOnStart(loadOnStart);
-    for (int i=0; i<theStoryTree.columnCount(); ++i)
+    for (int i=0; i<theStoryProxyTree.columnCount(); ++i)
         dlg.setShowColumn(i, !ui->storyTreeView->isColumnHidden(i));
 
     QObject::connect(&dlg, SIGNAL(accepted(const QVariantMap &)),
@@ -442,14 +446,14 @@ void MainWindow::onStoryModelDataChanged(const QModelIndex &index)
         return;
 
     //remember changed item
-    QString id = theStoryTree.data(theStoryTree.index(index.row(), ST_ID, index.parent()), Qt::DisplayRole).toString();
+    QString id = theStoryProxyTree.data(theStoryProxyTree.index(index.row(), ST_ID, index.parent()), Qt::DisplayRole).toString();
     QString attribute = storyFieldNames[index.column()];
-    theStoryChanges[id][attribute] = theStoryTree.data(index);
+    theStoryChanges[id][attribute] = theStoryProxyTree.data(index);
     //update card preview
     fillCard(index);
     //mark row as modified
-    theStoryTree.setData(
-        theStoryTree.index(index.row(), ST_MODIFIED, index.parent()),
+    theStoryProxyTree.setData(
+        theStoryProxyTree.index(index.row(), ST_MODIFIED, index.parent()),
         true,
         Qt::EditRole
     );
@@ -598,31 +602,18 @@ void MainWindow::ioMessage(const QString &s)
 
 void MainWindow::applyStoryFilter()
 {
-    // get list with checkboxes
     QList<QCheckBox*> list = ui->showStatusGroupBox->findChildren<QCheckBox*>();
-    // Map to store display status
-    QMap<const StoryItem *, bool> displayMap;
-    //for each status ...
+    QString str;
     foreach (QCheckBox *cb, list) {
-        QString statusName = cb->objectName();
-        bool isChecked = cb->checkState() == Qt::Checked;
-        //... check if the item ...
-        for (StoryModel::iterator itr = theStoryTree.begin(); itr != theStoryTree.end(); ++itr) {
-            if (itr->data(ST_STATUS).toString() == statusName) {
-                // ... and its parents have to be displayed ...
-                for (const StoryItem *item = &*itr; item != 0; item = item->parent()) {
-                    // ... and mark this in the display map
-                    displayMap[item] = displayMap[item] || isChecked;
-                }
-            }
+        if (cb->checkState() == Qt::Checked) {
+            if (!str.isEmpty())
+                str += "|";
+            str += cb->objectName();
         }
     }
-    // show or hide rows
-    foreach (const StoryItem *item, displayMap.keys()){
-        QModelIndex parent = theStoryTree.parent(item);
-        bool hide = !displayMap.value(item);
-        ui->storyTreeView->setRowHidden(item->row(),parent, hide);
-    }
+    theStoryProxyTree.setFilterRegExp(str);
+
+
 }
 
 struct s_statistics
@@ -644,7 +635,7 @@ void MainWindow::updateStatisticsLabel(const QModelIndex &current)
 {
     QMap<QString, s_statistics> storyPoints;
     if (current.isValid()) {
-        for (StoryModel::iterator itr = theStoryTree.begin(current); itr != theStoryTree.end(); ++ itr){
+        for (StoryModel::iterator itr = theStoryTree.begin(theStoryProxyTree.mapToSource(current)); itr != theStoryTree.end(); ++ itr){
             QString status = itr->data(ST_STATUS).toString();
             QString estimation = itr->data(ST_EST).toString();
             if (estimation == "?") {
