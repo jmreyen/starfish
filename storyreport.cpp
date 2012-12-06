@@ -1,6 +1,6 @@
 #include "storyreport.h"
-#include "storyitem.h"
-#include "fields.h"
+#include "models/storyitem.h"
+#include "base/fields.h"
 
 #include <QRegExp>
 

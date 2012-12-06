@@ -11,11 +11,11 @@
 class QXmlStreamWriter;
 
 class StoryItem;
-class StoryItemModel;
+class StoryModel;
 
 class StoryIterator
 {
-    friend class StoryItemModel;
+    friend class StoryModel;
 
 public:
     StoryIterator() {current = -1;}
@@ -33,14 +33,14 @@ private:
     int current;
 };
 
-class StoryItemModel : public QAbstractItemModel
+class StoryModel : public QAbstractItemModel
 {
     Q_OBJECT
     friend class StoryIterator;
 
 public:
-    StoryItemModel(QObject *parent);
-    ~StoryItemModel();
+    StoryModel(QObject *parent);
+    ~StoryModel();
 
     // inherited from QAbstractItemModel
     // All models

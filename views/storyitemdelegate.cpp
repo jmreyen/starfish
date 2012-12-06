@@ -1,5 +1,5 @@
-#include "storyitemdelegate.h"
-#include "fields.h"
+#include "views/storyitemdelegate.h"
+#include "base/fields.h"
 
 #include <QComboBox>
 

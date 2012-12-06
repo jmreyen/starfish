@@ -1,6 +1,6 @@
-#include "newstorydialog.h"
+#include "dialogs/newstorydialog.h"
 #include "ui_newstorydialog.h"
-#include "fields.h"
+#include "base/fields.h"
 #include <QDebug>
 
 NewStoryDialog::NewStoryDialog(QAbstractItemModel *m1,

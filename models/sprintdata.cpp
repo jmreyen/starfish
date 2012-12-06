@@ -1,5 +1,5 @@
-#include "sprintdata.h"
-#include "fields.h"
+#include "models/sprintdata.h"
+#include "base/fields.h"
 
 #include <QVariant>
 #include <QRegExp>

@@ -1,5 +1,5 @@
-#include "sprintmodel.h"
-#include "fields.h"
+#include "models/sprintmodel.h"
+#include "base/fields.h"
 
 #include <QListWidget>
 

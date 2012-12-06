@@ -1,4 +1,4 @@
-#include "storycardscene.h"
+#include "views/storycardscene.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>

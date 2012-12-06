@@ -10,45 +10,48 @@ TARGET = starfish
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    storycardscene.cpp \
-    setupdialog.cpp \
-    sprintmodel.cpp \
-    sprintdata.cpp \
-    burndownscene.cpp \
+SOURCES += \
+    main.cpp\
+    mainwindow.cpp \
     storyreport.cpp \
-    storyreportdialog.cpp \
-    newstorydialog.cpp \
-    storyitem.cpp \
-    storyitemmodel.cpp \
-    storyitemdelegate.cpp \
-    fields.cpp \
     io/iofactory.cpp \
-    io/tracio.cpp
+    io/tracio.cpp \
+    dialogs/storyreportdialog.cpp \
+    dialogs/setupdialog.cpp \
+    dialogs/newstorydialog.cpp \
+    models/storymodel.cpp \
+    models/storyitem.cpp \
+    models/sprintmodel.cpp \
+    models/sprintdata.cpp \
+    views/storyitemdelegate.cpp \
+    views/storycardscene.cpp \
+    views/burndownscene.cpp \
+    base/fields.cpp
 
-HEADERS  += mainwindow.h \
-    storycardscene.h \
-    setupdialog.h \
-    sprintmodel.h \
-    sprintdata.h \
-    burndownscene.h \
+HEADERS  += \
+    mainwindow.h \
     storyreport.h \
-    storyreportdialog.h \
-    newstorydialog.h \
-    storyitem.h \
-    storyitemmodel.h \
-    storyitemdelegate.h \
-    fields.h \
     io/abstractio.h \
     io/iofactory.h \
-    io/tracio.h
+    io/tracio.h \
+   dialogs/storyreportdialog.h \
+    dialogs/setupdialog.h \
+    dialogs/newstorydialog.h \
+    models/storymodel.h \
+    models/storyitem.h \
+    models/sprintmodel.h \
+    models/sprintdata.h \
+    views/storyitemdelegate.h \
+    views/storycardscene.h \
+    views/burndownscene.h \
+    base/fields.h
 
-FORMS    += mainwindow.ui \
-    setupdialog.ui \
-    reportdialog.ui \
-    newstorydialog.ui \
-    tracsettingsframe.ui
+FORMS    += \
+    mainwindow.ui \
+    dialogs/setupdialog.ui \
+    dialogs/reportdialog.ui \
+    dialogs/newstorydialog.ui \
+    io/tracsettingsframe.ui
 
 INCLUDEPATH += ./libmaia
 LIBS += ./libmaia/debug/libmaia.a

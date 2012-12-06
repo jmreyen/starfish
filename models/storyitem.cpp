@@ -1,5 +1,5 @@
-#include "storyitem.h"
-#include "fields.h"
+#include "models/storyitem.h"
+#include "base/fields.h"
 
 #include <QList>
 #include <QVariant>

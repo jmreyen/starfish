@@ -1,8 +1,8 @@
 #include <QUrl>
 
 #include "ui_setupdialog.h"
-#include "setupdialog.h"
-#include "fields.h"
+#include "dialogs/setupdialog.h"
+#include "base/fields.h"
 
 
 SetupDialog::SetupDialog(QFrame *extraSettings, QWidget *parent):

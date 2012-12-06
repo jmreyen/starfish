@@ -1,4 +1,4 @@
-#include "storyreportdialog.h"
+#include "dialogs/storyreportdialog.h"
 #include "ui_reportdialog.h"
 
 #include <QPrinter>

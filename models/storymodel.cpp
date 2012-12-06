@@ -1,5 +1,5 @@
-#include "storyitem.h"
-#include "storyitemmodel.h"
+#include "models/storyitem.h"
+#include "models/storymodel.h"
 
 #include <QtGui>
 #include <QXmlStreamWriter>
@@ -60,7 +60,7 @@ bool StoryIterator::operator !=(const StoryIterator &iterator) const
 
 // class StoryItemModel
 
-StoryItemModel::StoryItemModel(QObject *parent)
+StoryModel::StoryModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
     QList<QVariant> rootData;
@@ -69,13 +69,13 @@ StoryItemModel::StoryItemModel(QObject *parent)
     rootItem = new StoryItem(rootData);
 }
 
-StoryItemModel::~StoryItemModel()
+StoryModel::~StoryModel()
 {
     delete rootItem;
 }
 
 // >>> model/view methods (from QAbstractItemModel
-QVariant StoryItemModel::data(const QModelIndex &index, int role) const
+QVariant StoryModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -107,7 +107,7 @@ QVariant StoryItemModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags StoryItemModel::flags(const QModelIndex &index) const
+Qt::ItemFlags StoryModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::ItemIsEnabled | Qt::ItemIsDropEnabled;
@@ -125,7 +125,7 @@ Qt::ItemFlags StoryItemModel::flags(const QModelIndex &index) const
     return f;
 }
 
-QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant StoryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     switch (role) {
     case Qt::DisplayRole:
@@ -140,7 +140,7 @@ QVariant StoryItemModel::headerData(int section, Qt::Orientation orientation, in
     return QVariant();
 }
 
-int StoryItemModel::rowCount(const QModelIndex &parent) const
+int StoryModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.column() > 0)
         return 0;
@@ -148,12 +148,12 @@ int StoryItemModel::rowCount(const QModelIndex &parent) const
     return getItem(parent)->childCount();
 }
 
-int StoryItemModel::columnCount(const QModelIndex &parent) const
+int StoryModel::columnCount(const QModelIndex &parent) const
 {
     return getItem(parent)->columnCount();
 }
 
-bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value, int role )
+bool StoryModel::setData ( const QModelIndex & index, const QVariant & value, int role )
 {
     if (!index.isValid())
         return false;
@@ -183,7 +183,7 @@ bool StoryItemModel::setData ( const QModelIndex & index, const QVariant & value
     return false;
 }
 
-bool StoryItemModel::insertRows(int position, int count, const QModelIndex &parent)
+bool StoryModel::insertRows(int position, int count, const QModelIndex &parent)
 {
     StoryItem *parentItem = parent.isValid()?getItem(parent):rootItem;
 
@@ -199,7 +199,7 @@ bool StoryItemModel::insertRows(int position, int count, const QModelIndex &pare
     return true;
 }
 
-bool StoryItemModel::removeRows(int position, int count, const QModelIndex &parent)
+bool StoryModel::removeRows(int position, int count, const QModelIndex &parent)
 {
     StoryItem *parentItem = parent.isValid()?getItem(parent):rootItem;
 
@@ -212,7 +212,7 @@ bool StoryItemModel::removeRows(int position, int count, const QModelIndex &pare
     return true;
 }
 
-QModelIndex StoryItemModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex StoryModel::index(int row, int column, const QModelIndex &parent) const
 {
     StoryItem *parentItem;
     if (!parent.isValid())
@@ -223,7 +223,7 @@ QModelIndex StoryItemModel::index(int row, int column, const QModelIndex &parent
     return index(row, column, parentItem);
 }
 
-QModelIndex StoryItemModel::index(int row, int column, const StoryItem *parentItem) const
+QModelIndex StoryModel::index(int row, int column, const StoryItem *parentItem) const
 {
     StoryItem *childItem = parentItem->childAt(row);
     if (childItem)
@@ -232,7 +232,7 @@ QModelIndex StoryItemModel::index(int row, int column, const StoryItem *parentIt
         return QModelIndex();
 }
 
-QModelIndex StoryItemModel::parent(const QModelIndex &index) const
+QModelIndex StoryModel::parent(const QModelIndex &index) const
 {
     if (!index.isValid())
         return QModelIndex();
@@ -241,7 +241,7 @@ QModelIndex StoryItemModel::parent(const QModelIndex &index) const
     return parent(childItem);
 }
 
-QModelIndex StoryItemModel::parent(const StoryItem *childItem) const
+QModelIndex StoryModel::parent(const StoryItem *childItem) const
 {
     StoryItem *parentItem = childItem->parent();
 
@@ -254,24 +254,24 @@ QModelIndex StoryItemModel::parent(const StoryItem *childItem) const
 
 // >>> drag and drop
 const QString MimeType = "application/pic";
-QStringList StoryItemModel::mimeTypes() const
+QStringList StoryModel::mimeTypes() const
 {
     QStringList types;
     types << MimeType;
     return types;
 }
 
-Qt::DropActions StoryItemModel::supportedDropActions() const
+Qt::DropActions StoryModel::supportedDropActions() const
 {
     return Qt::MoveAction;
 }
 
-Qt::DropActions StoryItemModel::supportedDragActions() const
+Qt::DropActions StoryModel::supportedDragActions() const
 {
     return Qt::MoveAction;
 }
 
-QMimeData *StoryItemModel::mimeData(const QModelIndexList &indexes) const
+QMimeData *StoryModel::mimeData(const QModelIndexList &indexes) const
 {
 
     if (indexes.count() !=1 )
@@ -290,7 +290,7 @@ QMimeData *StoryItemModel::mimeData(const QModelIndexList &indexes) const
 
 }
 
-bool StoryItemModel::dropMimeData(const QMimeData *mimeData,
+bool StoryModel::dropMimeData(const QMimeData *mimeData,
                                   Qt::DropAction action, int row, int /*column */,
                                   const QModelIndex &parent)
 {
@@ -313,7 +313,7 @@ bool StoryItemModel::dropMimeData(const QMimeData *mimeData,
 }
 
 
-QModelIndex StoryItemModel::addStory(const QModelIndex &parent, const QVariantMap &map)
+QModelIndex StoryModel::addStory(const QModelIndex &parent, const QVariantMap &map)
 {
     StoryItem *parentItem = getItem(parent);
     int position = parentItem->childCount();
@@ -324,7 +324,7 @@ QModelIndex StoryItemModel::addStory(const QModelIndex &parent, const QVariantMa
 }
 
 
-void StoryItemModel::fromList(const QVariantList &list)
+void StoryModel::fromList(const QVariantList &list)
 {
     emit layoutAboutToBeChanged();
 
@@ -359,7 +359,7 @@ void StoryItemModel::fromList(const QVariantList &list)
     emit layoutChanged();
 }
 
-void StoryItemModel::clear()
+void StoryModel::clear()
 {
     //remove all rows from the storylist and notify attached views
     beginResetModel();
@@ -367,7 +367,7 @@ void StoryItemModel::clear()
     endResetModel();
 }
 
-StoryItem *StoryItemModel::getItem(const QModelIndex &index) const
+StoryItem *StoryModel::getItem(const QModelIndex &index) const
 {
     if (index.isValid()) {
         StoryItem *item = static_cast<StoryItem*>(index.internalPointer());
@@ -378,7 +378,7 @@ StoryItem *StoryItemModel::getItem(const QModelIndex &index) const
 }
 
 const QString StoryTag("Story");
-void StoryItemModel::writeStoryAndChildren(QXmlStreamWriter *writer, StoryItem *story) const
+void StoryModel::writeStoryAndChildren(QXmlStreamWriter *writer, StoryItem *story) const
 {
     if (story != rootItem) {
         writer->writeStartElement(StoryTag);
@@ -390,7 +390,7 @@ void StoryItemModel::writeStoryAndChildren(QXmlStreamWriter *writer, StoryItem *
         writer->writeEndElement();
 }
 
-void StoryItemModel::readStories(QXmlStreamReader *reader, StoryItem *story)
+void StoryModel::readStories(QXmlStreamReader *reader, StoryItem *story)
 {
     while (!reader->atEnd()) {
         reader->readNext();

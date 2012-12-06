@@ -1,4 +1,4 @@
-#include "fields.h"
+#include "base/fields.h"
 
 const char *storyFieldNames[ST_LAST] = {
     "id",

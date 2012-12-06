@@ -1,16 +1,17 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "burndownscene.h"
-#include "storycardscene.h"
-#include "storyitemmodel.h"
-#include "sprintmodel.h"
+#include "views/burndownscene.h"
+#include "views/storycardscene.h"
+#include "models/storymodel.h"
+#include "models/sprintmodel.h"
 #include "io/iofactory.h"
 
 #include <QMainWindow>
 #include <QSettings>
 #include <QPrinter>
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 #include <QDataWidgetMapper>
 #include <QCheckBox>
 
@@ -77,7 +78,8 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    StoryItemModel theStoryTree;
+    StoryModel theStoryTree;
+    QSortFilterProxyModel theProxyStoryTree;
     SprintModel theSprints;
     QStringList thePriorities;
     QStringList theEstimations;

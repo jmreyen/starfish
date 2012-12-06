@@ -1,4 +1,4 @@
-#include "burndownscene.h"
+#include "views/burndownscene.h"
 #include <QDebug>
 #include <QGraphicsItem>
 
