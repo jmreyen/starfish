@@ -38,13 +38,6 @@
         <enum>QFrame::Raised</enum>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="0">
-         <widget class="QGroupBox" name="showStatusGroupBox">
-          <property name="title">
-           <string>Story Filter</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0">
          <widget class="QTreeView" name="storyTreeView">
           <property name="minimumSize">
@@ -72,7 +65,7 @@
            <bool>true</bool>
           </property>
           <property name="sortingEnabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="wordWrap">
            <bool>false</bool>
@@ -82,8 +75,15 @@
           </attribute>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="showStatusGroupBox">
+          <property name="title">
+           <string>Story Filter</string>
+          </property>
+         </widget>
+        </item>
        </layout>
-       <zorder>splitter_2</zorder>
+       <zorder>storyTreeView</zorder>
        <zorder>showStatusGroupBox</zorder>
       </widget>
       <widget class="QTabWidget" name="tabWidget">
