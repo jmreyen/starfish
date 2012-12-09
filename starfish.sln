@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "starfish", "starfish.vcproj", "{F2F93D2B-BF60-34B0-BAEC-05D3C0AE52BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34349281-AE7B-3BD3-B8AA-4BE450FB0A80} = {34349281-AE7B-3BD3-B8AA-4BE450FB0A80}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "maia", "libmaia\maia.vcproj", "{34349281-AE7B-3BD3-B8AA-4BE450FB0A80}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F2F93D2B-BF60-34B0-BAEC-05D3C0AE52BE}.Debug|x64.ActiveCfg = Debug|x64
+		{F2F93D2B-BF60-34B0-BAEC-05D3C0AE52BE}.Debug|x64.Build.0 = Debug|x64
+		{F2F93D2B-BF60-34B0-BAEC-05D3C0AE52BE}.Release|x64.ActiveCfg = Release|x64
+		{F2F93D2B-BF60-34B0-BAEC-05D3C0AE52BE}.Release|x64.Build.0 = Release|x64
+		{34349281-AE7B-3BD3-B8AA-4BE450FB0A80}.Debug|x64.ActiveCfg = Debug|x64
+		{34349281-AE7B-3BD3-B8AA-4BE450FB0A80}.Debug|x64.Build.0 = Debug|x64
+		{34349281-AE7B-3BD3-B8AA-4BE450FB0A80}.Release|x64.ActiveCfg = Release|x64
+		{34349281-AE7B-3BD3-B8AA-4BE450FB0A80}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
