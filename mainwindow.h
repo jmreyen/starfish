@@ -6,6 +6,7 @@
 #include "models/storymodel.h"
 #include "models/sprintmodel.h"
 #include "io/iofactory.h"
+#include "models/storyproxymodel.h"
 
 #include <QMainWindow>
 #include <QSettings>
@@ -78,6 +79,7 @@ private:
 private:
     Ui::MainWindow *ui;
     StoryModel theStoryTree;
+    StoryProxyModel theStoryProxyTree;
     SprintModel theSprints;
     QStringList thePriorities;
     QStringList theEstimations;
